@@ -8,7 +8,7 @@ const Mockup: React.FC = () => {
         <div className="mockup-container">
           <div className="telegram-mockup">
             <div className="chat-header">
-              <span className="chat-title">Team Chat</span>
+              <span className="chat-title">Telegram Group Chat</span>
             </div>
             <div className="chat-messages">
               <div className="message">
