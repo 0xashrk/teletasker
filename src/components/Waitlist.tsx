@@ -1,35 +1,35 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './Waitlist.css';
+import { usePrivy } from '@privy-io/react-auth';
 
 const Waitlist: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { login, authenticated, user } = usePrivy();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement actual form submission
-    console.log('Email submitted:', email);
-    setIsSubmitted(true);
+  const handleSignup = async () => {
+    try {
+      await login();
+    } catch (error) {
+      console.error('Error during signup:', error);
+    }
   };
 
   return (
     <section className="waitlist">
       <div className="waitlist-content">
         <h2>Join early access beta</h2>
-        {!isSubmitted ? (
-          <form onSubmit={handleSubmit} className="waitlist-form">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-            />
-            <button type="submit">Get Early Access</button>
-          </form>
+        {!authenticated ? (
+          <div className="waitlist-form">
+            <button 
+              onClick={handleSignup}
+              className="signup-button"
+            >
+              Sign up with Email
+            </button>
+          </div>
         ) : (
           <div className="success-message">
-            <p>Thanks for joining! We'll be in touch soon. 🚀</p>
+            <p>Welcome! You're now on the waitlist. 🚀</p>
+            <p className="subtext">We'll notify you when early access begins.</p>
           </div>
         )}
       </div>

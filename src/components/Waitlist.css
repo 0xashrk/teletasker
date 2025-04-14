@@ -1,8 +1,7 @@
 .waitlist {
-  padding: 6rem 2rem;
-  background-color: var(--background-primary);
+  padding: 4rem 2rem;
+  background-color: var(--background-secondary);
   text-align: center;
-  transition: background-color 0.3s ease;
 }
 
 .waitlist-content {
@@ -12,16 +11,15 @@
 
 .waitlist h2 {
   font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
   color: var(--text-primary);
-  transition: color 0.3s ease;
+  margin-bottom: 2rem;
 }
 
 .waitlist-form {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
-  max-width: 440px;
+  max-width: 400px;
   margin: 0 auto;
 }
 
@@ -42,41 +40,51 @@
   box-shadow: 0 0 0 4px rgba(var(--accent-primary-rgb), 0.15);
 }
 
-.waitlist-form button {
-  padding: 0.875rem 1.5rem;
-  background: var(--accent-primary);
+.signup-button {
+  background-color: var(--accent-primary);
   color: white;
   border: none;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
   border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
+  transition: background-color 0.3s ease;
+  font-weight: 500;
 }
 
-.waitlist-form button:hover {
-  background: var(--accent-hover);
+.signup-button:hover {
+  background-color: var(--accent-primary-dark);
 }
 
 .success-message {
+  background-color: var(--background-primary);
   padding: 2rem;
-  background-color: var(--surface-primary);
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.success-message p {
+  font-size: 1.2rem;
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-bottom: 0.5rem;
+}
+
+.success-message .subtext {
+  font-size: 1rem;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {
   .waitlist {
-    padding: 4rem 1.5rem;
+    padding: 3rem 1.5rem;
   }
-
-  .waitlist-form {
-    flex-direction: column;
+  
+  .waitlist h2 {
+    font-size: 1.75rem;
   }
-
-  .waitlist-form button {
-    width: 100%;
+  
+  .signup-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
   }
 } 
