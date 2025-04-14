@@ -1,6 +1,7 @@
 .mockup {
   padding: 4rem 2rem 6rem;
-  background-color: #0a0a0a;
+  background-color: var(--background-secondary);
+  transition: background-color 0.3s ease;
 }
 
 .mockup-content {
@@ -20,23 +21,26 @@
 .task-mockup {
   flex: 1;
   max-width: 400px;
-  background: #1c1c1e;
+  background: var(--surface-primary);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--card-shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .chat-header,
 .task-header {
   padding: 1rem;
-  background: #2c2c2e;
-  border-bottom: 1px solid #3a3a3c;
+  background: var(--surface-secondary);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .chat-title,
 .task-title {
   font-weight: 600;
-  color: #f5f5f7;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .chat-messages {
@@ -46,20 +50,23 @@
 .message {
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
-  background: #2c2c2e;
+  background: var(--surface-secondary);
   border-radius: 8px;
+  transition: background-color 0.3s ease;
 }
 
 .sender {
   font-weight: 600;
-  color: #2997ff;
+  color: var(--accent-primary);
   margin-bottom: 0.25rem;
   display: block;
+  transition: color 0.3s ease;
 }
 
 .message p {
-  color: #f5f5f7;
+  color: var(--text-primary);
   font-size: 0.95rem;
+  transition: color 0.3s ease;
 }
 
 .task-list {
@@ -68,33 +75,38 @@
 
 .task {
   padding: 1rem;
-  background: #2c2c2e;
+  background: var(--surface-secondary);
   border-radius: 8px;
   margin-bottom: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 .task-source {
   font-size: 0.8rem;
-  color: #86868b;
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
   display: block;
+  transition: color 0.3s ease;
 }
 
 .task p {
-  color: #f5f5f7;
+  color: var(--text-primary);
   font-weight: 500;
   margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
 }
 
 .task-due {
   font-size: 0.8rem;
-  color: #2997ff;
+  color: var(--accent-primary);
   display: block;
+  transition: color 0.3s ease;
 }
 
 .arrow {
   font-size: 1.5rem;
-  color: #86868b;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
 @media (max-width: 768px) {

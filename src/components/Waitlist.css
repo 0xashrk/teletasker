@@ -1,7 +1,8 @@
 .waitlist {
   padding: 6rem 2rem;
-  background-color: #000000;
+  background-color: var(--background-primary);
   text-align: center;
+  transition: background-color 0.3s ease;
 }
 
 .waitlist-content {
@@ -13,7 +14,8 @@
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 2rem;
-  color: #f5f5f7;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .waitlist-form {
@@ -26,42 +28,43 @@
 .waitlist-form input {
   flex: 1;
   padding: 0.875rem 1rem;
-  border: 1px solid #3a3a3c;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;
-  transition: all 0.2s ease;
-  background: rgba(255, 255, 255, 0.05);
-  color: #f5f5f7;
+  transition: all 0.3s ease;
+  background: var(--input-background);
+  color: var(--text-primary);
 }
 
 .waitlist-form input:focus {
   outline: none;
-  border-color: #2997ff;
-  box-shadow: 0 0 0 4px rgba(41, 151, 255, 0.15);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 4px rgba(var(--accent-primary-rgb), 0.15);
 }
 
 .waitlist-form button {
   padding: 0.875rem 1.5rem;
-  background: #2997ff;
+  background: var(--accent-primary);
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   white-space: nowrap;
 }
 
 .waitlist-form button:hover {
-  background: #147ce5;
+  background: var(--accent-hover);
 }
 
 .success-message {
   padding: 2rem;
-  background-color: #1c1c1e;
+  background-color: var(--surface-primary);
   border-radius: 8px;
-  color: #f5f5f7;
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @media (max-width: 768px) {
