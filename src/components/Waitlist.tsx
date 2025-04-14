@@ -16,14 +16,14 @@ const Waitlist: React.FC = () => {
   return (
     <section className="waitlist">
       <div className="waitlist-content">
-        <h2>Join early access beta</h2>
+        <h2>Get early access</h2>
         {!authenticated ? (
           <div className="waitlist-form">
             <button 
               onClick={handleSignup}
               className="signup-button"
             >
-              Sign up with Email
+              Join the waitlist
             </button>
           </div>
         ) : (
