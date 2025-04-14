@@ -8,9 +8,6 @@ const SocialProof: React.FC = () => {
         <p className="audience">
           Built for founders, ops leads, and Telegram power users who drop too many follow-ups.
         </p>
-        <p className="credibility">
-          Inspired by a tweet from <a href="https://twitter.com/PareenL" target="_blank" rel="noopener noreferrer">@PareenL</a>
-        </p>
       </div>
     </section>
   );
