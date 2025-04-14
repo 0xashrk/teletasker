@@ -1,12 +1,17 @@
 import React from 'react';
 import './App.css';
+import Hero from './components/Hero';
+import Waitlist from './components/Waitlist';
+import Mockup from './components/Mockup';
+import SocialProof from './components/SocialProof';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Welcome to Teletasker</h1>
-      </header>
+      <Hero />
+      <Mockup />
+      <Waitlist />
+      <SocialProof />
     </div>
   );
 }

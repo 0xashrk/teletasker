@@ -1,0 +1,43 @@
+.social-proof {
+  padding: 6rem 2rem;
+  background-color: #f5f5f7;
+  text-align: center;
+}
+
+.social-proof-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.audience {
+  font-size: 1.5rem;
+  color: #1d1d1f;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.credibility {
+  font-size: 1rem;
+  color: #6e6e73;
+}
+
+.credibility a {
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.credibility a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .social-proof {
+    padding: 4rem 1.5rem;
+  }
+
+  .audience {
+    font-size: 1.25rem;
+  }
+} 
