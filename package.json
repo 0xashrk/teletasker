@@ -2,6 +2,9 @@
   "name": "teletasker.xyz",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@privy-io/react-auth": "^2.9.1",
     "@testing-library/dom": "^10.4.0",

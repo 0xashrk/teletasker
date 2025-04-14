@@ -3,7 +3,7 @@ import './Waitlist.css';
 import { usePrivy } from '@privy-io/react-auth';
 
 const Waitlist: React.FC = () => {
-  const { login, authenticated, user } = usePrivy();
+  const { login, authenticated } = usePrivy();
 
   const handleSignup = async () => {
     try {
