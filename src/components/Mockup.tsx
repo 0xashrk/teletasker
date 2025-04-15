@@ -12,12 +12,12 @@ const Mockup: React.FC = () => {
             </div>
             <div className="chat-messages">
               <div className="message">
-                <span className="sender">@Pareen</span>
-                <p>Can you send me the pitch deck by EOD?</p>
+                <span className="sender">@Sarah</span>
+                <p>Hey team, can you review the product specs by tomorrow?</p>
               </div>
               <div className="message">
                 <span className="sender">@Alex</span>
-                <p>Sure, I'll get that to you</p>
+                <p>Will do! I'll share my feedback first thing tomorrow 👍</p>
               </div>
             </div>
           </div>
@@ -28,9 +28,9 @@ const Mockup: React.FC = () => {
             </div>
             <div className="task-list">
               <div className="task">
-                <span className="task-source">From @Pareen</span>
-                <p>Send pitch deck</p>
-                <span className="task-due">Due: Today</span>
+                <span className="task-source">From @Sarah</span>
+                <p>Review product specs</p>
+                <span className="task-due">Due: Tomorrow</span>
               </div>
             </div>
           </div>
