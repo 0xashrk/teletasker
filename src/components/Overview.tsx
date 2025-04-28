@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../pages/Dashboard.module.css';
+import styles from './Overview.module.css';
 
 interface Chat {
   id: string;
@@ -35,6 +35,24 @@ const Overview: React.FC<OverviewProps> = ({
     ? tasks.filter(task => task.chatId === selectedChatId)
     : tasks;
 
+  const selectedChat = selectedChatId 
+    ? chats.find(chat => chat.id === selectedChatId)
+    : null;
+
+  const renderTaskStatus = (task: Task) => {
+    const statusClass = task.status === 'automated' 
+      ? styles.automated 
+      : task.status === 'completed' 
+        ? styles.completed 
+        : styles.pending;
+
+    return (
+      <span className={`${styles.taskStatus} ${statusClass}`}>
+        {task.status}
+      </span>
+    );
+  };
+
   return (
     <div className={styles.overview}>
       <div className={styles.sidebar}>
@@ -62,20 +80,22 @@ const Overview: React.FC<OverviewProps> = ({
       </div>
 
       <div className={styles.content}>
-        <div className={styles.taskList}>
-          <h3 className={styles.sectionTitle}>
-            {selectedChatId 
-              ? `Tasks from ${chats.find(c => c.id === selectedChatId)?.name}`
-              : 'All Tasks'
+        <div className={styles.contentHeader}>
+          <h3 className={styles.contentTitle}>
+            {selectedChat 
+              ? <>Tasks from {selectedChat.name} <span className={styles.taskCount}>({filteredTasks.length})</span></>
+              : <>All Tasks <span className={styles.taskCount}>({filteredTasks.length})</span></>
             }
           </h3>
-          
-          {filteredTasks.map(task => (
-            <div key={task.id} className={styles.taskItem}>
-              <div className={styles.taskContent}>
+        </div>
+        
+        <div className={styles.taskList}>
+          {filteredTasks.length > 0 ? (
+            filteredTasks.map(task => (
+              <div key={task.id} className={styles.taskItem}>
                 <div className={styles.taskHeader}>
                   <span className={styles.taskSource}>
-                    <span className={styles.modeIcon}>
+                    <span className={styles.taskSourceIcon}>
                       {task.isAutomated ? '⬡' : '◎'}
                     </span>
                     {task.source}
@@ -84,21 +104,18 @@ const Overview: React.FC<OverviewProps> = ({
                 <div className={styles.taskText}>{task.text}</div>
                 <div className={styles.taskMeta}>
                   <span className={styles.taskTime}>{task.time}</span>
-                  <span className={`${styles.taskStatus} ${task.isAutomated ? styles.automated : ''}`}>
-                    {task.status}
-                  </span>
+                  {renderTaskStatus(task)}
                 </div>
               </div>
-            </div>
-          ))}
-
-          {filteredTasks.length === 0 && (
-            <div className={styles.taskItem}>
-              <div className={styles.taskContent}>
-                <div className={styles.taskText} style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  No tasks yet. The AI assistant will start tracking tasks as they appear in your chats.
-                </div>
-              </div>
+            ))
+          ) : (
+            <div className={styles.emptyState}>
+              <span className={styles.emptyStateIcon}>📋</span>
+              <p className={styles.emptyStateText}>
+                {selectedChat 
+                  ? `No tasks yet from ${selectedChat.name}. The AI assistant will start tracking tasks as they appear.`
+                  : 'No tasks yet. The AI assistant will start tracking tasks as they appear in your chats.'}
+              </p>
             </div>
           )}
         </div>
