@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import ChatList from '../components/ChatList';
+import AssistantModeConfig from '../components/AssistantModeConfig';
 import './Dashboard.css';
 
 // Mock chat data
@@ -17,11 +18,18 @@ const mockChats = [
 
 const CHAT_LIMIT = 5;
 
+interface ChatConfig {
+  id: string;
+  mode: 'observe' | 'automate';
+}
+
 const Dashboard: React.FC = () => {
   const { user, logout } = usePrivy();
   const navigate = useNavigate();
   const [connected, setConnected] = useState(false);
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
+  const [chatConfigs, setChatConfigs] = useState<ChatConfig[]>([]);
+  const [showModes, setShowModes] = useState(false);
 
   const handleConnect = () => {
     setConnected(true);
@@ -39,9 +47,30 @@ const Dashboard: React.FC = () => {
   const handleToggleChat = (id: string) => {
     if (selectedChats.includes(id)) {
       setSelectedChats(selectedChats.filter(cid => cid !== id));
+      setChatConfigs(chatConfigs.filter(config => config.id !== id));
     } else if (selectedChats.length < CHAT_LIMIT) {
       setSelectedChats([...selectedChats, id]);
     }
+  };
+
+  const handleContinue = () => {
+    setShowModes(true);
+  };
+
+  const handleSetMode = (chatId: string, mode: 'observe' | 'automate') => {
+    const existingConfig = chatConfigs.find(c => c.id === chatId);
+    if (existingConfig) {
+      setChatConfigs(chatConfigs.map(c => 
+        c.id === chatId ? { ...c, mode } : c
+      ));
+    } else {
+      setChatConfigs([...chatConfigs, { id: chatId, mode }]);
+    }
+  };
+
+  const handleStart = () => {
+    // TODO: Implement start functionality
+    console.log('Starting with configurations:', chatConfigs);
   };
 
   return (
@@ -68,11 +97,11 @@ const Dashboard: React.FC = () => {
               Continue with Telegram
             </button>
           </div>
-        ) : (
+        ) : !showModes ? (
           <div className="chat-select-card">
             <h2>Select Chats</h2>
             <p className="chat-select-desc">
-              Choose up to {CHAT_LIMIT} chats to monitor for tasks and automate responses.
+              Choose up to {CHAT_LIMIT} chats for your AI assistant to manage.
             </p>
             <ChatList
               chats={mockChats}
@@ -83,10 +112,18 @@ const Dashboard: React.FC = () => {
             <button 
               className="continue-button" 
               disabled={selectedChats.length === 0}
+              onClick={handleContinue}
             >
               {selectedChats.length === 0 ? 'Select chats to continue' : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
             </button>
           </div>
+        ) : (
+          <AssistantModeConfig
+            selectedChats={mockChats.filter(chat => selectedChats.includes(chat.id))}
+            chatConfigs={chatConfigs}
+            onSetMode={handleSetMode}
+            onStart={handleStart}
+          />
         )}
       </main>
     </div>
