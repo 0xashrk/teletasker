@@ -22,7 +22,7 @@ interface OverviewProps {
   chats: Chat[];
   tasks: Task[];
   selectedChatId: string | null;
-  onSelectChat: (chatId: string) => void;
+  onSelectChat: (chatId: string | null) => void;
 }
 
 const Overview: React.FC<OverviewProps> = ({
@@ -56,13 +56,24 @@ const Overview: React.FC<OverviewProps> = ({
   return (
     <div className={styles.overview}>
       <div className={styles.sidebar}>
+        <div className={styles.navigation}>
+          <div 
+            className={`${styles.navItem} ${!selectedChatId ? styles.active : ''}`}
+            onClick={() => onSelectChat(null)}
+          >
+            <span className={styles.navIcon}>📋</span>
+            All Tasks
+            <span className={styles.taskCount}>({tasks.length})</span>
+          </div>
+        </div>
+
         <div className={styles.activeChats}>
           <h3 className={styles.sectionTitle}>Active Chats</h3>
           {chats.map(chat => (
             <div
               key={chat.id}
               className={`${styles.chatItem} ${chat.id === selectedChatId ? styles.active : ''}`}
-              onClick={() => onSelectChat(chat.id)}
+              onClick={() => onSelectChat(chat.id === selectedChatId ? null : chat.id)}
             >
               <span className={styles.chatAvatar}>{chat.avatar}</span>
               <div className={styles.chatInfo}>
@@ -74,6 +85,11 @@ const Overview: React.FC<OverviewProps> = ({
                   {chat.mode === 'observe' ? 'Track Mode' : 'Auto Mode'}
                 </div>
               </div>
+              {tasks.filter(t => t.chatId === chat.id).length > 0 && (
+                <span className={styles.chatTaskCount}>
+                  {tasks.filter(t => t.chatId === chat.id).length}
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -84,7 +100,7 @@ const Overview: React.FC<OverviewProps> = ({
           <h3 className={styles.contentTitle}>
             {selectedChat 
               ? <>Tasks from {selectedChat.name} <span className={styles.taskCount}>({filteredTasks.length})</span></>
-              : <>All Tasks <span className={styles.taskCount}>({filteredTasks.length})</span></>
+              : <>All Tasks <span className={styles.taskCount}>({tasks.length})</span></>
             }
           </h3>
         </div>

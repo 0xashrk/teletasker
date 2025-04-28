@@ -264,4 +264,49 @@
   .taskList {
     padding: 16px;
   }
+}
+
+.navigation {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.navItem.active {
+  background: rgba(0, 122, 255, 0.08);
+  border-left: 2px solid var(--accent-color);
+}
+
+.navIcon {
+  font-size: 16px;
+  color: var(--accent-color);
+}
+
+.chatTaskCount {
+  background: var(--accent-color);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 } 

@@ -106,8 +106,8 @@ const Dashboard: React.FC = () => {
     setShowOverview(true);
   };
 
-  const handleSelectChat = (chatId: string) => {
-    setSelectedChatId(chatId === selectedChatId ? null : chatId);
+  const handleSelectChat = (chatId: string | null) => {
+    setSelectedChatId(chatId);
   };
 
   const configuredChats = mockChats
