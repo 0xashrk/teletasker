@@ -38,16 +38,27 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  background-color: var(--background-secondary);
+  background-color: var(--background-primary);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .dashboard-logo {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 600;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  transition: color 0.3s ease, background 0.3s ease, -webkit-text-fill-color 0.3s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dashboard-logo {
+    background: linear-gradient(90deg, var(--accent-primary), #4fb3ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
 
 .dashboard-user-section {
@@ -59,6 +70,7 @@ body {
 .dashboard-user {
   color: var(--text-secondary);
   font-size: 0.95rem;
+  transition: color 0.3s ease;
 }
 
 .logout-button {
