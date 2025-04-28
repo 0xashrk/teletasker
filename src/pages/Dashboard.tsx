@@ -115,7 +115,15 @@ const Dashboard: React.FC = () => {
     .map(chat => ({
       ...chat,
       mode: chatConfigs.find(c => c.id === chat.id)?.mode || 'observe'
-    }));
+    })) as Array<{
+      id: string;
+      name: string;
+      avatar: string;
+      mode: 'observe' | 'automate';
+      lastMessage: string;
+      time: string;
+      unread: number;
+    }>;
 
   const renderContent = () => {
     if (!connected) {
@@ -170,7 +178,6 @@ const Dashboard: React.FC = () => {
     return (
       <Overview
         chats={configuredChats}
-        tasks={mockTasks}
         selectedChatId={selectedChatId}
         onSelectChat={handleSelectChat}
       />
