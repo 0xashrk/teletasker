@@ -3,6 +3,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import ChatList from '../components/ChatList';
 import AssistantModeConfig from '../components/AssistantModeConfig';
+import Overview from '../components/Overview';
 import styles from './Dashboard.module.css';
 
 // Mock chat data
@@ -14,6 +15,37 @@ const mockChats = [
   { id: '5', name: 'Support', avatar: '💡', lastMessage: 'New ticket assigned to you', time: '1h', unread: 2 },
   { id: '6', name: 'Design Team', avatar: '🎨', lastMessage: 'Updated mockups ready', time: '2h', unread: 0 },
   { id: '7', name: 'Engineering', avatar: '⚙️', lastMessage: 'Deployment successful', time: '3h', unread: 0 },
+];
+
+// Mock tasks data
+const mockTasks = [
+  {
+    id: '1',
+    chatId: '1',
+    text: 'Review the Q4 marketing proposal by Friday',
+    source: 'Alice Smith',
+    time: '2m ago',
+    status: 'pending' as const,
+    isAutomated: false
+  },
+  {
+    id: '2',
+    chatId: '2',
+    text: 'Schedule team sync for sprint planning',
+    source: 'Product Team',
+    time: '5m ago',
+    status: 'automated' as const,
+    isAutomated: true
+  },
+  {
+    id: '3',
+    chatId: '3',
+    text: 'Review pull request #42: Add new dashboard features',
+    source: 'John Developer',
+    time: '15m ago',
+    status: 'pending' as const,
+    isAutomated: false
+  }
 ];
 
 const CHAT_LIMIT = 5;
@@ -30,6 +62,8 @@ const Dashboard: React.FC = () => {
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
   const [chatConfigs, setChatConfigs] = useState<ChatConfig[]>([]);
   const [showModes, setShowModes] = useState(false);
+  const [showOverview, setShowOverview] = useState(false);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
   const handleConnect = () => {
     setConnected(true);
@@ -69,9 +103,19 @@ const Dashboard: React.FC = () => {
   };
 
   const handleStart = () => {
-    // TODO: Implement start functionality
-    console.log('Starting with configurations:', chatConfigs);
+    setShowOverview(true);
   };
+
+  const handleSelectChat = (chatId: string) => {
+    setSelectedChatId(chatId === selectedChatId ? null : chatId);
+  };
+
+  const configuredChats = mockChats
+    .filter(chat => chatConfigs.some(c => c.id === chat.id))
+    .map(chat => ({
+      ...chat,
+      mode: chatConfigs.find(c => c.id === chat.id)?.mode || 'observe'
+    }));
 
   return (
     <div className={styles.root}>
@@ -117,12 +161,19 @@ const Dashboard: React.FC = () => {
               {selectedChats.length === 0 ? 'Select chats to continue' : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
             </button>
           </div>
-        ) : (
+        ) : !showOverview ? (
           <AssistantModeConfig
             selectedChats={mockChats.filter(chat => selectedChats.includes(chat.id))}
             chatConfigs={chatConfigs}
             onSetMode={handleSetMode}
             onStart={handleStart}
+          />
+        ) : (
+          <Overview
+            chats={configuredChats}
+            tasks={mockTasks}
+            selectedChatId={selectedChatId}
+            onSelectChat={handleSelectChat}
           />
         )}
       </main>
