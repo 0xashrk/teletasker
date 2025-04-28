@@ -99,6 +99,15 @@ const Dashboard: React.FC = () => {
                 );
               })}
             </div>
+            {selectedChats.length >= CHAT_LIMIT && (
+              <div className="upgrade-banner">
+                <div className="upgrade-text">
+                  <span>✨</span>
+                  <span>Upgrade to monitor unlimited chats</span>
+                </div>
+                <span className="upgrade-arrow">→</span>
+              </div>
+            )}
             <button 
               className="continue-button" 
               disabled={selectedChats.length === 0}
