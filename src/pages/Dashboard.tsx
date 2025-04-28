@@ -3,7 +3,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import ChatList from '../components/ChatList';
 import AssistantModeConfig from '../components/AssistantModeConfig';
-import './Dashboard.css';
+import styles from './Dashboard.module.css';
 
 // Mock chat data
 const mockChats = [
@@ -74,33 +74,33 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="dashboard-root">
-      <header className="dashboard-topbar">
-        <div className="dashboard-logo">Teletasker</div>
-        <div className="dashboard-user-section">
-          <span className="dashboard-user">
+    <div className={styles.root}>
+      <header className={styles.topbar}>
+        <div className={styles.logo}>Teletasker</div>
+        <div className={styles.userSection}>
+          <span className={styles.userEmail}>
             {user?.email?.address}
           </span>
-          <button className="logout-button" onClick={handleLogout}>
+          <button className={styles.logoutBtn} onClick={handleLogout}>
             Log out
           </button>
         </div>
       </header>
-      <main className="dashboard-main">
+      <main className={styles.main}>
         {!connected ? (
-          <div className="onboarding-card">
-            <h2>Connect to Telegram</h2>
-            <p className="chat-select-desc">
+          <div className={styles.card}>
+            <h2 className={styles.title}>Connect to Telegram</h2>
+            <p className={styles.desc}>
               Connect your Telegram account to start managing tasks from your chats.
             </p>
-            <button className="connect-button" onClick={handleConnect}>
+            <button className={styles.button} onClick={handleConnect}>
               Continue with Telegram
             </button>
           </div>
         ) : !showModes ? (
-          <div className="chat-select-card">
-            <h2>Select Chats</h2>
-            <p className="chat-select-desc">
+          <div className={styles.card}>
+            <h2 className={styles.title}>Select Chats</h2>
+            <p className={styles.desc}>
               Choose up to {CHAT_LIMIT} chats for your AI assistant to manage.
             </p>
             <ChatList
@@ -110,7 +110,7 @@ const Dashboard: React.FC = () => {
               onToggleChat={handleToggleChat}
             />
             <button 
-              className="continue-button" 
+              className={styles.button}
               disabled={selectedChats.length === 0}
               onClick={handleContinue}
             >

@@ -1,0 +1,217 @@
+/* Light and Dark Mode System Colors */
+:root {
+  /* Dark Mode Colors */
+  --dark-gray-6: rgba(28, 28, 30, 1);
+  --dark-gray-5: rgba(44, 44, 46, 1);
+  --dark-gray-4: rgba(58, 58, 60, 1);
+  --dark-gray-3: rgba(72, 72, 74, 1);
+  --dark-gray-2: rgba(142, 142, 147, 1);
+  --dark-gray-1: rgba(174, 174, 178, 1);
+  --dark-blue: rgba(0, 122, 255, 1);
+  --dark-white: rgba(255, 255, 255, 1);
+
+  /* Light Mode Colors */
+  --light-gray-6: rgba(242, 242, 247, 1);
+  --light-gray-5: rgba(229, 229, 234, 1);
+  --light-gray-4: rgba(209, 209, 214, 1);
+  --light-gray-3: rgba(199, 199, 204, 1);
+  --light-gray-2: rgba(174, 174, 178, 1);
+  --light-gray-1: rgba(142, 142, 147, 1);
+  --light-blue: rgba(0, 122, 255, 1);
+  --light-black: rgba(0, 0, 0, 1);
+
+  /* Default to Light Mode */
+  --system-gray-6: var(--light-gray-6);
+  --system-gray-5: var(--light-gray-5);
+  --system-gray-4: var(--light-gray-4);
+  --system-gray-3: var(--light-gray-3);
+  --system-gray-2: var(--light-gray-2);
+  --system-gray-1: var(--light-gray-1);
+  --system-blue: var(--light-blue);
+  --system-text: var(--light-black);
+  
+  /* Semantic Colors */
+  --background-primary: var(--system-gray-6);
+  --background-secondary: var(--system-gray-5);
+  --background-tertiary: var(--system-gray-4);
+  --text-primary: var(--system-text);
+  --text-secondary: var(--system-gray-1);
+  --border-color: var(--system-gray-4);
+  --accent-color: var(--system-blue);
+}
+
+/* Dark Mode Override */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --system-gray-6: var(--dark-gray-6);
+    --system-gray-5: var(--dark-gray-5);
+    --system-gray-4: var(--dark-gray-4);
+    --system-gray-3: var(--dark-gray-3);
+    --system-gray-2: var(--dark-gray-2);
+    --system-gray-1: var(--dark-gray-1);
+    --system-blue: var(--dark-blue);
+    --system-text: var(--dark-white);
+  }
+}
+
+.root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background-color: var(--background-primary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo {
+    background: linear-gradient(90deg, var(--accent-color), #4fb3ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.userEmail {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.logoutBtn {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.logoutBtn:hover {
+  background-color: var(--background-tertiary);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 32px 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.card {
+  width: 100%;
+  background-color: var(--background-secondary);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
+
+.desc {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0 0 24px;
+  line-height: 1.4;
+}
+
+.button {
+  background-color: var(--accent-color);
+  color: var(--dark-white);
+  border: none;
+  padding: 14px 24px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.betaBanner {
+  background-color: var(--background-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.betaTag {
+  background-color: var(--system-gray-2);
+  color: var(--background-primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    padding: 0 16px;
+  }
+  
+  .main {
+    padding: 24px 16px;
+  }
+} 
