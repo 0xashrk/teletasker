@@ -49,14 +49,14 @@ const AssistantModeConfig: React.FC<AssistantModeConfigProps> = ({
                   className={`${styles.modeBtn} ${config?.mode === 'observe' ? styles.active : ''}`}
                   onClick={() => onSetMode(chat.id, 'observe')}
                 >
-                  <span className={styles.icon}>👁️</span>
+                  <span className={styles.icon}>◎</span>
                   Track
                 </button>
                 <button
                   className={`${styles.modeBtn} ${config?.mode === 'automate' ? styles.active : ''}`}
                   onClick={() => onSetMode(chat.id, 'automate')}
                 >
-                  <span className={styles.icon}>✨</span>
+                  <span className={styles.icon}>⬡</span>
                   Auto
                 </button>
               </div>

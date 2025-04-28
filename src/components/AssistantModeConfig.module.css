@@ -79,7 +79,7 @@
   transition: all 0.15s ease;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   min-width: 80px;
 }
 
@@ -94,7 +94,13 @@
 }
 
 .icon {
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.modeBtn.active .icon {
+  opacity: 1;
 }
 
 .startBtn {
