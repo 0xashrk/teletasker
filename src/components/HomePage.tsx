@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import { useNavigate } from 'react-router-dom';
 import LoginButton from './LoginButton';
 import './HomePage.css';
 
 const HomePage: React.FC = () => {
   const { login, authenticated } = usePrivy();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (authenticated) {
+      navigate('/dashboard');
+    }
+  }, [authenticated, navigate]);
 
   const handleSignup = async () => {
     try {
