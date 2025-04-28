@@ -1,5 +1,5 @@
 import React from 'react';
-import './AssistantModeConfig.css';
+import styles from './AssistantModeConfig.module.css';
 
 interface Chat {
   id: string;
@@ -29,35 +29,35 @@ const AssistantModeConfig: React.FC<AssistantModeConfigProps> = ({
   onStart,
 }) => {
   return (
-    <div className="chat-modes-card">
-      <h2>Configure AI Assistant</h2>
-      <p className="modes-desc">
-        Choose how you want your AI chief of staff to handle each chat.
-      </p>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Configure AI Assistant</h2>
+        <p className={styles.subtitle}>
+          Set behavior for {selectedChats.length} selected chats
+        </p>
+      </div>
       
-      <div className="selected-chats-list">
+      <div className={styles.list}>
         {selectedChats.map(chat => {
           const config = chatConfigs.find(c => c.id === chat.id);
           return (
-            <div key={chat.id} className="chat-mode-item">
-              <div className="chat-info">
-                <span className="chat-avatar">{chat.avatar}</span>
-                <span className="chat-name">{chat.name}</span>
-              </div>
-              <div className="mode-toggles">
+            <div key={chat.id} className={styles.item}>
+              <span className={styles.avatar}>{chat.avatar}</span>
+              <span className={styles.name}>{chat.name}</span>
+              <div className={styles.modes}>
                 <button
-                  className={`mode-button ${config?.mode === 'observe' ? 'active' : ''}`}
+                  className={`${styles.modeBtn} ${config?.mode === 'observe' ? styles.active : ''}`}
                   onClick={() => onSetMode(chat.id, 'observe')}
                 >
-                  🔍 Observer
-                  <span className="mode-desc">Extract tasks only</span>
+                  <span className={styles.icon}>👁️</span>
+                  Track
                 </button>
                 <button
-                  className={`mode-button ${config?.mode === 'automate' ? 'active' : ''}`}
+                  className={`${styles.modeBtn} ${config?.mode === 'automate' ? styles.active : ''}`}
                   onClick={() => onSetMode(chat.id, 'automate')}
                 >
-                  🤖 Autopilot
-                  <span className="mode-desc">Full task automation</span>
+                  <span className={styles.icon}>✨</span>
+                  Auto
                 </button>
               </div>
             </div>
@@ -66,13 +66,13 @@ const AssistantModeConfig: React.FC<AssistantModeConfigProps> = ({
       </div>
 
       <button 
-        className="start-button"
+        className={styles.startBtn}
         disabled={chatConfigs.length !== selectedChats.length}
         onClick={onStart}
       >
         {chatConfigs.length === selectedChats.length 
           ? "Start AI Assistant" 
-          : `Configure ${selectedChats.length - chatConfigs.length} more ${selectedChats.length - chatConfigs.length === 1 ? 'chat' : 'chats'}`
+          : `${selectedChats.length - chatConfigs.length} chats left to configure`
         }
       </button>
     </div>
