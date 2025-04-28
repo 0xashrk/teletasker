@@ -100,12 +100,9 @@ const Dashboard: React.FC = () => {
               })}
             </div>
             {selectedChats.length >= CHAT_LIMIT && (
-              <div className="upgrade-banner">
-                <div className="upgrade-text">
-                  <span>✨</span>
-                  <span>Upgrade to monitor unlimited chats</span>
-                </div>
-                <span className="upgrade-arrow">→</span>
+              <div className="beta-banner">
+                <span className="beta-tag">Beta</span>
+                <span>Chat selection is limited to 5 during Beta</span>
               </div>
             )}
             <button 

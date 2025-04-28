@@ -280,4 +280,34 @@ h2 {
 /* Update spacing for the continue button when banner is shown */
 .upgrade-banner + .continue-button {
   margin-top: 0;
+}
+
+/* New Beta Banner Design */
+.beta-banner {
+  background-color: var(--background-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.beta-tag {
+  background-color: var(--system-gray-2);
+  color: var(--background-primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.beta-banner + .continue-button {
+  margin-top: 0;
 } 
