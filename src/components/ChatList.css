@@ -4,9 +4,10 @@
 
 .chat-list {
   border-radius: 12px;
-  background-color: var(--background-tertiary);
+  background-color: var(--background-primary);
   overflow: hidden;
   margin-bottom: 24px;
+  border: 1px solid var(--border-color);
 }
 
 .chat-item {
@@ -14,9 +15,10 @@
   align-items: center;
   padding: 12px 16px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   border-bottom: 1px solid var(--border-color);
   min-height: 44px;
+  background-color: var(--background-primary);
 }
 
 .chat-item:last-child {
@@ -24,11 +26,26 @@
 }
 
 .chat-item:hover {
-  background-color: var(--system-gray-3);
+  background-color: var(--background-secondary);
 }
 
 .chat-item.selected {
-  background-color: rgba(0, 122, 255, 0.1);
+  background-color: rgba(0, 122, 255, 0.15);
+  position: relative;
+}
+
+.chat-item.selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--accent-color);
+}
+
+.chat-item.selected .chat-name {
+  color: var(--accent-color);
 }
 
 .chat-item.disabled {
@@ -58,6 +75,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--text-primary);
 }
 
 .chat-message {
@@ -92,8 +110,9 @@
   text-align: center;
 }
 
+/* Beta Banner Light/Dark Mode Styles */
 .beta-banner {
-  background-color: var(--background-tertiary);
+  background-color: var(--background-primary);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
   padding: 12px 16px;
@@ -107,7 +126,7 @@
 }
 
 .beta-tag {
-  background-color: var(--system-gray-2);
+  background-color: var(--text-secondary);
   color: var(--background-primary);
   padding: 2px 6px;
   border-radius: 4px;
@@ -115,4 +134,26 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* Light Mode Specific Overrides */
+@media (prefers-color-scheme: light) {
+  .chat-item.selected {
+    background-color: rgba(0, 122, 255, 0.12);
+  }
+
+  .chat-item:hover {
+    background-color: var(--background-secondary);
+  }
+
+  .beta-banner {
+    background-color: var(--background-secondary);
+  }
+}
+
+/* Dark Mode Specific Overrides */
+@media (prefers-color-scheme: dark) {
+  .chat-item.selected {
+    background-color: rgba(0, 122, 255, 0.2);
+  }
 } 
