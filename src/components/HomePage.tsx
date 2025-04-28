@@ -1,5 +1,6 @@
 import React from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import LoginButton from './LoginButton';
 import './HomePage.css';
 
 const HomePage: React.FC = () => {
@@ -24,6 +25,9 @@ const HomePage: React.FC = () => {
           <p className="subheadline">
             Never miss a follow-up again. Your AI assistant reads your chats, replies to messages, and turns your Telegram chaos into a clean, synced task list — Notion, Linear, or wherever you work.
           </p>
+          <div className="hero-actions">
+            <LoginButton variant="primary" className="hero-login-button" />
+          </div>
         </div>
       </section>
 
