@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
+import ChatList from '../components/ChatList';
 import './Dashboard.css';
 
 // Mock chat data
@@ -73,38 +74,12 @@ const Dashboard: React.FC = () => {
             <p className="chat-select-desc">
               Choose up to {CHAT_LIMIT} chats to monitor for tasks and automate responses.
             </p>
-            <div className="chat-list">
-              {mockChats.map(chat => {
-                const selected = selectedChats.includes(chat.id);
-                const disabled = !selected && selectedChats.length >= CHAT_LIMIT;
-
-                return (
-                  <div
-                    key={chat.id}
-                    className={`chat-item${selected ? ' selected' : ''}${disabled ? ' disabled' : ''}`}
-                    onClick={() => !disabled && handleToggleChat(chat.id)}
-                  >
-                    <span className="chat-avatar">{chat.avatar}</span>
-                    <div className="chat-info">
-                      <div className="chat-name">{chat.name}</div>
-                      <div className="chat-message">{chat.lastMessage}</div>
-                    </div>
-                    <div className="chat-meta">
-                      <span className="chat-time">{chat.time}</span>
-                      {chat.unread > 0 && (
-                        <span className="chat-unread">{chat.unread}</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {selectedChats.length >= CHAT_LIMIT && (
-              <div className="beta-banner">
-                <span className="beta-tag">Beta</span>
-                <span>Chat selection is limited to 5 during Beta</span>
-              </div>
-            )}
+            <ChatList
+              chats={mockChats}
+              selectedChats={selectedChats}
+              chatLimit={CHAT_LIMIT}
+              onToggleChat={handleToggleChat}
+            />
             <button 
               className="continue-button" 
               disabled={selectedChats.length === 0}
