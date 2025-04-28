@@ -1,27 +1,38 @@
 import React, { useState } from 'react';
-import './Dashboard.css';
 import { usePrivy } from '@privy-io/react-auth';
+import { useNavigate } from 'react-router-dom';
+import './Dashboard.css';
 
 // Mock chat data
 const mockChats = [
-  { id: '1', name: 'Product Team', avatar: '🧑‍💻' },
-  { id: '2', name: 'Founders', avatar: '🚀' },
-  { id: '3', name: 'Family', avatar: '👨‍👩‍👧‍👦' },
-  { id: '4', name: 'Crypto Alpha', avatar: '🦄' },
-  { id: '5', name: 'Side Hustle', avatar: '💡' },
-  { id: '6', name: 'Web3 Friends', avatar: '🌐' },
-  { id: '7', name: 'Investors', avatar: '💰' },
+  { id: '1', name: 'Alice Smith', avatar: '👩', lastMessage: 'Can you review the proposal?', time: '2m', unread: 3 },
+  { id: '2', name: 'Product Team', avatar: '🧑‍💻', lastMessage: 'Sprint planning at 2 PM', time: '5m', unread: 0 },
+  { id: '3', name: 'John Developer', avatar: '👨‍💻', lastMessage: 'PR is ready for review', time: '15m', unread: 1 },
+  { id: '4', name: 'Marketing', avatar: '📢', lastMessage: 'Campaign stats are in!', time: '30m', unread: 0 },
+  { id: '5', name: 'Support', avatar: '💡', lastMessage: 'New ticket assigned to you', time: '1h', unread: 2 },
+  { id: '6', name: 'Design Team', avatar: '🎨', lastMessage: 'Updated mockups ready', time: '2h', unread: 0 },
+  { id: '7', name: 'Engineering', avatar: '⚙️', lastMessage: 'Deployment successful', time: '3h', unread: 0 },
 ];
 
 const CHAT_LIMIT = 5;
 
 const Dashboard: React.FC = () => {
-  const { user } = usePrivy();
-  const [connected, setConnected] = useState(false); // mock connection state
+  const { user, logout } = usePrivy();
+  const navigate = useNavigate();
+  const [connected, setConnected] = useState(false);
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
 
   const handleConnect = () => {
-    setConnected(true); // mock connect
+    setConnected(true);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   const handleToggleChat = (id: string) => {
@@ -36,44 +47,64 @@ const Dashboard: React.FC = () => {
     <div className="dashboard-root">
       <header className="dashboard-topbar">
         <div className="dashboard-logo">Teletasker</div>
-        <div className="dashboard-user">
-          {user?.email?.address ? `Hi, ${user.email.address}` : 'Welcome!'}
+        <div className="dashboard-user-section">
+          <span className="dashboard-user">
+            {user?.email?.address}
+          </span>
+          <button className="logout-button" onClick={handleLogout}>
+            Log out
+          </button>
         </div>
       </header>
       <main className="dashboard-main">
         {!connected ? (
           <div className="onboarding-card">
-            <h2>Connect your Telegram</h2>
-            <p className="onboarding-desc">To get started, connect your Telegram account. We'll never DM or spam you.</p>
-            <button className="connect-btn" onClick={handleConnect}>Connect Telegram</button>
+            <h2>Connect to Telegram</h2>
+            <p className="chat-select-desc">
+              Connect your Telegram account to start managing tasks from your chats.
+            </p>
+            <button className="connect-button" onClick={handleConnect}>
+              Continue with Telegram
+            </button>
           </div>
         ) : (
           <div className="chat-select-card">
-            <h2>Select chats to monitor</h2>
-            <p className="chat-select-desc">Pick up to {CHAT_LIMIT} chats to watch for tasks and auto-replies.</p>
-            <div className="chat-grid">
+            <h2>Select Chats</h2>
+            <p className="chat-select-desc">
+              Choose up to {CHAT_LIMIT} chats to monitor for tasks and automate responses.
+            </p>
+            <div className="chat-list">
               {mockChats.map(chat => {
                 const selected = selectedChats.includes(chat.id);
                 const disabled = !selected && selectedChats.length >= CHAT_LIMIT;
+
                 return (
                   <div
                     key={chat.id}
-                    className={`chat-tile${selected ? ' selected' : ''}${disabled ? ' disabled' : ''}`}
+                    className={`chat-item${selected ? ' selected' : ''}${disabled ? ' disabled' : ''}`}
                     onClick={() => !disabled && handleToggleChat(chat.id)}
                   >
                     <span className="chat-avatar">{chat.avatar}</span>
-                    <span className="chat-name">{chat.name}</span>
-                    {selected && <span className="chat-check">✓</span>}
+                    <div className="chat-info">
+                      <div className="chat-name">{chat.name}</div>
+                      <div className="chat-message">{chat.lastMessage}</div>
+                    </div>
+                    <div className="chat-meta">
+                      <span className="chat-time">{chat.time}</span>
+                      {chat.unread > 0 && (
+                        <span className="chat-unread">{chat.unread}</span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
-            {selectedChats.length >= CHAT_LIMIT && (
-              <div className="upgrade-banner">
-                <span>Upgrade for unlimited chat monitoring →</span>
-              </div>
-            )}
-            <button className="save-btn" disabled={selectedChats.length === 0}>Save Selection</button>
+            <button 
+              className="continue-button" 
+              disabled={selectedChats.length === 0}
+            >
+              {selectedChats.length === 0 ? 'Select chats to continue' : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
+            </button>
           </div>
         )}
       </main>
