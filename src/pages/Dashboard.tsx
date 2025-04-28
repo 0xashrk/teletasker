@@ -117,6 +117,66 @@ const Dashboard: React.FC = () => {
       mode: chatConfigs.find(c => c.id === chat.id)?.mode || 'observe'
     }));
 
+  const renderContent = () => {
+    if (!connected) {
+      return (
+        <div className={styles.card}>
+          <h2 className={styles.title}>Connect to Telegram</h2>
+          <p className={styles.desc}>
+            Connect your Telegram account to start managing tasks from your chats.
+          </p>
+          <button className={styles.button} onClick={handleConnect}>
+            Continue with Telegram
+          </button>
+        </div>
+      );
+    }
+
+    if (!showModes) {
+      return (
+        <div className={styles.card}>
+          <h2 className={styles.title}>Select Chats</h2>
+          <p className={styles.desc}>
+            Choose up to {CHAT_LIMIT} chats for your AI assistant to manage.
+          </p>
+          <ChatList
+            chats={mockChats}
+            selectedChats={selectedChats}
+            chatLimit={CHAT_LIMIT}
+            onToggleChat={handleToggleChat}
+          />
+          <button 
+            className={styles.button}
+            disabled={selectedChats.length === 0}
+            onClick={handleContinue}
+          >
+            {selectedChats.length === 0 ? 'Select chats to continue' : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
+          </button>
+        </div>
+      );
+    }
+
+    if (!showOverview) {
+      return (
+        <AssistantModeConfig
+          selectedChats={mockChats.filter(chat => selectedChats.includes(chat.id))}
+          chatConfigs={chatConfigs}
+          onSetMode={handleSetMode}
+          onStart={handleStart}
+        />
+      );
+    }
+
+    return (
+      <Overview
+        chats={configuredChats}
+        tasks={mockTasks}
+        selectedChatId={selectedChatId}
+        onSelectChat={handleSelectChat}
+      />
+    );
+  };
+
   return (
     <div className={styles.root}>
       <header className={styles.topbar}>
@@ -131,51 +191,7 @@ const Dashboard: React.FC = () => {
         </div>
       </header>
       <main className={styles.main}>
-        {!connected ? (
-          <div className={styles.card}>
-            <h2 className={styles.title}>Connect to Telegram</h2>
-            <p className={styles.desc}>
-              Connect your Telegram account to start managing tasks from your chats.
-            </p>
-            <button className={styles.button} onClick={handleConnect}>
-              Continue with Telegram
-            </button>
-          </div>
-        ) : !showModes ? (
-          <div className={styles.card}>
-            <h2 className={styles.title}>Select Chats</h2>
-            <p className={styles.desc}>
-              Choose up to {CHAT_LIMIT} chats for your AI assistant to manage.
-            </p>
-            <ChatList
-              chats={mockChats}
-              selectedChats={selectedChats}
-              chatLimit={CHAT_LIMIT}
-              onToggleChat={handleToggleChat}
-            />
-            <button 
-              className={styles.button}
-              disabled={selectedChats.length === 0}
-              onClick={handleContinue}
-            >
-              {selectedChats.length === 0 ? 'Select chats to continue' : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
-            </button>
-          </div>
-        ) : !showOverview ? (
-          <AssistantModeConfig
-            selectedChats={mockChats.filter(chat => selectedChats.includes(chat.id))}
-            chatConfigs={chatConfigs}
-            onSetMode={handleSetMode}
-            onStart={handleStart}
-          />
-        ) : (
-          <Overview
-            chats={configuredChats}
-            tasks={mockTasks}
-            selectedChatId={selectedChatId}
-            onSelectChat={handleSelectChat}
-          />
-        )}
+        {renderContent()}
       </main>
     </div>
   );
