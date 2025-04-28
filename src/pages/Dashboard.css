@@ -1,21 +1,65 @@
+/* Light and Dark Mode System Colors */
 :root {
-  --system-gray-6: rgba(28, 28, 30, 1);
-  --system-gray-5: rgba(44, 44, 46, 1);
-  --system-gray-4: rgba(58, 58, 60, 1);
-  --system-gray-3: rgba(72, 72, 74, 1);
-  --system-gray-2: rgba(142, 142, 147, 1);
-  --system-gray-1: rgba(174, 174, 178, 1);
-  --system-blue: rgba(0, 122, 255, 1);
-  --system-white: rgba(255, 255, 255, 1);
+  /* Dark Mode Colors */
+  --dark-gray-6: rgba(28, 28, 30, 1);
+  --dark-gray-5: rgba(44, 44, 46, 1);
+  --dark-gray-4: rgba(58, 58, 60, 1);
+  --dark-gray-3: rgba(72, 72, 74, 1);
+  --dark-gray-2: rgba(142, 142, 147, 1);
+  --dark-gray-1: rgba(174, 174, 178, 1);
+  --dark-blue: rgba(0, 122, 255, 1);
+  --dark-white: rgba(255, 255, 255, 1);
+
+  /* Light Mode Colors */
+  --light-gray-6: rgba(242, 242, 247, 1);
+  --light-gray-5: rgba(229, 229, 234, 1);
+  --light-gray-4: rgba(209, 209, 214, 1);
+  --light-gray-3: rgba(199, 199, 204, 1);
+  --light-gray-2: rgba(174, 174, 178, 1);
+  --light-gray-1: rgba(142, 142, 147, 1);
+  --light-blue: rgba(0, 122, 255, 1);
+  --light-black: rgba(0, 0, 0, 1);
+
+  /* Default to Light Mode */
+  --system-gray-6: var(--light-gray-6);
+  --system-gray-5: var(--light-gray-5);
+  --system-gray-4: var(--light-gray-4);
+  --system-gray-3: var(--light-gray-3);
+  --system-gray-2: var(--light-gray-2);
+  --system-gray-1: var(--light-gray-1);
+  --system-blue: var(--light-blue);
+  --system-text: var(--light-black);
   
   /* Semantic Colors */
   --background-primary: var(--system-gray-6);
   --background-secondary: var(--system-gray-5);
   --background-tertiary: var(--system-gray-4);
-  --text-primary: var(--system-white);
+  --text-primary: var(--system-text);
   --text-secondary: var(--system-gray-1);
   --border-color: var(--system-gray-4);
   --accent-color: var(--system-blue);
+}
+
+/* Dark Mode Override */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --system-gray-6: var(--dark-gray-6);
+    --system-gray-5: var(--dark-gray-5);
+    --system-gray-4: var(--dark-gray-4);
+    --system-gray-3: var(--dark-gray-3);
+    --system-gray-2: var(--dark-gray-2);
+    --system-gray-1: var(--dark-gray-1);
+    --system-blue: var(--dark-blue);
+    --system-text: var(--dark-white);
+  }
+}
+
+/* Global Transition Settings */
+* {
+  transition: background-color 0.3s ease,
+              border-color 0.3s ease,
+              color 0.3s ease,
+              box-shadow 0.3s ease;
 }
 
 body {
@@ -76,29 +120,29 @@ body {
 .logout-button {
   background-color: transparent;
   color: var(--text-primary);
-  border: none;
+  border: 1px solid var(--border-color);
   padding: 8px 16px;
   font-size: 0.95rem;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   font-weight: 500;
 }
 
 .logout-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--background-tertiary);
 }
 
 /* Main action buttons */
 .connect-button, .continue-button {
-  background-color: #0A84FF;
-  color: white;
+  background-color: var(--system-blue);
+  color: var(--dark-white);
   border: none;
   padding: 14px 24px;
   font-size: 1rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   font-weight: 500;
   width: 100%;
   display: flex;
@@ -108,7 +152,7 @@ body {
 }
 
 .connect-button:hover, .continue-button:hover {
-  background-color: #0071E3;
+  filter: brightness(1.1);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
@@ -119,7 +163,7 @@ body {
 }
 
 .connect-button:disabled, .continue-button:disabled {
-  background-color: rgba(10, 132, 255, 0.5);
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -185,6 +229,11 @@ h2 {
 
 .chat-item.selected {
   background-color: rgba(0, 122, 255, 0.1);
+}
+
+.chat-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .chat-avatar {
