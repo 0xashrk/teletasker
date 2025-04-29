@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ChatList from '../components/ChatList';
 import AssistantModeConfig from '../components/AssistantModeConfig';
 import Overview from '../components/Overview';
+import ConnectTelegram from '../components/ConnectTelegram';
 import styles from './Dashboard.module.css';
 
 // Mock chat data
@@ -127,17 +128,7 @@ const Dashboard: React.FC = () => {
 
   const renderContent = () => {
     if (!connected) {
-      return (
-        <div className={styles.card}>
-          <h2 className={styles.title}>Connect to Telegram</h2>
-          <p className={styles.desc}>
-            Connect your Telegram account to start managing tasks from your chats.
-          </p>
-          <button className={styles.button} onClick={handleConnect}>
-            Continue with Telegram
-          </button>
-        </div>
-      );
+      return <ConnectTelegram onConnect={handleConnect} />;
     }
 
     if (!showModes) {
