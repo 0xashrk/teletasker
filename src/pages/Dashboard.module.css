@@ -1,9 +1,9 @@
 /* Light and Dark Mode System Colors */
 :root {
   /* Dark Mode Colors */
-  --dark-gray-6: rgba(28, 28, 30, 1);
-  --dark-gray-5: rgba(44, 44, 46, 1);
-  --dark-gray-4: rgba(58, 58, 60, 1);
+  --dark-gray-6: #000000;
+  --dark-gray-5: #111111;
+  --dark-gray-4: #1a1a1a;
   --dark-gray-3: rgba(72, 72, 74, 1);
   --dark-gray-2: rgba(142, 142, 147, 1);
   --dark-gray-1: rgba(174, 174, 178, 1);
