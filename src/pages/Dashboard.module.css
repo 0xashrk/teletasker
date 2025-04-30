@@ -40,6 +40,14 @@
   --accent-color: var(--system-blue);
 }
 
+/* Global transition for all color properties */
+* {
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
 /* Dark Mode Override */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -80,6 +88,7 @@
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--text-primary);
+  transition: color 0.3s ease, background 0.3s ease, -webkit-text-fill-color 0.3s ease;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -162,7 +171,7 @@
   font-size: 1rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease, background-color 0.3s ease;
   font-weight: 500;
   width: 100%;
   display: flex;
@@ -256,7 +265,7 @@
   padding: 8px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s ease, background-color 0.3s ease;
 }
 
 .chatItem:hover {
@@ -265,6 +274,7 @@
 
 .chatItem.active {
   background: rgba(0, 122, 255, 0.1);
+  transition: background-color 0.3s ease;
 }
 
 .chatAvatar {
@@ -378,6 +388,7 @@
 .taskStatus.automated {
   background: rgba(0, 122, 255, 0.1);
   color: var(--accent-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @media (max-width: 768px) {
