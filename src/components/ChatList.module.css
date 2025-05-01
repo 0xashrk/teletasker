@@ -1,8 +1,8 @@
-.chat-list-container {
+.chatListContainer {
   width: 100%;
 }
 
-.chat-list {
+.chatList {
   border-radius: 12px;
   background-color: var(--background-primary);
   overflow: hidden;
@@ -10,7 +10,7 @@
   border: 1px solid var(--border-color);
 }
 
-.chat-item {
+.chatItem {
   display: flex;
   align-items: center;
   padding: 12px 16px;
@@ -21,20 +21,20 @@
   background-color: var(--background-primary);
 }
 
-.chat-item:last-child {
+.chatItem:last-child {
   border-bottom: none;
 }
 
-.chat-item:hover {
+.chatItem:hover {
   background-color: var(--background-secondary);
 }
 
-.chat-item.selected {
+.chatItem.selected {
   background-color: rgba(0, 122, 255, 0.15);
   position: relative;
 }
 
-.chat-item.selected::before {
+.chatItem.selected::before {
   content: '';
   position: absolute;
   left: 0;
@@ -44,16 +44,16 @@
   background-color: var(--accent-color);
 }
 
-.chat-item.selected .chat-name {
+.chatItem.selected .chatName {
   color: var(--accent-color);
 }
 
-.chat-item.disabled {
+.chatItem.disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.chat-avatar {
+.chatAvatar {
   font-size: 24px;
   margin-right: 12px;
   width: 32px;
@@ -63,12 +63,12 @@
   justify-content: center;
 }
 
-.chat-info {
+.chatInfo {
   flex: 1;
   min-width: 0;
 }
 
-.chat-name {
+.chatName {
   font-size: 15px;
   font-weight: 500;
   margin-bottom: 2px;
@@ -78,7 +78,7 @@
   color: var(--text-primary);
 }
 
-.chat-message {
+.chatMessage {
   font-size: 13px;
   color: var(--text-secondary);
   white-space: nowrap;
@@ -86,20 +86,20 @@
   text-overflow: ellipsis;
 }
 
-.chat-meta {
+.chatMeta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   margin-left: 12px;
 }
 
-.chat-time {
+.chatTime {
   font-size: 12px;
   color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
-.chat-unread {
+.chatUnread {
   background-color: var(--accent-color);
   color: var(--dark-white);
   font-size: 12px;
@@ -110,8 +110,7 @@
   text-align: center;
 }
 
-/* Beta Banner Light/Dark Mode Styles */
-.beta-banner {
+.betaBanner {
   background-color: var(--background-primary);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
@@ -125,7 +124,7 @@
   gap: 8px;
 }
 
-.beta-tag {
+.betaTag {
   background-color: var(--text-secondary);
   color: var(--background-primary);
   padding: 2px 6px;
@@ -138,22 +137,22 @@
 
 /* Light Mode Specific Overrides */
 @media (prefers-color-scheme: light) {
-  .chat-item.selected {
+  .chatItem.selected {
     background-color: rgba(0, 122, 255, 0.12);
   }
 
-  .chat-item:hover {
+  .chatItem:hover {
     background-color: var(--background-secondary);
   }
 
-  .beta-banner {
+  .betaBanner {
     background-color: var(--background-secondary);
   }
 }
 
 /* Dark Mode Specific Overrides */
 @media (prefers-color-scheme: dark) {
-  .chat-item.selected {
+  .chatItem.selected {
     background-color: rgba(0, 122, 255, 0.2);
   }
 } 
