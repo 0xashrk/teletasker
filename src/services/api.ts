@@ -12,6 +12,7 @@ const PORTFOLIO_PNL_URL = "https://gains-bydmcxepbfc0gddw.westeurope-01.azureweb
 const SOCIAL_PRODUCTION_API_URL = "https://social-dmfjg7hqebfmb5ct.westeurope-01.azurewebsites.net/"
 const SEARCH_DEV_API_URL = 'http://127.0.0.1:8000';
 
+
 // Get the fixed Bearer token from environment variables
 const FIXED_BEARER_TOKEN = process.env.REACT_APP_SWIPE_KEY;
 
@@ -101,8 +102,10 @@ const withRetry = async <T>(
 
 export const testApiConnection = async () => {
   try {
-    const response = await socialProdApi.get('/api-test');
-    return response.data;
+    return await withRetry(async () => {
+      const response = await localApi.get('/api-test');
+      return response.data;
+    });
   } catch (error: any) {
     console.error('Error testing API connection:', error.response.data);
     throw error;
