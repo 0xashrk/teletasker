@@ -146,4 +146,20 @@ export const verifyTelegramCode = async (phoneNumber: string, verificationCode: 
   }
 };
 
+interface TelegramAuthStatus {
+  logged_in: boolean;
+}
+
+export const checkTelegramAuthStatus = async (): Promise<TelegramAuthStatus> => {
+  try {
+    return await withRetry(async () => {
+      const response = await localApi.get('/telethon/auth/status');
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error checking Telegram auth status:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export default localApi;

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { sendTelegramVerificationCode, verifyTelegramCode } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './ConnectTelegram.module.css';
 
 interface ConnectTelegramProps {
@@ -7,12 +8,24 @@ interface ConnectTelegramProps {
 }
 
 const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const { 
+    isTelegramConnected, 
+    telegramPhoneNumber, 
+    setTelegramConnected,
+    isCheckingTelegramStatus 
+  } = useAuth();
+  const [phoneNumber, setPhoneNumber] = useState(telegramPhoneNumber || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState('');
   const [verificationInProgress, setVerificationInProgress] = useState(false);
+
+  useEffect(() => {
+    if (!isCheckingTelegramStatus && isTelegramConnected) {
+      onConnect();
+    }
+  }, [isCheckingTelegramStatus, isTelegramConnected, onConnect]);
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +51,8 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
 
     try {
       await verifyTelegramCode(phoneNumber, otp);
-      onConnect(); // Notify parent component of successful connection
+      setTelegramConnected(phoneNumber); // Store in AuthContext
+      onConnect(); // Notify parent component
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to verify code');
     } finally {
@@ -58,6 +72,17 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
       setIsLoading(false);
     }
   };
+
+  if (isCheckingTelegramStatus) {
+    return (
+      <div className={styles.card}>
+        <h2 className={styles.title}>Checking Connection Status</h2>
+        <p className={styles.desc}>
+          Verifying your Telegram connection...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.card}>

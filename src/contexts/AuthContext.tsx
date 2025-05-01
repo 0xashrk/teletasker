@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-import { tokenExpiredEmitter, TOKEN_EXPIRED_EVENT } from '../services/api';
+import { tokenExpiredEmitter, TOKEN_EXPIRED_EVENT, checkTelegramAuthStatus } from '../services/api';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -8,6 +8,12 @@ interface AuthContextType {
   logout: () => void;
   getAuthToken: () => Promise<string | null>;
   authToken: string | null;
+  isTelegramConnected: boolean;
+  telegramPhoneNumber: string | null;
+  setTelegramConnected: (phoneNumber: string) => void;
+  disconnectTelegram: () => void;
+  checkTelegramStatus: () => Promise<void>;
+  isCheckingTelegramStatus: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,6 +22,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { login: privyLogin, logout: privyLogout, authenticated, getAccessToken } = usePrivy();
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isTelegramConnected, setIsTelegramConnected] = useState(false);
+  const [telegramPhoneNumber, setTelegramPhoneNumber] = useState<string | null>(null);
+  const [isCheckingTelegramStatus, setIsCheckingTelegramStatus] = useState(true);
+
+  const checkTelegramStatus = useCallback(async () => {
+    if (!authenticated) {
+      setIsTelegramConnected(false);
+      setTelegramPhoneNumber(null);
+      return;
+    }
+
+    setIsCheckingTelegramStatus(true);
+    try {
+      const status = await checkTelegramAuthStatus();
+      setIsTelegramConnected(status.logged_in);
+      
+      // Only keep phone number in localStorage if still connected
+      if (status.logged_in) {
+        const savedPhoneNumber = localStorage.getItem('telegram_phone_number');
+        if (savedPhoneNumber) {
+          setTelegramPhoneNumber(savedPhoneNumber);
+        }
+      } else {
+        setTelegramPhoneNumber(null);
+        localStorage.removeItem('telegram_phone_number');
+      }
+    } catch (error) {
+      console.error('Error checking Telegram status:', error);
+      setIsTelegramConnected(false);
+      setTelegramPhoneNumber(null);
+    } finally {
+      setIsCheckingTelegramStatus(false);
+    }
+  }, [authenticated]);
+
+  // Check Telegram status on mount and when authentication changes
+  useEffect(() => {
+    checkTelegramStatus();
+  }, [authenticated, checkTelegramStatus]);
+
+  const setTelegramConnected = useCallback((phoneNumber: string) => {
+    setIsTelegramConnected(true);
+    setTelegramPhoneNumber(phoneNumber);
+    localStorage.setItem('telegram_phone_number', phoneNumber);
+  }, []);
+
+  const disconnectTelegram = useCallback(() => {
+    setIsTelegramConnected(false);
+    setTelegramPhoneNumber(null);
+    localStorage.removeItem('telegram_phone_number');
+  }, []);
 
   const fetchAndSetToken = useCallback(async () => {
     if (!authenticated) return null;
@@ -38,7 +95,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return fetchAndSetToken();
   }, [authenticated, authToken, fetchAndSetToken]);
 
-  // Set up token management
   useEffect(() => {
     if (authenticated) {
       fetchAndSetToken();
@@ -48,7 +104,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [authenticated, fetchAndSetToken]);
 
-  // Handle token expiry
   useEffect(() => {
     const handleTokenExpired = async () => {
       await fetchAndSetToken();
@@ -68,6 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     privyLogout();
     setAuthToken(null);
     localStorage.removeItem('auth_token');
+    disconnectTelegram();
   };
 
   return (
@@ -77,6 +133,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logout,
       getAuthToken,
       authToken,
+      isTelegramConnected,
+      telegramPhoneNumber,
+      setTelegramConnected,
+      disconnectTelegram,
+      checkTelegramStatus,
+      isCheckingTelegramStatus,
     }}>
       {children}
     </AuthContext.Provider>
