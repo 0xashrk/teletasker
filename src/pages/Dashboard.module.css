@@ -395,7 +395,7 @@
   .overview {
     grid-template-columns: 1fr;
   }
-}
+} 
 
 .apiTest {
   display: flex;

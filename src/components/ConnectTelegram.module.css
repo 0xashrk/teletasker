@@ -80,9 +80,16 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  flex: 1;
+  text-align: center;
 }
 
-.secondaryButton:hover {
+.secondaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondaryButton:not(:disabled):hover {
   opacity: 0.8;
 }
 
@@ -90,6 +97,21 @@
   color: #ff3b30;
   font-size: 14px;
   margin: 0;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+/* Update input styles for better OTP visibility */
+.input[type="text"] {
+  letter-spacing: 4px;
+  font-size: 18px;
+  text-align: center;
+  font-family: monospace;
 }
 
 @media (max-width: 640px) {

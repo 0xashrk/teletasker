@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { sendTelegramVerificationCode } from '../services/api';
+import { sendTelegramVerificationCode, verifyTelegramCode } from '../services/api';
 import styles from './ConnectTelegram.module.css';
 
 interface ConnectTelegramProps {
@@ -12,6 +12,7 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
   const [error, setError] = useState<string | null>(null);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState('');
+  const [verificationInProgress, setVerificationInProgress] = useState(false);
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,9 +20,9 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
     setIsLoading(true);
 
     try {
-      // Format phone number to include + if not present
       const formattedNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
       await sendTelegramVerificationCode(formattedNumber);
+      setPhoneNumber(formattedNumber); // Store the formatted number
       setShowOtpInput(true);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to send verification code');
@@ -32,9 +33,30 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // We'll implement this in the next step when we add the verify code endpoint
-    // For now, just log the OTP
-    console.log('OTP submitted:', otp);
+    setError(null);
+    setVerificationInProgress(true);
+
+    try {
+      await verifyTelegramCode(phoneNumber, otp);
+      onConnect(); // Notify parent component of successful connection
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to verify code');
+    } finally {
+      setVerificationInProgress(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      await sendTelegramVerificationCode(phoneNumber);
+      setOtp(''); // Clear previous OTP
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to resend code');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -43,7 +65,7 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
       <p className={styles.desc}>
         {!showOtpInput 
           ? 'Enter your Telegram phone number to connect your account.'
-          : 'Enter the verification code sent to your Telegram account.'
+          : `Enter the verification code sent to ${phoneNumber}`
         }
       </p>
 
@@ -74,7 +96,7 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
             <input
               type="text"
               value={otp}
-              onChange={(e) => setOtp(e.target.value.slice(0, 5))}
+              onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 5))}
               placeholder="Enter 5-digit code"
               className={styles.input}
               maxLength={5}
@@ -86,21 +108,31 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
           <button 
             type="submit" 
             className={styles.button}
-            disabled={isLoading || otp.length !== 5}
+            disabled={verificationInProgress || otp.length !== 5}
           >
-            Verify Code
+            {verificationInProgress ? 'Verifying...' : 'Verify Code'}
           </button>
-          <button 
-            type="button"
-            className={styles.secondaryButton}
-            onClick={() => {
-              setShowOtpInput(false);
-              setOtp('');
-              setError(null);
-            }}
-          >
-            Change Phone Number
-          </button>
+          <div className={styles.actionButtons}>
+            <button 
+              type="button"
+              className={styles.secondaryButton}
+              onClick={() => {
+                setShowOtpInput(false);
+                setOtp('');
+                setError(null);
+              }}
+            >
+              Change Phone Number
+            </button>
+            <button 
+              type="button"
+              className={styles.secondaryButton}
+              onClick={handleResendCode}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Sending...' : 'Resend Code'}
+            </button>
+          </div>
         </form>
       )}
     </div>

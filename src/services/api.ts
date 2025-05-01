@@ -131,4 +131,19 @@ export const sendTelegramVerificationCode = async (phoneNumber: string) => {
   }
 };
 
+export const verifyTelegramCode = async (phoneNumber: string, verificationCode: string) => {
+  try {
+    return await withRetry(async () => {
+      const response = await localApi.post('/telethon/auth/verify', {
+        phone_number: phoneNumber,
+        verification_code: verificationCode
+      });
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error verifying Telegram code:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export default localApi;
