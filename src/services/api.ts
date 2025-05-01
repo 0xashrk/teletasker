@@ -162,4 +162,29 @@ export const checkTelegramAuthStatus = async (): Promise<TelegramAuthStatus> => 
   }
 };
 
+interface TelegramChat {
+  id: number;
+  title: string;
+  type: string;
+  username?: string;
+  unread_count: number;
+  last_message: {
+    text: string;
+    date: string;
+    is_outgoing: boolean;
+  };
+}
+
+export const getTelegramChats = async (): Promise<TelegramChat[]> => {
+  try {
+    return await withRetry(async () => {
+      const response = await localApi.get('/telethon/chats');
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error fetching Telegram chats:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export default localApi;

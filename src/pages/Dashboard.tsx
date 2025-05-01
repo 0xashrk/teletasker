@@ -1,24 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import ChatList from '../components/ChatList';
 import AssistantModeConfig from '../components/AssistantModeConfig';
 import Overview from '../components/Overview';
 import ConnectTelegram from '../components/ConnectTelegram';
-import { testApiConnection } from '../services/api';
+import { getTelegramChats } from '../services/api';
 import styles from './Dashboard.module.css';
 import { useAuth } from '../contexts/AuthContext';
-
-// Mock chat data
-const mockChats = [
-  { id: '1', name: 'Alice Smith', avatar: '👩', lastMessage: 'Can you review the proposal?', time: '2m', unread: 3 },
-  { id: '2', name: 'Product Team', avatar: '🧑‍💻', lastMessage: 'Sprint planning at 2 PM', time: '5m', unread: 0 },
-  { id: '3', name: 'John Developer', avatar: '👨‍💻', lastMessage: 'PR is ready for review', time: '15m', unread: 1 },
-  { id: '4', name: 'Marketing', avatar: '📢', lastMessage: 'Campaign stats are in!', time: '30m', unread: 0 },
-  { id: '5', name: 'Support', avatar: '💡', lastMessage: 'New ticket assigned to you', time: '1h', unread: 2 },
-  { id: '6', name: 'Design Team', avatar: '🎨', lastMessage: 'Updated mockups ready', time: '2h', unread: 0 },
-  { id: '7', name: 'Engineering', avatar: '⚙️', lastMessage: 'Deployment successful', time: '3h', unread: 0 },
-];
 
 // Mock tasks data
 const mockTasks = [
@@ -67,8 +56,44 @@ const Dashboard: React.FC = () => {
   const [showModes, setShowModes] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const [testResult, setTestResult] = useState<string>('');
-  const { authToken } = useAuth();
+  const [chats, setChats] = useState<any[]>([]);
+  const [isLoadingChats, setIsLoadingChats] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+  const { isTelegramConnected } = useAuth();
+
+  // Fetch chats when connected
+  useEffect(() => {
+    const fetchChats = async () => {
+      if (!connected || !isTelegramConnected) return;
+      
+      setIsLoadingChats(true);
+      setChatError(null);
+      
+      try {
+        const telegramChats = await getTelegramChats();
+        // Transform Telegram chat format to our app's format
+        const formattedChats = telegramChats.map(chat => ({
+          id: chat.id.toString(),
+          name: chat.title,
+          avatar: chat.type === 'user' ? '👤' : '👥', // Default avatars based on type
+          lastMessage: chat.last_message.text || 'No messages',
+          time: new Date(chat.last_message.date).toLocaleTimeString([], { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          unread: chat.unread_count
+        }));
+        setChats(formattedChats);
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+        setChatError('Failed to load chats. Please try again.');
+      } finally {
+        setIsLoadingChats(false);
+      }
+    };
+
+    fetchChats();
+  }, [connected, isTelegramConnected]);
 
   const handleConnect = () => {
     setConnected(true);
@@ -115,16 +140,7 @@ const Dashboard: React.FC = () => {
     setSelectedChatId(chatId);
   };
 
-  const handleTestApi = async () => {
-    try {
-      const result = await testApiConnection();
-      setTestResult(JSON.stringify(result));
-    } catch (error) {
-      setTestResult('Error testing API');
-    }
-  };
-
-  const configuredChats = mockChats
+  const configuredChats = chats
     .filter(chat => chatConfigs.some(c => c.id === chat.id))
     .map(chat => ({
       ...chat,
@@ -151,15 +167,29 @@ const Dashboard: React.FC = () => {
           <p className={styles.desc}>
             Choose up to {CHAT_LIMIT} chats for your AI assistant to manage.
           </p>
-          <ChatList
-            chats={mockChats}
-            selectedChats={selectedChats}
-            chatLimit={CHAT_LIMIT}
-            onToggleChat={handleToggleChat}
-          />
+          {isLoadingChats ? (
+            <div className={styles.loading}>Loading your chats...</div>
+          ) : chatError ? (
+            <div className={styles.error}>
+              {chatError}
+              <button 
+                className={styles.retryButton}
+                onClick={() => setConnected(true)} // This will trigger a re-fetch
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <ChatList
+              chats={chats}
+              selectedChats={selectedChats}
+              chatLimit={CHAT_LIMIT}
+              onToggleChat={handleToggleChat}
+            />
+          )}
           <button 
             className={styles.button}
-            disabled={selectedChats.length === 0}
+            disabled={selectedChats.length === 0 || isLoadingChats}
             onClick={handleContinue}
           >
             {selectedChats.length === 0 ? 'Select chats to continue' : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
@@ -171,7 +201,7 @@ const Dashboard: React.FC = () => {
     if (!showOverview) {
       return (
         <AssistantModeConfig
-          selectedChats={mockChats.filter(chat => selectedChats.includes(chat.id))}
+          selectedChats={chats.filter(chat => selectedChats.includes(chat.id))}
           chatConfigs={chatConfigs}
           onSetMode={handleSetMode}
           onStart={handleStart}
