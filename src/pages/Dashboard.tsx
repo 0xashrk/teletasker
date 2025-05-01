@@ -1,99 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useTelegramChats } from '../hooks/useTelegramChats';
+import { useChatSelection } from '../hooks/useChatSelection';
 import ChatList from '../components/ChatList';
 import AssistantModeConfig from '../components/AssistantModeConfig';
 import Overview from '../components/Overview';
 import ConnectTelegram from '../components/ConnectTelegram';
-import { getTelegramChats } from '../services/api';
 import styles from './Dashboard.module.css';
-import { useAuth } from '../contexts/AuthContext';
-
-// Mock tasks data
-const mockTasks = [
-  {
-    id: '1',
-    chatId: '1',
-    text: 'Review the Q4 marketing proposal by Friday',
-    source: 'Alice Smith',
-    time: '2m ago',
-    status: 'pending' as const,
-    isAutomated: false
-  },
-  {
-    id: '2',
-    chatId: '2',
-    text: 'Schedule team sync for sprint planning',
-    source: 'Product Team',
-    time: '5m ago',
-    status: 'automated' as const,
-    isAutomated: true
-  },
-  {
-    id: '3',
-    chatId: '3',
-    text: 'Review pull request #42: Add new dashboard features',
-    source: 'John Developer',
-    time: '15m ago',
-    status: 'pending' as const,
-    isAutomated: false
-  }
-];
 
 const CHAT_LIMIT = 5;
-
-interface ChatConfig {
-  id: string;
-  mode: 'observe' | 'automate';
-}
 
 const Dashboard: React.FC = () => {
   const { user, logout } = usePrivy();
   const navigate = useNavigate();
+  const { isTelegramConnected } = useAuth();
   const [connected, setConnected] = useState(false);
-  const [selectedChats, setSelectedChats] = useState<string[]>([]);
-  const [chatConfigs, setChatConfigs] = useState<ChatConfig[]>([]);
   const [showModes, setShowModes] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const [chats, setChats] = useState<any[]>([]);
-  const [isLoadingChats, setIsLoadingChats] = useState(false);
-  const [chatError, setChatError] = useState<string | null>(null);
-  const { isTelegramConnected } = useAuth();
 
-  // Fetch chats when connected
-  useEffect(() => {
-    const fetchChats = async () => {
-      if (!connected || !isTelegramConnected) return;
-      
-      setIsLoadingChats(true);
-      setChatError(null);
-      
-      try {
-        const telegramChats = await getTelegramChats();
-        // Transform Telegram chat format to our app's format
-        const formattedChats = telegramChats.map(chat => ({
-          id: chat.id.toString(),
-          name: chat.title,
-          avatar: chat.type === 'user' ? '👤' : '👥', // Default avatars based on type
-          lastMessage: chat.last_message.text || 'No messages',
-          time: new Date(chat.last_message.date).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          }),
-          unread: chat.unread_count
-        }));
-        setChats(formattedChats);
-      } catch (error) {
-        console.error('Error fetching chats:', error);
-        setChatError('Failed to load chats. Please try again.');
-      } finally {
-        setIsLoadingChats(false);
-      }
-    };
+  const {
+    chats,
+    isLoadingChats,
+    chatError,
+    refetchChats
+  } = useTelegramChats(connected, isTelegramConnected);
 
-    fetchChats();
-  }, [connected, isTelegramConnected]);
+  const {
+    selectedChats,
+    chatConfigs,
+    configuredChats,
+    handleToggleChat,
+    handleSetMode,
+  } = useChatSelection(chats, CHAT_LIMIT);
 
   const handleConnect = () => {
     setConnected(true);
@@ -108,52 +49,13 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleToggleChat = (id: string) => {
-    if (selectedChats.includes(id)) {
-      setSelectedChats(selectedChats.filter(cid => cid !== id));
-      setChatConfigs(chatConfigs.filter(config => config.id !== id));
-    } else if (selectedChats.length < CHAT_LIMIT) {
-      setSelectedChats([...selectedChats, id]);
-    }
-  };
-
   const handleContinue = () => {
     setShowModes(true);
-  };
-
-  const handleSetMode = (chatId: string, mode: 'observe' | 'automate') => {
-    const existingConfig = chatConfigs.find(c => c.id === chatId);
-    if (existingConfig) {
-      setChatConfigs(chatConfigs.map(c => 
-        c.id === chatId ? { ...c, mode } : c
-      ));
-    } else {
-      setChatConfigs([...chatConfigs, { id: chatId, mode }]);
-    }
   };
 
   const handleStart = () => {
     setShowOverview(true);
   };
-
-  const handleSelectChat = (chatId: string | null) => {
-    setSelectedChatId(chatId);
-  };
-
-  const configuredChats = chats
-    .filter(chat => chatConfigs.some(c => c.id === chat.id))
-    .map(chat => ({
-      ...chat,
-      mode: chatConfigs.find(c => c.id === chat.id)?.mode || 'observe'
-    })) as Array<{
-      id: string;
-      name: string;
-      avatar: string;
-      mode: 'observe' | 'automate';
-      lastMessage: string;
-      time: string;
-      unread: number;
-    }>;
 
   const renderContent = () => {
     if (!connected) {
@@ -213,7 +115,7 @@ const Dashboard: React.FC = () => {
       <Overview
         chats={configuredChats}
         selectedChatId={selectedChatId}
-        onSelectChat={handleSelectChat}
+        onSelectChat={setSelectedChatId}
       />
     );
   };
