@@ -109,20 +109,6 @@ export const testApiConnection = async () => {
   }
 };
 
-export const getTokens = async (network: Network): Promise<Token[]> => {
-  try {
-    return await withRetry(async () => {
-      const response = await backendProdApi.get<Token[]>('/products', {
-        params: { network }
-      });
-      return response.data;
-    });
-  } catch (error) {
-    console.error('Error fetching tokens: ', error);
-    throw error;
-  }
-};
-
 export const getTokenOverview = async (contractAddress: string) => {
   try {
     const response = await backendProdApi.get(`/token-overview/${contractAddress}`);
