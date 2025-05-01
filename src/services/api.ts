@@ -117,83 +117,16 @@ export const testApiConnection = async () => {
   }
 };
 
-export const getTokenOverview = async (contractAddress: string) => {
+export const sendTelegramVerificationCode = async (phoneNumber: string) => {
   try {
-    const response = await backendProdApi.get(`/token-overview/${contractAddress}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching token overview:', error);
-    throw error;
-  }
-};
-
-export const getPriceChart = async (timeRange: string, contractAddress: string) => {
-  try {
-    const response = await backendProdApi.get(`/price-chart/${timeRange}?token_address=${contractAddress}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching price chart data:', error);
-    throw error;
-  }
-};
-
-export const searchToken = async (input: string) => {
-  try {
-    const response = await searchProdApi.get('/search', {
-      params: {
-        query_text: input,
-      }
+    return await withRetry(async () => {
+      const response = await localApi.post('/telethon/auth/send-code', {
+        phone_number: phoneNumber
+      });
+      return response.data;
     });
-    return response.data;
-  } catch (error) {
-    console.error('Error returning search result:', error);
-    throw error; // Re-throw to handle in the component
-  }
-}
-
-// And for suggestions
-export const getSuggestions = async (input: string) => {
-  try {
-    const response = await searchProdApi.get('/search/suggest', {
-      params: {
-        query_text: input,
-      }
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching suggestions:', error);
-    throw error;
-  }
-}
-
-export const getPortfolioTokenDetails = async (contractAddresses: string[]) => {
-  try {
-    const response = await backendProdApi.post('/products/token-details', {
-      contract_addresses: contractAddresses
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching portfolio token details:', error);
-    throw error;
-  }
-};
-
-export const getTrendingTokens = async () => {
-  try {
-    const response = await backendProdApi.get('/api/trending-tokens');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching trending tokens:', error);
-    throw error;
-  }
-};
-
-export const checkUsernameAvailability = async (username: string): Promise<{ taken: boolean }> => {
-  try {
-    const response = await backendProdApi.get(`/profile/username/check/${username}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error checking username availability:', error);
+  } catch (error: any) {
+    console.error('Error sending Telegram verification code:', error.response?.data || error.message);
     throw error;
   }
 };
