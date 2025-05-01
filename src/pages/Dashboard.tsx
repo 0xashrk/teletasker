@@ -5,7 +5,9 @@ import ChatList from '../components/ChatList';
 import AssistantModeConfig from '../components/AssistantModeConfig';
 import Overview from '../components/Overview';
 import ConnectTelegram from '../components/ConnectTelegram';
+import { testApiConnection } from '../services/api';
 import styles from './Dashboard.module.css';
+import { useAuth } from '../contexts/AuthContext';
 
 // Mock chat data
 const mockChats = [
@@ -65,6 +67,8 @@ const Dashboard: React.FC = () => {
   const [showModes, setShowModes] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<string>('');
+  const { authToken } = useAuth();
 
   const handleConnect = () => {
     setConnected(true);
@@ -109,6 +113,15 @@ const Dashboard: React.FC = () => {
 
   const handleSelectChat = (chatId: string | null) => {
     setSelectedChatId(chatId);
+  };
+
+  const handleTestApi = async () => {
+    try {
+      const result = await testApiConnection();
+      setTestResult(JSON.stringify(result));
+    } catch (error) {
+      setTestResult('Error testing API');
+    }
   };
 
   const configuredChats = mockChats
@@ -180,6 +193,12 @@ const Dashboard: React.FC = () => {
       <header className={styles.topbar}>
         <div className={styles.logo}>Teletasker</div>
         <div className={styles.userSection}>
+          {/* <div className={styles.apiTest}>
+            <button className={styles.testButton} onClick={handleTestApi}>
+              Test API
+            </button>
+            {testResult && <p className={styles.testResult}>{testResult}</p>}
+          </div> */}
           <span className={styles.userEmail}>
             {user?.email?.address}
           </span>

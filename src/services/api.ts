@@ -95,7 +95,12 @@ const withRetry = async <T>(
     startingDelay: 1000,
     timeMultiple: 2,
     retry: (error: any) => {
-      return error?.response?.status === 401;
+      if (error?.response?.status === 401) {
+        // Trigger token refresh event
+        tokenExpiredEmitter.dispatchEvent(new Event(TOKEN_EXPIRED_EVENT));
+        return true;
+      }
+      return false;
     },
   });
 };

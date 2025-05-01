@@ -1,6 +1,6 @@
 import React from 'react';
-import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import './LoginButton.css';
 
 interface LoginButtonProps {
@@ -12,13 +12,13 @@ const LoginButton: React.FC<LoginButtonProps> = ({
   variant = 'primary',
   className = ''
 }) => {
-  const { login, authenticated } = usePrivy();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       await login();
-      if (authenticated) {
+      if (isAuthenticated) {
         navigate('/dashboard');
       }
     } catch (error) {
@@ -31,7 +31,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({
       onClick={handleLogin}
       className={`login-button ${variant} ${className}`}
     >
-      {authenticated ? 'Go to Dashboard' : 'Login'}
+      {isAuthenticated ? 'Go to Dashboard' : 'Login'}
     </button>
   );
 };
