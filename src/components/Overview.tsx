@@ -34,6 +34,7 @@ interface OverviewProps {
   chats: Chat[];
   selectedChatId: string | null;
   onSelectChat: (chatId: string | null) => void;
+  onRemoveChat: (chatId: string) => void;
 }
 
 // Mock data for observe mode (task extraction)
@@ -130,6 +131,7 @@ const Overview: React.FC<OverviewProps> = ({
   chats,
   selectedChatId,
   onSelectChat,
+  onRemoveChat,
 }) => {
   const selectedChat = selectedChatId 
     ? chats.find(chat => chat.id === selectedChatId)
@@ -164,18 +166,32 @@ const Overview: React.FC<OverviewProps> = ({
             <div
               key={chat.id}
               className={`${styles.chatItem} ${chat.id === selectedChatId ? styles.active : ''}`}
-              onClick={() => onSelectChat(chat.id === selectedChatId ? null : chat.id)}
             >
-              <span className={styles.chatAvatar}>{chat.avatar}</span>
-              <div className={styles.chatInfo}>
-                <div className={styles.chatName}>{chat.name}</div>
-                <div className={styles.chatMode}>
-                  <span className={styles.modeIcon}>
-                    {chat.mode === 'observe' ? '📋' : '⚡'}
-                  </span>
-                  {chat.mode === 'observe' ? 'Task Extraction' : 'Auto Reply'}
+              <div 
+                className={styles.chatContent}
+                onClick={() => onSelectChat(chat.id === selectedChatId ? null : chat.id)}
+              >
+                <span className={styles.chatAvatar}>{chat.avatar}</span>
+                <div className={styles.chatInfo}>
+                  <div className={styles.chatName}>{chat.name}</div>
+                  <div className={styles.chatMode}>
+                    <span className={styles.modeIcon}>
+                      {chat.mode === 'observe' ? '📋' : '⚡'}
+                    </span>
+                    {chat.mode === 'observe' ? 'Task Extraction' : 'Auto Reply'}
+                  </div>
                 </div>
               </div>
+              <button
+                className={styles.removeButton}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemoveChat(chat.id);
+                }}
+                title="Remove chat"
+              >
+                −
+              </button>
             </div>
           ))}
         </div>

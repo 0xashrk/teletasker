@@ -400,4 +400,37 @@
   font-size: 13px;
   color: var(--text-secondary);
   font-weight: normal;
+}
+
+.chatContent {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+
+.removeButton {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.chatItem:hover .removeButton {
+  opacity: 1;
+}
+
+.removeButton:hover {
+  background: rgba(255, 0, 0, 0.2);
+  color: #ff4444;
 } 

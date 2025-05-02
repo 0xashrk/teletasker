@@ -116,6 +116,7 @@ const Dashboard: React.FC = () => {
         chats={configuredChats}
         selectedChatId={selectedChatId}
         onSelectChat={setSelectedChatId}
+        onRemoveChat={handleToggleChat}
       />
     );
   };
