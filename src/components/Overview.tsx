@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './Overview.module.css';
+import ChatSelectionModal from './ChatSelectionModal';
+import { TelegramChat } from '../hooks/useTelegramChats';
 
 interface Chat {
   id: string;
@@ -35,6 +37,10 @@ interface OverviewProps {
   selectedChatId: string | null;
   onSelectChat: (chatId: string | null) => void;
   onRemoveChat: (chatId: string) => void;
+  availableChats: TelegramChat[];
+  selectedChats: string[];
+  chatLimit: number;
+  onToggleChat: (id: string) => void;
 }
 
 // Mock data for observe mode (task extraction)
@@ -132,7 +138,13 @@ const Overview: React.FC<OverviewProps> = ({
   selectedChatId,
   onSelectChat,
   onRemoveChat,
+  availableChats,
+  selectedChats,
+  chatLimit,
+  onToggleChat,
 }) => {
+  const [showChatSelection, setShowChatSelection] = useState(false);
+
   const selectedChat = selectedChatId 
     ? chats.find(chat => chat.id === selectedChatId)
     : null;
@@ -161,7 +173,16 @@ const Overview: React.FC<OverviewProps> = ({
         </div>
 
         <div className={styles.activeChats}>
-          <h3 className={styles.sectionTitle}>Active Chats</h3>
+          <div className={styles.sectionHeader}>
+            <h3 className={styles.sectionTitle}>Active Chats</h3>
+            <button 
+              className={styles.addButton}
+              onClick={() => setShowChatSelection(true)}
+              title="Add more chats"
+            >
+              +
+            </button>
+          </div>
           {chats.map(chat => (
             <div
               key={chat.id}
@@ -274,6 +295,16 @@ const Overview: React.FC<OverviewProps> = ({
           )}
         </div>
       </div>
+      
+      {showChatSelection && (
+        <ChatSelectionModal
+          chats={availableChats}
+          selectedChats={selectedChats}
+          chatLimit={chatLimit}
+          onToggleChat={onToggleChat}
+          onClose={() => setShowChatSelection(false)}
+        />
+      )}
     </div>
   );
 };
