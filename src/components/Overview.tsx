@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './Overview.module.css';
-import ChatSelectionModal from './ChatSelectionModal';
+import ChatList from './ChatList';  // Import existing ChatList
 import { TelegramChat } from '../hooks/useTelegramChats';
+import AssistantModeConfig from './AssistantModeConfig';
+import { ChatConfig } from '../hooks/useChatSelection';
 
 interface Chat {
   id: string;
@@ -41,6 +44,8 @@ interface OverviewProps {
   selectedChats: string[];
   chatLimit: number;
   onToggleChat: (id: string) => void;
+  chatConfigs: ChatConfig[];
+  onSetMode: (chatId: string, mode: 'observe' | 'automate') => void;
 }
 
 // Mock data for observe mode (task extraction)
@@ -142,8 +147,11 @@ const Overview: React.FC<OverviewProps> = ({
   selectedChats,
   chatLimit,
   onToggleChat,
+  chatConfigs,
+  onSetMode,
 }) => {
   const [showChatSelection, setShowChatSelection] = useState(false);
+  const [showModeSelection, setShowModeSelection] = useState(false);
 
   const selectedChat = selectedChatId 
     ? chats.find(chat => chat.id === selectedChatId)
@@ -155,6 +163,17 @@ const Overview: React.FC<OverviewProps> = ({
       ? mockTasks.filter(task => task.chatId === selectedChatId)
       : mockMessages.filter(msg => msg.chatId === selectedChatId)
     : mockTasks; // Default to showing all tasks
+
+  // Modify the chat selection flow
+  const handleChatSelectionDone = () => {
+    setShowChatSelection(false);
+    setShowModeSelection(true);
+  };
+
+  // Add handler for mode selection done
+  const handleModeSelectionDone = () => {
+    setShowModeSelection(false);
+  };
 
   return (
     <div className={styles.overview}>
@@ -296,14 +315,45 @@ const Overview: React.FC<OverviewProps> = ({
         </div>
       </div>
       
-      {showChatSelection && (
-        <ChatSelectionModal
-          chats={availableChats}
-          selectedChats={selectedChats}
-          chatLimit={chatLimit}
-          onToggleChat={onToggleChat}
-          onClose={() => setShowChatSelection(false)}
-        />
+      {/* Simple modal using existing ChatList */}
+      {showChatSelection && createPortal(
+        <div className={styles.modalOverlay}>
+          <div className={styles.card}>
+            <h2 className={styles.title}>Select Chats</h2>
+            <p className={styles.desc}>
+              Choose up to {chatLimit} chats for your AI assistant to manage.
+            </p>
+            <ChatList
+              chats={availableChats}
+              selectedChats={selectedChats}
+              chatLimit={chatLimit}
+              onToggleChat={onToggleChat}
+            />
+            <button 
+              className={styles.button}
+              disabled={selectedChats.length === 0}
+              onClick={handleChatSelectionDone}
+            >
+              {selectedChats.length === 0 ? 'Select chats to continue' : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Add the mode selection modal */}
+      {showModeSelection && createPortal(
+        <div className={styles.modalOverlay}>
+          <div className={styles.card}>
+            <AssistantModeConfig
+              selectedChats={availableChats.filter(chat => selectedChats.includes(chat.id))}
+              chatConfigs={chatConfigs}
+              onSetMode={onSetMode}
+              onStart={handleModeSelectionDone}
+            />
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

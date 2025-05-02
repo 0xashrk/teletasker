@@ -121,6 +121,8 @@ const Dashboard: React.FC = () => {
         selectedChats={selectedChats}
         chatLimit={CHAT_LIMIT}
         onToggleChat={handleToggleChat}
+        chatConfigs={chatConfigs}
+        onSetMode={handleSetMode}
       />
     );
   };
