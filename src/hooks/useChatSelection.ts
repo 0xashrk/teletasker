@@ -16,6 +16,7 @@ interface UseChatSelectionReturn {
   saveChatConfigurations: () => Promise<void>;
   isLoading: boolean;
   error: string | null;
+  initialized: boolean;
 }
 
 export const useChatSelection = (
@@ -26,6 +27,7 @@ export const useChatSelection = (
   const [chatConfigs, setChatConfigs] = useState<ChatConfig[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState<boolean>(false);
 
   // Fetch initial monitored chats on mount
   useEffect(() => {
@@ -49,6 +51,7 @@ export const useChatSelection = (
         setError('Failed to fetch monitored chats. Please try again.');
       } finally {
         setIsLoading(false);
+        setInitialized(true);
       }
     };
 
@@ -129,6 +132,7 @@ export const useChatSelection = (
     handleSetMode,
     saveChatConfigurations,
     isLoading,
-    error
+    error,
+    initialized
   };
 }; 

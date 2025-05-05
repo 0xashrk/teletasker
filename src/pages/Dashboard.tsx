@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -20,6 +20,7 @@ const Dashboard: React.FC = () => {
   const [showModes, setShowModes] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [initializing, setInitializing] = useState(true);
 
   const {
     chats,
@@ -36,8 +37,35 @@ const Dashboard: React.FC = () => {
     handleSetMode,
     saveChatConfigurations,
     isLoading,
-    error
+    error,
+    initialized: chatSelectionInitialized
   } = useChatSelection(chats, CHAT_LIMIT);
+
+  // Check for existing monitored chats on component mount
+  useEffect(() => {
+    const checkExistingConfiguration = async () => {
+      // Wait for chat selection to be initialized
+      if (!chatSelectionInitialized) return;
+      
+      try {
+        if (isTelegramConnected) {
+          setConnected(true);
+          
+          // If we have monitored chats, skip to overview
+          if (selectedChats.length > 0) {
+            setShowModes(true);
+            setShowOverview(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking existing configuration:', error);
+      } finally {
+        setInitializing(false);
+      }
+    };
+
+    checkExistingConfiguration();
+  }, [isTelegramConnected, selectedChats, chatSelectionInitialized]);
 
   const handleConnect = () => {
     setConnected(true);
@@ -61,6 +89,11 @@ const Dashboard: React.FC = () => {
   };
 
   const renderContent = () => {
+    // Show loading state until initialization is complete
+    if (initializing || !chatSelectionInitialized) {
+      return <div className={styles.loading}>Loading your dashboard...</div>;
+    }
+
     if (!connected) {
       return <ConnectTelegram onConnect={handleConnect} />;
     }
