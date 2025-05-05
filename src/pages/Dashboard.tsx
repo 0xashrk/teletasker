@@ -8,6 +8,7 @@ import ChatList from '../components/ChatList';
 import AssistantModeConfig from '../components/AssistantModeConfig';
 import Overview from '../components/Overview';
 import ConnectTelegram from '../components/ConnectTelegram';
+import Loader from '../components/Loader';
 import styles from './Dashboard.module.css';
 
 const CHAT_LIMIT = 5;
@@ -91,7 +92,7 @@ const Dashboard: React.FC = () => {
   const renderContent = () => {
     // Show loading state until initialization is complete
     if (initializing || !chatSelectionInitialized) {
-      return <div className={styles.loading}>Loading your dashboard...</div>;
+      return <Loader message="Preparing your dashboard..." />;
     }
 
     if (!connected) {
