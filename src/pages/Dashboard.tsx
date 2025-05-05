@@ -10,6 +10,7 @@ import Overview from '../components/Overview';
 import ConnectTelegram from '../components/ConnectTelegram';
 import Loader from '../components/Loader';
 import styles from './Dashboard.module.css';
+import { removeMonitoredChat } from '../services/api';
 
 const CHAT_LIMIT = 5;
 
@@ -164,6 +165,7 @@ const Dashboard: React.FC = () => {
         onSetMode={handleSetMode}
         onSaveConfigurations={saveChatConfigurations}
         isLoading={isLoading}
+        removeMonitoredChat={removeMonitoredChat}
       />
     );
   };

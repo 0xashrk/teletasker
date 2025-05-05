@@ -5,6 +5,7 @@ import ChatList from './ChatList';  // Import existing ChatList
 import { TelegramChat } from '../hooks/useTelegramChats';
 import AssistantModeConfig from './AssistantModeConfig';
 import { ChatConfig } from '../hooks/useChatSelection';
+import { removeMonitoredChat } from '../services/api';
 
 interface Chat {
   id: string;
@@ -48,6 +49,7 @@ interface OverviewProps {
   onSetMode: (chatId: string, mode: 'observe' | 'automate') => void;
   onSaveConfigurations: () => Promise<void>;
   isLoading?: boolean;
+  removeMonitoredChat: (chatId: string) => Promise<void>;
 }
 
 // Mock data for observe mode (task extraction)
@@ -153,6 +155,7 @@ const Overview: React.FC<OverviewProps> = ({
   onSetMode,
   onSaveConfigurations,
   isLoading = false,
+  removeMonitoredChat,
 }) => {
   const [showChatSelection, setShowChatSelection] = useState(false);
   const [showModeSelection, setShowModeSelection] = useState(false);
@@ -228,9 +231,17 @@ const Overview: React.FC<OverviewProps> = ({
               </div>
               <button
                 className={styles.removeButton}
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  onRemoveChat(chat.id);
+                  try {
+                    // First remove from backend
+                    await removeMonitoredChat(chat.id);
+                    // Then update UI
+                    onRemoveChat(chat.id);
+                  } catch (error) {
+                    console.error('Error removing chat:', error);
+                    // Optionally show an error message to the user
+                  }
                 }}
                 title="Remove chat"
               >
