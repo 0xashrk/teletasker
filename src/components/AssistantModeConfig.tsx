@@ -20,6 +20,8 @@ interface AssistantModeConfigProps {
   chatConfigs: ChatConfig[];
   onSetMode: (chatId: string, mode: 'observe' | 'automate') => void;
   onStart: () => void;
+  onSaveConfigurations: () => Promise<void>;
+  isLoading?: boolean;
 }
 
 const AssistantModeConfig: React.FC<AssistantModeConfigProps> = ({
@@ -27,7 +29,19 @@ const AssistantModeConfig: React.FC<AssistantModeConfigProps> = ({
   chatConfigs,
   onSetMode,
   onStart,
+  onSaveConfigurations,
+  isLoading = false,
 }) => {
+  const handleStart = async () => {
+    try {
+      await onSaveConfigurations();
+      onStart();
+    } catch (error) {
+      console.error('Error saving chat configurations:', error);
+      // You could add error handling UI here
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -67,13 +81,16 @@ const AssistantModeConfig: React.FC<AssistantModeConfigProps> = ({
 
       <button 
         className={styles.startBtn}
-        disabled={chatConfigs.length !== selectedChats.length}
-        onClick={onStart}
+        disabled={isLoading || chatConfigs.length !== selectedChats.length}
+        onClick={handleStart}
       >
-        {chatConfigs.length === selectedChats.length 
-          ? "Start AI Assistant" 
-          : `${selectedChats.length - chatConfigs.length} chats left to configure`
-        }
+        {isLoading ? (
+          "Saving configurations..."
+        ) : chatConfigs.length === selectedChats.length ? (
+          "Start AI Assistant"
+        ) : (
+          `${selectedChats.length - chatConfigs.length} chats left to configure`
+        )}
       </button>
     </div>
   );

@@ -34,6 +34,9 @@ const Dashboard: React.FC = () => {
     configuredChats,
     handleToggleChat,
     handleSetMode,
+    saveChatConfigurations,
+    isLoading,
+    error
   } = useChatSelection(chats, CHAT_LIMIT);
 
   const handleConnect = () => {
@@ -107,6 +110,8 @@ const Dashboard: React.FC = () => {
           chatConfigs={chatConfigs}
           onSetMode={handleSetMode}
           onStart={handleStart}
+          onSaveConfigurations={saveChatConfigurations}
+          isLoading={isLoading}
         />
       );
     }
@@ -123,6 +128,8 @@ const Dashboard: React.FC = () => {
         onToggleChat={handleToggleChat}
         chatConfigs={chatConfigs}
         onSetMode={handleSetMode}
+        onSaveConfigurations={saveChatConfigurations}
+        isLoading={isLoading}
       />
     );
   };

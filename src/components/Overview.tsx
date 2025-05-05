@@ -46,6 +46,8 @@ interface OverviewProps {
   onToggleChat: (id: string) => void;
   chatConfigs: ChatConfig[];
   onSetMode: (chatId: string, mode: 'observe' | 'automate') => void;
+  onSaveConfigurations: () => Promise<void>;
+  isLoading?: boolean;
 }
 
 // Mock data for observe mode (task extraction)
@@ -149,6 +151,8 @@ const Overview: React.FC<OverviewProps> = ({
   onToggleChat,
   chatConfigs,
   onSetMode,
+  onSaveConfigurations,
+  isLoading = false,
 }) => {
   const [showChatSelection, setShowChatSelection] = useState(false);
   const [showModeSelection, setShowModeSelection] = useState(false);
@@ -170,7 +174,7 @@ const Overview: React.FC<OverviewProps> = ({
     setShowModeSelection(true);
   };
 
-  // Add handler for mode selection done
+  // Update handler for mode selection done
   const handleModeSelectionDone = () => {
     setShowModeSelection(false);
   };
@@ -341,7 +345,7 @@ const Overview: React.FC<OverviewProps> = ({
         document.body
       )}
 
-      {/* Add the mode selection modal */}
+      {/* Update the mode selection modal */}
       {showModeSelection && createPortal(
         <div className={styles.modalOverlay}>
           <div className={styles.card}>
@@ -350,6 +354,8 @@ const Overview: React.FC<OverviewProps> = ({
               chatConfigs={chatConfigs}
               onSetMode={onSetMode}
               onStart={handleModeSelectionDone}
+              onSaveConfigurations={onSaveConfigurations}
+              isLoading={isLoading}
             />
           </div>
         </div>,
