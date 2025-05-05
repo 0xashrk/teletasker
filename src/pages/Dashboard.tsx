@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -43,7 +43,10 @@ const Dashboard: React.FC = () => {
     initialized: chatSelectionInitialized
   } = useChatSelection(chats, CHAT_LIMIT);
 
-  // Check for existing monitored chats on component mount
+  // Add a ref to track if this is the initial load
+  const initialLoadRef = useRef(true);
+
+  // Modify the existing useEffect
   useEffect(() => {
     const checkExistingConfiguration = async () => {
       // Wait for chat selection to be initialized
@@ -53,16 +56,18 @@ const Dashboard: React.FC = () => {
         if (isTelegramConnected) {
           setConnected(true);
           
-          // If we have monitored chats, skip to overview
-          if (selectedChats.length > 0) {
+          // Only auto-navigate to Overview on initial load, not when selectedChats changes during onboarding
+          if (initialLoadRef.current && selectedChats.length > 0) {
             setShowModes(true);
             setShowOverview(true);
+            initialLoadRef.current = false; // Mark initial load as completed
           }
         }
       } catch (error) {
         console.error('Error checking existing configuration:', error);
       } finally {
         setInitializing(false);
+        initialLoadRef.current = false; // Also mark as false after initialization
       }
     };
 
