@@ -96,81 +96,75 @@ const Dashboard: React.FC = () => {
     }
 
     if (!connected) {
-      return <div className={styles.fadeIn}><ConnectTelegram onConnect={handleConnect} /></div>;
+      return <ConnectTelegram onConnect={handleConnect} />;
     }
 
     if (!showModes) {
       return (
-        <div className={styles.fadeIn}>
-          <div className={styles.card}>
-            <h2 className={styles.title}>Select Chats</h2>
-            <p className={styles.desc}>
-              Choose up to {CHAT_LIMIT} chats for your AI assistant to manage.
-            </p>
-            {isLoadingChats ? (
-              <div className={styles.loading}>Loading your chats...</div>
-            ) : chatError ? (
-              <div className={styles.error}>
-                {chatError}
-                <button 
-                  className={styles.retryButton}
-                  onClick={() => setConnected(true)} // This will trigger a re-fetch
-                >
-                  Retry
-                </button>
-              </div>
-            ) : (
-              <ChatList
-                chats={chats}
-                selectedChats={selectedChats}
-                chatLimit={CHAT_LIMIT}
-                onToggleChat={handleToggleChat}
-              />
-            )}
-            <button 
-              className={styles.button}
-              disabled={selectedChats.length === 0 || isLoadingChats}
-              onClick={handleContinue}
-            >
-              {selectedChats.length === 0 ? 'Select chats to continue' : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
-            </button>
-          </div>
+        <div className={styles.card}>
+          <h2 className={styles.title}>Select Chats</h2>
+          <p className={styles.desc}>
+            Choose up to {CHAT_LIMIT} chats for your AI assistant to manage.
+          </p>
+          {isLoadingChats ? (
+            <div className={styles.loading}>Loading your chats...</div>
+          ) : chatError ? (
+            <div className={styles.error}>
+              {chatError}
+              <button 
+                className={styles.retryButton}
+                onClick={() => setConnected(true)} // This will trigger a re-fetch
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <ChatList
+              chats={chats}
+              selectedChats={selectedChats}
+              chatLimit={CHAT_LIMIT}
+              onToggleChat={handleToggleChat}
+            />
+          )}
+          <button 
+            className={styles.button}
+            disabled={selectedChats.length === 0 || isLoadingChats}
+            onClick={handleContinue}
+          >
+            {selectedChats.length === 0 ? 'Select chats to continue' : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
+          </button>
         </div>
       );
     }
 
     if (!showOverview) {
       return (
-        <div className={styles.fadeIn}>
-          <AssistantModeConfig
-            selectedChats={chats.filter(chat => selectedChats.includes(chat.id))}
-            chatConfigs={chatConfigs}
-            onSetMode={handleSetMode}
-            onStart={handleStart}
-            onSaveConfigurations={saveChatConfigurations}
-            isLoading={isLoading}
-          />
-        </div>
+        <AssistantModeConfig
+          selectedChats={chats.filter(chat => selectedChats.includes(chat.id))}
+          chatConfigs={chatConfigs}
+          onSetMode={handleSetMode}
+          onStart={handleStart}
+          onSaveConfigurations={saveChatConfigurations}
+          isLoading={isLoading}
+        />
       );
     }
 
     return (
-      <div className={styles.fadeIn}>
-        <Overview
-          chats={configuredChats}
-          selectedChatId={selectedChatId}
-          onSelectChat={setSelectedChatId}
-          onRemoveChat={handleToggleChat}
-          availableChats={chats}
-          selectedChats={selectedChats}
-          chatLimit={CHAT_LIMIT}
-          onToggleChat={handleToggleChat}
-          chatConfigs={chatConfigs}
-          onSetMode={handleSetMode}
-          onSaveConfigurations={saveChatConfigurations}
-          isLoading={isLoading}
-        />
-      </div>
+      <Overview
+        chats={configuredChats}
+        selectedChatId={selectedChatId}
+        onSelectChat={setSelectedChatId}
+        onRemoveChat={handleToggleChat}
+        availableChats={chats}
+        selectedChats={selectedChats}
+        chatLimit={CHAT_LIMIT}
+        onToggleChat={handleToggleChat}
+        chatConfigs={chatConfigs}
+        onSetMode={handleSetMode}
+        onSaveConfigurations={saveChatConfigurations}
+        isLoading={isLoading}
+      />
     );
   };
 

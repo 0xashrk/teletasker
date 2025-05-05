@@ -180,7 +180,7 @@ const Overview: React.FC<OverviewProps> = ({
   };
 
   return (
-    <div className={`${styles.overview} ${styles.fadeIn}`}>
+    <div className={styles.overview}>
       <div className={styles.sidebar}>
         <div className={styles.navigation}>
           <div 
