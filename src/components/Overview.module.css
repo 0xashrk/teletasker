@@ -460,11 +460,11 @@
   border: none;
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
-  font-size: 18px;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  padding: 0;
   transition: all 0.2s;
 }
 
