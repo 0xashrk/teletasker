@@ -187,4 +187,41 @@ export const getTelegramChats = async (): Promise<TelegramChat[]> => {
   }
 };
 
+// Add functions for monitored chats
+export const addMonitoredChat = async (chatId: string | number): Promise<any> => {
+  try {
+    return await withRetry(async () => {
+      const response = await localApi.post(`/tasks/monitored-chats/${chatId}`);
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error adding monitored chat:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getMonitoredChats = async (): Promise<any[]> => {
+  try {
+    return await withRetry(async () => {
+      const response = await localApi.get('/tasks/monitored-chats');
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error getting monitored chats:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const removeMonitoredChat = async (chatId: string | number): Promise<any> => {
+  try {
+    return await withRetry(async () => {
+      const response = await localApi.delete(`/tasks/monitored-chats/${chatId}`);
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error removing monitored chat:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export default localApi;
