@@ -5,7 +5,7 @@ import ChatList from './ChatList';  // Import existing ChatList
 import { TelegramChat } from '../hooks/useTelegramChats';
 import AssistantModeConfig from './AssistantModeConfig';
 import { ChatConfig } from '../hooks/useChatSelection';
-import { removeMonitoredChat } from '../services/api';
+import Sidebar from './Sidebar';
 
 interface Chat {
   id: string;
@@ -184,73 +184,15 @@ const Overview: React.FC<OverviewProps> = ({
 
   return (
     <div className={styles.overview}>
-      <div className={styles.sidebar}>
-        <div className={styles.navigation}>
-          <div 
-            className={`${styles.navItem} ${!selectedChatId ? styles.active : ''}`}
-            onClick={() => onSelectChat(null)}
-          >
-            <span className={styles.navIcon}>📋</span>
-            All Tasks
-            <span className={styles.count}>
-              ({mockTasks.length})
-            </span>
-          </div>
-        </div>
-
-        <div className={styles.activeChats}>
-          <div className={styles.sectionHeader}>
-            <h3 className={styles.sectionTitle}>Active Chats</h3>
-            <button 
-              className={styles.addButton}
-              onClick={() => setShowChatSelection(true)}
-              title="Add more chats"
-            >
-              +
-            </button>
-          </div>
-          {chats.map(chat => (
-            <div
-              key={chat.id}
-              className={`${styles.chatItem} ${chat.id === selectedChatId ? styles.active : ''}`}
-            >
-              <div 
-                className={styles.chatContent}
-                onClick={() => onSelectChat(chat.id === selectedChatId ? null : chat.id)}
-              >
-                <span className={styles.chatAvatar}>{chat.avatar}</span>
-                <div className={styles.chatInfo}>
-                  <div className={styles.chatName}>{chat.name}</div>
-                  <div className={styles.chatMode}>
-                    <span className={styles.modeIcon}>
-                      {chat.mode === 'observe' ? '📋' : '⚡'}
-                    </span>
-                    {chat.mode === 'observe' ? 'Task Extraction' : 'Auto Reply'}
-                  </div>
-                </div>
-              </div>
-              <button
-                className={styles.removeButton}
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  try {
-                    // First remove from backend
-                    await removeMonitoredChat(chat.id);
-                    // Then update UI
-                    onRemoveChat(chat.id);
-                  } catch (error) {
-                    console.error('Error removing chat:', error);
-                    // Optionally show an error message to the user
-                  }
-                }}
-                title="Remove chat"
-              >
-                −
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
+      <Sidebar 
+        chats={chats}
+        selectedChatId={selectedChatId}
+        onSelectChat={onSelectChat}
+        onRemoveChat={onRemoveChat}
+        onAddChat={() => setShowChatSelection(true)}
+        tasksCount={mockTasks.length}
+        removeMonitoredChat={removeMonitoredChat}
+      />
 
       <div className={styles.content}>
         <div className={styles.contentHeader}>
