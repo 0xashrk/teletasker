@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import LoginButton from './LoginButton';
@@ -7,18 +7,43 @@ import './HomePage.css';
 const HomePage: React.FC = () => {
   const { login, authenticated } = usePrivy();
   const navigate = useNavigate();
+  const [showWaitlistSuccess, setShowWaitlistSuccess] = useState(false);
+  const [isNewSignup, setIsNewSignup] = useState(false);
 
+  // Only redirect to dashboard if authenticated and not a new waitlist signup
   useEffect(() => {
-    if (authenticated) {
+    // Check if user was previously on the dashboard (not a new signup)
+    const wasDashboardUser = localStorage.getItem('dashboard_user') === 'true';
+    
+    if (authenticated && wasDashboardUser) {
       navigate('/dashboard');
+    } else if (authenticated && isNewSignup) {
+      // Just show success message for new waitlist signups
+      setShowWaitlistSuccess(true);
+    } else if (authenticated) {
+      // User was authenticated before but we don't know if they're a dashboard user
+      // Let's check if they should see the waitlist success or go to dashboard
+      const checkExistingUser = async () => {
+        try {
+          // For now, just show waitlist success by default
+          setShowWaitlistSuccess(true);
+          // Can add API check here later if needed
+        } catch (error) {
+          console.error('Error checking user status:', error);
+        }
+      };
+      
+      checkExistingUser();
     }
-  }, [authenticated, navigate]);
+  }, [authenticated, navigate, isNewSignup]);
 
   const handleSignup = async () => {
     try {
+      setIsNewSignup(true);
       await login();
     } catch (error) {
       console.error('Error during signup:', error);
+      setIsNewSignup(false);
     }
   };
 

@@ -24,6 +24,11 @@ const Dashboard: React.FC = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
 
+  // Set the dashboard_user flag when the component mounts
+  useEffect(() => {
+    localStorage.setItem('dashboard_user', 'true');
+  }, []);
+
   const {
     chats,
     isLoadingChats,
