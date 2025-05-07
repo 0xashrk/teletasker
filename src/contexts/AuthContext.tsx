@@ -28,27 +28,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Enhanced login function to log data
   const login = useCallback(async () => {
-    console.log('Login attempt starting...');
+    // console.log('Login attempt starting...');
     try {
       const result = await privyLogin();
-      console.log('Login result:', result);
+      // console.log('Login result:', result);
       return result;
     } catch (error) {
-      console.error('Login error:', error);
+      // console.error('Login error:', error);
       throw error;
     }
   }, [privyLogin]);
 
   // Log authentication state changes
   useEffect(() => {
-    console.log('Authentication state changed:', { 
-      authenticated, 
-      ready,
-      user: user ? 'User exists' : 'No user yet'
-    });
+    // console.log('Authentication state changed:', { 
+    //   authenticated, 
+    //   ready,
+    //   user: user ? 'User exists' : 'No user yet'
+    // });
     
     if (user) {
-      console.log('Privy User in AuthContext:', user);
+      // console.log('Privy User in AuthContext:', user);
     }
   }, [authenticated, user, ready]);
 
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('telegram_phone_number');
       }
     } catch (error) {
-      console.error('Error checking Telegram status:', error);
+      // console.error('Error checking Telegram status:', error);
       setIsTelegramConnected(false);
       setTelegramPhoneNumber(null);
     } finally {
@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('auth_token', token as string);
       return token;
     } catch (error) {
-      console.error('Error refreshing auth token:', error);
+      // console.error('Error refreshing auth token:', error);
       setAuthToken(null);
       localStorage.removeItem('auth_token');
       return null;

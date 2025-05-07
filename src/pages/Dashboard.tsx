@@ -27,8 +27,8 @@ const Dashboard: React.FC = () => {
   // Log the full Privy user object for debugging
   useEffect(() => {
     if (user) {
-      console.log('Privy User Object:', user);
-      console.log('JSON.stringify(user):', JSON.stringify(user, null, 2));
+      // console.log('Privy User Object:', user);
+      // console.log('JSON.stringify(user):', JSON.stringify(user, null, 2));
     }
   }, [user]);
 
