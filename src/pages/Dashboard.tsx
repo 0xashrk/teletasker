@@ -24,6 +24,14 @@ const Dashboard: React.FC = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
 
+  // Log the full Privy user object for debugging
+  useEffect(() => {
+    if (user) {
+      console.log('Privy User Object:', user);
+      console.log('JSON.stringify(user):', JSON.stringify(user, null, 2));
+    }
+  }, [user]);
+
   // Set the dashboard_user flag when the component mounts
   useEffect(() => {
     localStorage.setItem('dashboard_user', 'true');
@@ -192,7 +200,9 @@ const Dashboard: React.FC = () => {
             {testResult && <p className={styles.testResult}>{testResult}</p>}
           </div> */}
           <span className={styles.userEmail}>
-            {user?.email?.address}
+            {user?.email?.address || 
+             (user?.twitter?.username ? `@${user?.twitter?.username}` : 
+             'User')}
           </span>
           <button className={styles.logoutBtn} onClick={handleLogout}>
             Log out

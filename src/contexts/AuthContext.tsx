@@ -19,12 +19,38 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { login: privyLogin, logout: privyLogout, authenticated, getAccessToken } = usePrivy();
+  const { login: privyLogin, logout: privyLogout, authenticated, getAccessToken, user, ready } = usePrivy();
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isTelegramConnected, setIsTelegramConnected] = useState(false);
   const [telegramPhoneNumber, setTelegramPhoneNumber] = useState<string | null>(null);
   const [isCheckingTelegramStatus, setIsCheckingTelegramStatus] = useState(true);
+
+  // Enhanced login function to log data
+  const login = useCallback(async () => {
+    console.log('Login attempt starting...');
+    try {
+      const result = await privyLogin();
+      console.log('Login result:', result);
+      return result;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  }, [privyLogin]);
+
+  // Log authentication state changes
+  useEffect(() => {
+    console.log('Authentication state changed:', { 
+      authenticated, 
+      ready,
+      user: user ? 'User exists' : 'No user yet'
+    });
+    
+    if (user) {
+      console.log('Privy User in AuthContext:', user);
+    }
+  }, [authenticated, user, ready]);
 
   const checkTelegramStatus = useCallback(async () => {
     if (!authenticated) {
@@ -129,7 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={{
       isAuthenticated,
-      login: privyLogin,
+      login,
       logout,
       getAuthToken,
       authToken,

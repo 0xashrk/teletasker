@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import LoginButton from './LoginButton';
 import './HomePage.css';
 
 const HomePage: React.FC = () => {
-  const { login, authenticated } = usePrivy();
+  const { authenticated } = usePrivy();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [showWaitlistSuccess, setShowWaitlistSuccess] = useState(false);
   const [isNewSignup, setIsNewSignup] = useState(false);
@@ -40,7 +42,9 @@ const HomePage: React.FC = () => {
   const handleSignup = async () => {
     try {
       setIsNewSignup(true);
-      await login();
+      console.log('Starting waitlist signup process...');
+      const result = await login();
+      console.log('Waitlist signup result:', result);
     } catch (error) {
       console.error('Error during signup:', error);
       setIsNewSignup(false);
