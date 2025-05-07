@@ -207,7 +207,7 @@ const Dashboard: React.FC = () => {
               
               // Finally check linked accounts for Twitter
               const twitterAccount = user?.linkedAccounts?.find(account => account.type === 'twitter_oauth');
-              if (twitterAccount?.username) {
+              if (twitterAccount?.type === 'twitter_oauth' && 'username' in twitterAccount) {
                 return `@${twitterAccount.username}`;
               }
               
