@@ -193,16 +193,26 @@ const Dashboard: React.FC = () => {
       <header className={styles.topbar}>
         <div className={styles.logo}>Teletasker</div>
         <div className={styles.userSection}>
-          {/* <div className={styles.apiTest}>
-            <button className={styles.testButton} onClick={handleTestApi}>
-              Test API
-            </button>
-            {testResult && <p className={styles.testResult}>{testResult}</p>}
-          </div> */}
           <span className={styles.userEmail}>
-            {user?.email?.address || 
-             (user?.twitter?.username ? `@${user?.twitter?.username}` : 
-             'User')}
+            {(() => {
+              // First check for email
+              if (user?.email?.address) {
+                return user.email.address;
+              }
+              
+              // Then check for Twitter username
+              if (user?.twitter?.username) {
+                return `@${user.twitter.username}`;
+              }
+              
+              // Finally check linked accounts for Twitter
+              const twitterAccount = user?.linkedAccounts?.find(account => account.type === 'twitter_oauth');
+              if (twitterAccount?.username) {
+                return `@${twitterAccount.username}`;
+              }
+              
+              return 'User';
+            })()}
           </span>
           <button className={styles.logoutBtn} onClick={handleLogout}>
             Log out
