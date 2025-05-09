@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './Overview.module.css'; // Reusing the same styles for now
+import styles from './Sidebar.module.css';
 
 interface Chat {
   id: string;

@@ -26,97 +26,7 @@
   animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Sidebar Styles */
-.sidebar {
-  background: var(--background-secondary);
-  height: 100%;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex;
-  flex-direction: column;
-  min-height: 0; /* Needed for Firefox */
-}
-
-.activeChats {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0; /* Needed for Firefox */
-}
-
-.sectionTitle {
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  padding: 16px;
-  margin: 0;
-  position: sticky;
-  top: 0;
-  background: var(--background-secondary);
-  z-index: 1;
-}
-
-.chatItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-  border-left: 2px solid transparent;
-}
-
-.chatItem:hover {
-  background: rgba(255, 255, 255, 0.03);
-  transform: translateX(2px);
-}
-
-.chatItem.active {
-  background: rgba(0, 122, 255, 0.08);
-  border-left-color: var(--accent-color);
-}
-
-.chatAvatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: var(--background-tertiary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.chatInfo {
-  flex: 1;
-  min-width: 0;
-}
-
-.chatName {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chatMode {
-  font-size: 12px;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.modeIcon {
-  font-size: 14px;
-  color: var(--accent-color);
-}
-
-/* Main Content */
+/* Main Content Styles - Sidebar styles moved to Sidebar.module.css */
 .content {
   display: flex;
   flex-direction: column;
@@ -288,10 +198,6 @@
 @media (max-width: 768px) {
   .overview {
     grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    display: none;
   }
 
   .contentList {
