@@ -56,15 +56,29 @@ interface OverviewProps {
 
 // Helper to convert API tasks to our Task interface
 const mapApiTasksToTasks = (apiTasks: ChatTask[]): Task[] => {
-  return apiTasks.map(task => ({
-    id: task.id.toString(),
-    chatId: task.chat_id.toString(),
-    text: task.text,
-    source: task.source,
-    time: new Date(task.created_at).toLocaleString(),
-    status: task.status,
-    extractedFrom: task.extracted_from
-  }));
+  if (!apiTasks || !Array.isArray(apiTasks)) {
+    console.error('Invalid API tasks data:', apiTasks);
+    return [];
+  }
+  
+  return apiTasks.map(task => {
+    // Safely extract data with fallbacks
+    const id = task.id?.toString() || Math.random().toString(36).substring(2, 10);
+    const chatId = task.chat_id?.toString() || 'unknown';
+    
+    // For debugging
+    console.log('Mapping task:', task);
+    
+    return {
+      id,
+      chatId,
+      text: task.description || 'No task description',
+      source: task.priority || 'Unknown',
+      time: task.created_at ? new Date(task.created_at).toLocaleString() : 'Unknown time',
+      status: task.completed ? 'completed' : 'pending',
+      extractedFrom: task.reasoning || 'No source message'
+    };
+  });
 };
 
 const Overview: React.FC<OverviewProps> = ({
@@ -98,6 +112,13 @@ const Overview: React.FC<OverviewProps> = ({
     ? chats.find(chat => chat.id === selectedChatId)
     : null;
 
+  // Let's debug what's being returned from the API
+  useEffect(() => {
+    if (tasks.length > 0) {
+      console.log('Current tasks:', tasks);
+    }
+  }, [tasks]);
+
   // Fetch tasks for a specific chat
   const fetchTasksForChat = useCallback(async (chatId: string) => {
     setIsLoadingTasks(true);
@@ -105,7 +126,9 @@ const Overview: React.FC<OverviewProps> = ({
     
     try {
       const apiTasks = await getChatTasks(chatId);
+      console.log('API Tasks received:', apiTasks);
       const mappedTasks = mapApiTasksToTasks(apiTasks);
+      console.log('Mapped tasks:', mappedTasks);
       
       setTasks(prevTasks => {
         // Remove existing tasks for this chat
@@ -167,6 +190,13 @@ const Overview: React.FC<OverviewProps> = ({
       : messages.filter(msg => msg.chatId === selectedChatId)
     : tasks;
 
+  // Debug content
+  useEffect(() => {
+    console.log('Filtered content for display:', content);
+    console.log('Selected chat ID:', selectedChatId);
+    console.log('All tasks:', tasks);
+  }, [content, selectedChatId, tasks]);
+
   // Handlers for the chat selection flow
   const handleChatSelectionDone = () => {
     setShowChatSelection(false);
@@ -221,6 +251,21 @@ const Overview: React.FC<OverviewProps> = ({
           </h3>
         </div>
         
+        {/* Debugging panel - remove this in production */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{ margin: '0 24px', padding: '8px', background: 'rgba(0,0,0,0.1)', fontSize: '12px' }}>
+            <div>Selected Chat ID: {selectedChatId || 'none'}</div>
+            <div>Content Items: {content.length}</div>
+            <div>All Tasks: {tasks.length}</div>
+            <button 
+              onClick={() => selectedChatId && fetchTasksForChat(selectedChatId)}
+              style={{ padding: '4px 8px', margin: '4px 0', fontSize: '12px' }}
+            >
+              Refresh Tasks
+            </button>
+          </div>
+        )}
+        
         <div className={styles.contentList}>
           {isLoadingTasks ? (
             <div className={styles.loading}>Loading tasks...</div>
@@ -240,14 +285,16 @@ const Overview: React.FC<OverviewProps> = ({
                 ? (content as Task[]).map(task => (
                     <div key={task.id} className={styles.taskItem}>
                       <div className={styles.taskHeader}>
-                        <span className={styles.taskSource}>{task.source}</span>
+                        <span className={styles.taskSource}>Priority: {task.source}</span>
                         <span className={styles.taskTime}>{task.time}</span>
                       </div>
                       <div className={styles.taskText}>{task.text}</div>
-                      <div className={styles.extractedFrom}>
-                        <div className={styles.extractedHeader}>Extracted From:</div>
-                        <div className={styles.extractedText}>{task.extractedFrom}</div>
-                      </div>
+                      {task.extractedFrom && (
+                        <div className={styles.extractedFrom}>
+                          <div className={styles.extractedHeader}>Reasoning:</div>
+                          <div className={styles.extractedText}>{task.extractedFrom}</div>
+                        </div>
+                      )}
                       <div className={styles.taskMeta}>
                         <span className={`${styles.taskStatus} ${styles[task.status]}`}>
                           {task.status}

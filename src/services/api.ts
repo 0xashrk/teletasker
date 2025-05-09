@@ -238,15 +238,18 @@ export interface ChatProcessingStatus {
   updated_at: string;
 }
 
+// Updated to match the actual backend response format
 export interface ChatTask {
   id: number;
+  user_id: string;
   chat_id: number;
-  text: string;
-  source: string;
-  status: 'pending' | 'completed';
-  extracted_from: string;
+  description: string;
+  due_date: string | null;
+  priority: string;
+  source_message_id: number;
+  reasoning: string;
+  completed: boolean;
   created_at: string;
-  updated_at: string;
 }
 
 // Chat processing status endpoint
@@ -254,6 +257,7 @@ export const getChatProcessingStatus = async (chatId: string | number): Promise<
   try {
     return await withRetry(async () => {
       const response = await localApi.get(`/tasks/chat/${chatId}/processing-status`);
+      console.log('Processing status response:', response.data);
       return response.data;
     });
   } catch (error: any) {
@@ -266,8 +270,16 @@ export const getChatProcessingStatus = async (chatId: string | number): Promise<
 export const getChatTasks = async (chatId: string | number): Promise<ChatTask[]> => {
   try {
     return await withRetry(async () => {
+      // Using the exact endpoint format from the API documentation
       const response = await localApi.get(`/tasks/chat/${chatId}/tasks`);
-      return response.data;
+      console.log('Raw API response for tasks:', response);
+      
+      // Check if the data is wrapped in a property
+      const tasks = Array.isArray(response.data) 
+        ? response.data 
+        : (response.data.tasks || response.data.data || []);
+      
+      return tasks;
     });
   } catch (error: any) {
     console.error('Error fetching chat tasks:', error.response?.data || error.message);
@@ -311,8 +323,10 @@ export const pollChatProcessingStatus = async (
         if (onComplete) {
           try {
             const tasks = await getChatTasks(chatId);
+            console.log(`Fetched ${tasks.length} tasks for chat ${chatId} after completion`, tasks);
             onComplete(tasks);
           } catch (tasksError) {
+            console.error('Error fetching tasks after completion:', tasksError);
             if (onError) onError(tasksError);
           }
         }
@@ -322,6 +336,7 @@ export const pollChatProcessingStatus = async (
       // Continue polling
       setTimeout(poll, intervalMs);
     } catch (error) {
+      console.error('Error during polling:', error);
       if (onError) onError(error);
     }
   };
