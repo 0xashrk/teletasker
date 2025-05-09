@@ -120,6 +120,7 @@ const Overview: React.FC<OverviewProps> = ({
   const [animate, setAnimate] = useState(true);
   const [fadeKey, setFadeKey] = useState(selectedChatId || 'all');
   const [previousTasks, setPreviousTasks] = useState<Task[]>([]);
+  const [copySuccess, setCopySuccess] = useState<boolean>(false);
   
   // Update the fadeKey when selectedChatId changes to trigger animation
   useEffect(() => {
@@ -340,6 +341,39 @@ const Overview: React.FC<OverviewProps> = ({
       });
   };
 
+  // Function to copy tasks to clipboard
+  const copyTasksToClipboard = useCallback(() => {
+    let tasksToCopy: Task[] = [];
+    
+    if (selectedChatId) {
+      // Copy tasks only from selected chat
+      tasksToCopy = tasks.filter(task => task.chatId === selectedChatId);
+    } else {
+      // Copy all tasks
+      tasksToCopy = tasks;
+    }
+    
+    if (tasksToCopy.length === 0) {
+      return;
+    }
+    
+    // Format tasks as text
+    const formattedTasks = tasksToCopy.map(task => {
+      return `Task: ${task.text}\nPriority: ${task.source}\nTime: ${task.time}\nStatus: ${task.status}\nReasoning: ${task.extractedFrom}\n\n`;
+    }).join('');
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(formattedTasks)
+      .then(() => {
+        // Show success message
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy tasks: ', err);
+      });
+  }, [selectedChatId, tasks]);
+
   // Simple pagination UI component
   const PaginationControls = () => {
     if (totalPages <= 1) return null;
@@ -396,6 +430,17 @@ const Overview: React.FC<OverviewProps> = ({
               <>All Tasks <span className={styles.count}>({tasks.length})</span></>
             )}
           </h3>
+          <div className={styles.headerActions}>
+            {(!selectedChat || selectedChat.mode === 'observe') && tasks.length > 0 && (
+              <button 
+                className={styles.copyButton} 
+                onClick={copyTasksToClipboard}
+                title="Copy tasks to clipboard"
+              >
+                {copySuccess ? "✓ Copied!" : "Copy Tasks"}
+              </button>
+            )}
+          </div>
         </div>
         
         {/* Debugging panel - remove this in production */}
