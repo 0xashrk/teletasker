@@ -287,6 +287,82 @@ export const getChatTasks = async (chatId: string | number): Promise<ChatTask[]>
   }
 };
 
+// New chat-summaries endpoint with correct response format
+export interface ChatInfo {
+  chat_id: number;
+  chat_username?: string;
+  chat_title: string;
+  chat_type: string;
+  last_analyzed_message_id?: number;
+}
+
+export interface ChatSummary {
+  chat: ChatInfo;
+  status: ChatProcessingStatus;
+  tasks: ChatTask[];
+  unread_task_count: number;
+}
+
+export interface ChatSummariesResponse {
+  chats: ChatSummary[];
+  total_count: number;
+  page: number;
+  page_size: number;
+  has_more: boolean;
+}
+
+export const getChatSummaries = async (options: {
+  page?: number;
+  page_size?: number;
+  chat_ids?: (string | number)[];
+  include_tasks?: boolean;
+  completed?: boolean | null;
+  task_limit?: number;
+} = {}): Promise<ChatSummariesResponse> => {
+  try {
+    return await withRetry(async () => {
+      // Build query parameters
+      const params = new URLSearchParams();
+      
+      if (options.page !== undefined) {
+        params.append('page', options.page.toString());
+      }
+      
+      if (options.page_size !== undefined) {
+        params.append('page_size', options.page_size.toString());
+      }
+      
+      if (options.chat_ids && options.chat_ids.length > 0) {
+        params.append('chat_ids', options.chat_ids.join(','));
+      }
+      
+      if (options.include_tasks !== undefined) {
+        params.append('include_tasks', options.include_tasks.toString());
+      }
+      
+      if (options.completed !== undefined && options.completed !== null) {
+        params.append('completed', options.completed.toString());
+      }
+      
+      if (options.task_limit !== undefined) {
+        params.append('task_limit', options.task_limit.toString());
+      }
+      
+      const queryString = params.toString();
+      const url = `/tasks/chat-summaries${queryString ? `?${queryString}` : ''}`;
+      
+      console.log('Fetching chat summaries from:', url);
+      const response = await localApi.get(url);
+      console.log('Raw chat summaries response:', response.data);
+      
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error fetching chat summaries:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 // Polling utility for chat processing status
 export const pollChatProcessingStatus = async (
   chatId: string | number, 
