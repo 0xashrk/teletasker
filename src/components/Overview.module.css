@@ -145,6 +145,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+  max-height: calc(100vh - 100px); /* Set a fixed height for content list */
 }
 
 .taskList {
@@ -270,7 +271,7 @@
     display: none;
   }
 
-  .taskList {
+  .contentList {
     padding: 16px;
   }
 }
@@ -492,6 +493,8 @@
   background-color: var(--background-secondary);
   border-radius: 12px;
   padding: 24px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .title {
@@ -542,4 +545,24 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+  color: #ff3b30;
+  font-size: 0.95rem;
+  text-align: center;
 } 
