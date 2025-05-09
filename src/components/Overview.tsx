@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './Overview.module.css';
 import ChatList from './ChatList';
@@ -11,9 +11,8 @@ import CopyTasksButton from './CopyTasksButton';
 import { 
   ChatTask, 
   ChatProcessingStatus,
-  getChatSummaries,
-  ChatSummary,
-  ChatSummariesResponse,
+  getChatProcessingStatus,
+  getChatTasks,
   ChatInfo
 } from '../services/api';
 
@@ -85,6 +84,16 @@ const mapApiTasksToTasks = (apiTasks: ChatTask[], chatId: string): Task[] => {
   });
 };
 
+// Chat status cache object with lastChecked timestamp
+interface ChatStatusCache {
+  chatId: string;
+  status: ChatProcessingStatus | null;
+  lastChecked: number;
+  tasks: Task[];
+  isPolling: boolean;
+  error: string | null;
+}
+
 const Overview: React.FC<OverviewProps> = ({
   chats,
   selectedChatId,
@@ -110,12 +119,12 @@ const Overview: React.FC<OverviewProps> = ({
   const [isLoadingChats, setIsLoadingChats] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // State for managing cached chat summaries
-  const [chatSummaries, setChatSummaries] = useState<ChatSummary[]>([]);
+  // Cache for chat status and tasks
+  const [chatStatusCache, setChatStatusCache] = useState<Record<string, ChatStatusCache>>({});
   const [lastFetchTime, setLastFetchTime] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
+  
+  // Polling timeouts ref
+  const pollingTimeouts = useRef<Record<string, NodeJS.Timeout>>({});
   
   // Animation state for smooth transitions
   const [animate, setAnimate] = useState(true);
@@ -140,167 +149,270 @@ const Overview: React.FC<OverviewProps> = ({
     setPreviousTasks(tasks);
   }, [tasks]);
   
+  // Clean up polling on unmount
+  useEffect(() => {
+    return () => {
+      // Clear all polling timeouts
+      Object.values(pollingTimeouts.current).forEach(timeout => {
+        clearTimeout(timeout);
+      });
+    };
+  }, []);
+  
   // Get the currently selected chat
   const selectedChat = selectedChatId 
     ? chats.find(chat => chat.id === selectedChatId)
     : null;
 
-  // Fetch chat summaries - this is now the only data fetching method
-  const fetchChatSummaries = useCallback(async (options: {
-    refresh?: boolean;
-    specificChatIds?: string[];
-    page?: number;
-    silent?: boolean;
-  } = {}) => {
-    // Skip fetch if not forced and we've fetched recently (within last 60 seconds)
-    const now = Date.now();
-    const cacheAge = now - lastFetchTime;
-    const isCacheValid = cacheAge < 60000; // 60 seconds
-
-    if (isCacheValid && !options.refresh && chatSummaries.length > 0) {
-      console.log('Using cached chat summaries - cache is still fresh');
+  // Initialize chat in cache if needed
+  const initializeChatInCache = useCallback((chatId: string) => {
+    setChatStatusCache(prev => {
+      if (prev[chatId]) {
+        // Already exists
+        return prev;
+      }
       
-      // If looking for specific chats, check if they're in the cache
-      if (options.specificChatIds && options.specificChatIds.length > 0) {
-        const allChatIdsInCache = options.specificChatIds.every(id => 
-          chatSummaries.some(summary => summary.chat.chat_id.toString() === id)
-        );
-        
-        if (allChatIdsInCache) {
-          console.log('All requested chat IDs found in cache');
-          return;
+      // Create new entry
+      return {
+        ...prev,
+        [chatId]: {
+          chatId,
+          status: null,
+          lastChecked: 0,
+          tasks: [],
+          isPolling: false,
+          error: null
         }
-        console.log('Some requested chat IDs not in cache, fetching from API');
-      } else {
-        return; // Use cache for all chats
-      }
-    }
+      };
+    });
+  }, []);
+
+  // Fetch chat status directly
+  const fetchChatStatus = useCallback(async (chatId: string) => {
+    initializeChatInCache(chatId);
     
-    // Only show loading state if not silent refresh
-    if (!options.silent) {
-      setIsLoadingChats(true);
-      // Only enable animation for explicit (non-silent) refreshes
-      if (options.refresh) {
-        setAnimate(true);
-        // Use requestAnimationFrame for smoother timing
-        requestAnimationFrame(() => {
-          // Reset animation flag after animation completes
-          setTimeout(() => {
-            setAnimate(false);
-          }, 500);
-        });
+    // Mark as loading
+    setChatStatusCache(prev => ({
+      ...prev,
+      [chatId]: {
+        ...prev[chatId],
+        isPolling: true
       }
-    }
-    setError(null);
-    
-    // Store current tasks to compare for finding new tasks later
-    const currentTasks = [...tasks];
+    }));
     
     try {
-      // Prepare request parameters
-      const requestParams: Parameters<typeof getChatSummaries>[0] = {
-        include_tasks: true,
-        page: options.page || currentPage,
-        page_size: 10 // Default page size
-      };
+      // Fetch status directly
+      const status = await getChatProcessingStatus(chatId);
+      const now = Date.now();
       
-      // Add specific chat IDs if requested
-      if (options.specificChatIds && options.specificChatIds.length > 0) {
-        requestParams.chat_ids = options.specificChatIds.map(id => parseInt(id, 10));
+      // Check if we already have tasks
+      const existingTasks = chatStatusCache[chatId]?.tasks || [];
+      
+      // Update cache
+      setChatStatusCache(prev => ({
+        ...prev,
+        [chatId]: {
+          ...prev[chatId],
+          status,
+          lastChecked: now,
+          error: null,
+          isPolling: status.status === 'processing' // Keep polling if processing
+        }
+      }));
+      
+      if (status.status === 'completed' && existingTasks.length === 0) {
+        // If completed and no tasks, fetch tasks
+        fetchChatTasks(chatId);
+      } else if (status.status === 'processing') {
+        // If processing, schedule next poll
+        scheduleNextPoll(chatId);
       }
       
-      // Make the API call
-      console.log('Fetching chat summaries with params:', requestParams);
-      const response = await getChatSummaries(requestParams);
-      
-      // Update state with the response
-      setChatSummaries(response.chats);
+      // Update global lastFetchTime
       setLastFetchTime(now);
-      setCurrentPage(response.page);
-      setHasMore(response.has_more);
-      
-      // Calculate total pages based on total count and page size
-      const calculatedTotalPages = Math.ceil(response.total_count / response.page_size);
-      setTotalPages(calculatedTotalPages);
-      
-      // Extract and map all tasks from all chat summaries
-      const allTasks: Task[] = [];
-      
-      if (response.chats && Array.isArray(response.chats)) {
-        response.chats.forEach(chatSummary => {
-          if (chatSummary.tasks && Array.isArray(chatSummary.tasks)) {
-            const chatId = chatSummary.chat.chat_id.toString();
-            const chatTasks = mapApiTasksToTasks(chatSummary.tasks, chatId);
-            allTasks.push(...chatTasks);
-          }
-        });
-      }
-      
-      // Update tasks
-      setTasks(allTasks);
-      
-      console.log(`Loaded ${allTasks.length} tasks from ${response.chats.length} chats`);
     } catch (error: any) {
-      console.error('Error fetching chat summaries:', error);
-      setError('Failed to load data: ' + (error.message || 'Unknown error'));
-    } finally {
-      if (!options.silent) {
-        setIsLoadingChats(false);
-      }
+      console.error(`Error fetching status for chat ${chatId}:`, error);
+      
+      // Update cache with error
+      setChatStatusCache(prev => ({
+        ...prev,
+        [chatId]: {
+          ...prev[chatId],
+          error: `Failed to fetch status: ${error.message || 'Unknown error'}`,
+          isPolling: false // Stop polling on error
+        }
+      }));
     }
-  }, [chatSummaries, currentPage, lastFetchTime, tasks]);
+  }, [chatStatusCache, initializeChatInCache]);
 
-  // Initial data load
+  // Fetch chat tasks directly
+  const fetchChatTasks = useCallback(async (chatId: string) => {
+    initializeChatInCache(chatId);
+    
+    // Mark as loading
+    setChatStatusCache(prev => ({
+      ...prev,
+      [chatId]: {
+        ...prev[chatId],
+        isPolling: true
+      }
+    }));
+    
+    try {
+      // Fetch tasks directly
+      const apiTasks = await getChatTasks(chatId);
+      
+      // Convert to our format
+      const chatTasks = mapApiTasksToTasks(apiTasks, chatId);
+      const now = Date.now();
+      
+      // Update cache with tasks
+      setChatStatusCache(prev => ({
+        ...prev,
+        [chatId]: {
+          ...prev[chatId],
+          tasks: chatTasks,
+          lastChecked: now,
+          isPolling: false, // Stop polling
+          error: null
+        }
+      }));
+      
+      // Update tasks state for UI
+      setTasks(prev => {
+        // Remove any existing tasks for this chat
+        const filteredTasks = prev.filter(task => task.chatId !== chatId);
+        // Add new tasks
+        return [...filteredTasks, ...chatTasks];
+      });
+      
+      // Update global lastFetchTime
+      setLastFetchTime(now);
+    } catch (error: any) {
+      console.error(`Error fetching tasks for chat ${chatId}:`, error);
+      
+      // Update cache with error
+      setChatStatusCache(prev => ({
+        ...prev,
+        [chatId]: {
+          ...prev[chatId],
+          error: `Failed to fetch tasks: ${error.message || 'Unknown error'}`,
+          isPolling: false // Stop polling on error
+        }
+      }));
+    }
+  }, [initializeChatInCache]);
+
+  // Schedule next poll for a chat
+  const scheduleNextPoll = useCallback((chatId: string) => {
+    // Clear any existing timeout
+    if (pollingTimeouts.current[chatId]) {
+      clearTimeout(pollingTimeouts.current[chatId]);
+    }
+    
+    // Only poll if chat is marked for polling
+    if (!chatStatusCache[chatId]?.isPolling) {
+      return;
+    }
+    
+    // Set timeout for next poll (3 seconds)
+    pollingTimeouts.current[chatId] = setTimeout(() => {
+      fetchChatStatus(chatId);
+    }, 3000);
+  }, [chatStatusCache, fetchChatStatus]);
+
+  // Start polling for a chat
+  const startPollingChat = useCallback((chatId: string) => {
+    if (!chatId) return;
+    
+    const cache = chatStatusCache[chatId];
+    
+    // If already polling or completed, don't start again
+    if (cache?.isPolling || (cache?.status?.status === 'completed' && cache?.tasks.length > 0)) {
+      return;
+    }
+    
+    // Fetch status which will trigger polling if needed
+    fetchChatStatus(chatId);
+  }, [chatStatusCache, fetchChatStatus]);
+
+  // Handle newly added chats
   useEffect(() => {
-    // Fetch data on initial load
-    fetchChatSummaries();
-    
-    // Set up interval for periodic refresh (every 60 seconds instead of 30)
-    const intervalId = setInterval(() => {
-      // Skip refresh if already loading data to prevent UI glitches
-      if (!isLoadingChats) {
-        console.log('Performing periodic data refresh');
-        // Use a silent refresh approach that doesn't trigger loading states
-        fetchChatSummaries({ refresh: true, silent: true });
+    // For each chat in chats list, initialize in cache
+    chats.forEach(chat => {
+      initializeChatInCache(chat.id);
+      
+      // If we haven't checked this chat's status recently, do it now
+      const cache = chatStatusCache[chat.id];
+      const now = Date.now();
+      const cacheAge = now - (cache?.lastChecked || 0);
+      
+      if ((!cache?.lastChecked || cacheAge > 60000) && // Not checked or older than 60 seconds
+          (!cache?.tasks.length || !cache?.status)) {  // No tasks or status
+        fetchChatStatus(chat.id);
       }
-    }, 60000); // Increased from 30000 to 60000 ms (1 minute)
-    
-    return () => clearInterval(intervalId);
-  }, [fetchChatSummaries, isLoadingChats]);
+    });
+  }, [chats, chatStatusCache, initializeChatInCache, fetchChatStatus]);
 
-  // Handle page change for pagination
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      fetchChatSummaries({ page: newPage, refresh: true });
+  // When a chat is selected, ensure its data is loaded
+  useEffect(() => {
+    if (selectedChatId) {
+      // Initialize if needed
+      initializeChatInCache(selectedChatId);
+      
+      const cache = chatStatusCache[selectedChatId];
+      const now = Date.now();
+      const cacheAge = now - (cache?.lastChecked || 0);
+      
+      // If we haven't checked this chat's status recently and no tasks, do it now
+      if ((!cache?.lastChecked || cacheAge > 60000) && // Not checked or older than 60 seconds 
+          (!cache?.tasks.length)) {                   // No tasks  
+        fetchChatStatus(selectedChatId);
+      }
+      // If processing, ensure we're polling
+      else if (cache?.status?.status === 'processing' && !cache?.isPolling) {
+        startPollingChat(selectedChatId);
+      }
     }
-  };
+  }, [selectedChatId, chatStatusCache, initializeChatInCache, fetchChatStatus, startPollingChat]);
 
-  // Get chat data from cache by ID
-  const getChatFromCache = useCallback((chatId: string) => {
-    return chatSummaries.find(summary => summary.chat.chat_id.toString() === chatId);
-  }, [chatSummaries]);
+  // Update tasks when cache changes
+  useEffect(() => {
+    // Compile tasks from all chats in cache
+    const allTasks: Task[] = [];
+    
+    Object.values(chatStatusCache).forEach(cache => {
+      if (cache.tasks.length > 0) {
+        allTasks.push(...cache.tasks);
+      }
+    });
+    
+    setTasks(allTasks);
+  }, [chatStatusCache]);
 
-  // Get processing status for a chat
-  const getChatStatus = useCallback((chatId: string): ChatProcessingStatus | undefined => {
-    const chatSummary = getChatFromCache(chatId);
-    return chatSummary?.status;
-  }, [getChatFromCache]);
-
-  // Handle manual refresh
+  // Handle manual refresh button
   const handleRefresh = useCallback(() => {
     if (selectedChatId) {
-      // Refresh just the selected chat
-      fetchChatSummaries({ 
-        specificChatIds: [selectedChatId],
-        refresh: true 
-      });
+      // Just fetch current chat
+      fetchChatTasks(selectedChatId);
     } else {
-      // Refresh all chats
-      fetchChatSummaries({ refresh: true });
+      // Fetch all chats
+      setIsLoadingChats(true);
+      
+      // Create fetch promises for all chats
+      const fetchPromises = chats.map(chat => fetchChatTasks(chat.id));
+      
+      // Wait for all to complete
+      Promise.all(fetchPromises)
+        .catch(error => {
+          console.error('Error refreshing all chats:', error);
+          setError('Failed to refresh some chats');
+        })
+        .finally(() => {
+          setIsLoadingChats(false);
+        });
     }
-  }, [fetchChatSummaries, selectedChatId]);
-
-  // Get unread task count for a chat
+  }, [selectedChatId, chats, fetchChatTasks]);
 
   // Filter content based on selected chat
   const content = useMemo(() => {
@@ -318,9 +430,10 @@ const Overview: React.FC<OverviewProps> = ({
   // Get the processing status for the selected chat
   const isProcessing = useMemo(() => {
     if (!selectedChatId) return false;
-    const status = getChatStatus(selectedChatId);
-    return status?.status === 'processing';
-  }, [selectedChatId, getChatStatus]);
+    
+    const cache = chatStatusCache[selectedChatId];
+    return cache?.status?.status === 'processing';
+  }, [selectedChatId, chatStatusCache]);
   
   // Handlers for the chat selection flow
   const handleChatSelectionDone = () => {
@@ -330,42 +443,26 @@ const Overview: React.FC<OverviewProps> = ({
 
   const handleModeSelectionDone = () => {
     setShowModeSelection(false);
+    
+    // Force refresh of all newly added chats
+    selectedChats.forEach(chatId => {
+      startPollingChat(chatId);
+    });
   };
   
   // Improved save configurations handler
   const handleSaveConfigurations = () => {
     setIsSaving(true);
     return onSaveConfigurations()
+      .then(() => {
+        // After saving, start polling new chats
+        selectedChats.forEach(chatId => {
+          startPollingChat(chatId);
+        });
+      })
       .finally(() => {
         setIsSaving(false);
       });
-  };
-
-  // Simple pagination UI component
-  const PaginationControls = () => {
-    if (totalPages <= 1) return null;
-    
-    return (
-      <div className={styles.paginationControls}>
-        <button 
-          className={styles.paginationButton}
-          disabled={currentPage <= 1}
-          onClick={() => handlePageChange(currentPage - 1)}
-        >
-          Previous
-        </button>
-        <span className={styles.pageInfo}>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button 
-          className={styles.paginationButton}
-          disabled={!hasMore}
-          onClick={() => handlePageChange(currentPage + 1)}
-        >
-          Next
-        </button>
-      </div>
-    );
   };
 
   return (
@@ -398,6 +495,13 @@ const Overview: React.FC<OverviewProps> = ({
             )}
           </h3>
           <div className={styles.headerActions}>
+            <button
+              className={styles.refreshButton}
+              onClick={handleRefresh}
+              disabled={isLoadingChats}
+            >
+              Refresh
+            </button>
             {(!selectedChat || selectedChat.mode === 'observe') && (
               <CopyTasksButton 
                 tasks={tasks}
@@ -406,21 +510,6 @@ const Overview: React.FC<OverviewProps> = ({
             )}
           </div>
         </div>
-        
-        {/* Debugging panel - remove this in production */}
-        {/* {process.env.NODE_ENV === 'development' && (
-          <div style={{ margin: '0 24px', padding: '8px', background: 'rgba(0,0,0,0.1)', fontSize: '12px' }}>
-            <div>Last fetched: {new Date(lastFetchTime).toLocaleTimeString() || 'Never'}</div>
-            <div>Chats loaded: {chatSummaries.length}</div>
-            <div>Tasks loaded: {tasks.length}</div>
-            <button 
-              onClick={handleRefresh}
-              style={{ padding: '4px 8px', margin: '4px 0', fontSize: '12px' }}
-            >
-              Refresh Data
-            </button>
-          </div>
-        )} */}
         
         <div className={styles.contentList}>
           {/* Animated content with key-based transitions */}
@@ -512,6 +601,9 @@ const Overview: React.FC<OverviewProps> = ({
                     <p className={styles.emptyStateText}>
                       Processing chat messages... This may take a few moments.
                     </p>
+                    <p className={styles.processingDetails}>
+                      The AI assistant is analyzing messages and extracting tasks.
+                    </p>
                   </>
                 ) : (
                   <>
@@ -529,10 +621,19 @@ const Overview: React.FC<OverviewProps> = ({
                 )}
               </div>
             )}
-            
-            {/* Pagination controls for all tasks view */}
-            {!selectedChatId && totalPages > 1 && <PaginationControls />}
           </div>
+          
+          {/* Last updated indicator */}
+          {lastFetchTime > 0 && (
+            <div className={styles.lastUpdated}>
+              Last updated: {new Date(lastFetchTime).toLocaleTimeString()}
+              {isProcessing && (
+                <span className={styles.pollingIndicator}>
+                  {' '}• Updating...
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
       
