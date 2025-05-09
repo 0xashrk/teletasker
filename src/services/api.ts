@@ -224,4 +224,110 @@ export const removeMonitoredChat = async (chatId: string | number): Promise<any>
   }
 };
 
+// Interfaces for chat processing and tasks
+export interface ChatProcessingStatus {
+  id: number;
+  user_id: string;
+  chat_id: number;
+  status: string;
+  started_at: string;
+  completed_at: string | null;
+  message_count: number;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatTask {
+  id: number;
+  chat_id: number;
+  text: string;
+  source: string;
+  status: 'pending' | 'completed';
+  extracted_from: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Chat processing status endpoint
+export const getChatProcessingStatus = async (chatId: string | number): Promise<ChatProcessingStatus> => {
+  try {
+    return await withRetry(async () => {
+      const response = await localApi.get(`/tasks/chat/${chatId}/processing-status`);
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error fetching chat processing status:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Chat tasks endpoint
+export const getChatTasks = async (chatId: string | number): Promise<ChatTask[]> => {
+  try {
+    return await withRetry(async () => {
+      const response = await localApi.get(`/tasks/chat/${chatId}/tasks`);
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error fetching chat tasks:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Polling utility for chat processing status
+export const pollChatProcessingStatus = async (
+  chatId: string | number, 
+  onStatusUpdate?: (status: ChatProcessingStatus) => void,
+  onComplete?: (tasks: ChatTask[]) => void,
+  onError?: (error: any) => void,
+  intervalMs: number = 2000,
+  maxAttempts: number = 30
+): Promise<void> => {
+  let attempts = 0;
+  
+  const poll = async () => {
+    if (attempts >= maxAttempts) {
+      if (onError) onError(new Error('Maximum polling attempts reached'));
+      return;
+    }
+    
+    attempts++;
+    
+    try {
+      const status = await getChatProcessingStatus(chatId);
+      
+      // Call the status update callback if provided
+      if (onStatusUpdate) onStatusUpdate(status);
+      
+      // Check if processing is complete or errored
+      if (status.status === 'completed' || status.status === 'error') {
+        if (status.status === 'error' && onError) {
+          onError(new Error(status.error_message || 'Unknown error during chat processing'));
+          return;
+        }
+        
+        // If complete, fetch tasks
+        if (onComplete) {
+          try {
+            const tasks = await getChatTasks(chatId);
+            onComplete(tasks);
+          } catch (tasksError) {
+            if (onError) onError(tasksError);
+          }
+        }
+        return;
+      }
+      
+      // Continue polling
+      setTimeout(poll, intervalMs);
+    } catch (error) {
+      if (onError) onError(error);
+    }
+  };
+  
+  // Start polling
+  poll();
+};
+
 export default localApi;
