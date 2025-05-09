@@ -1,1 +1,58 @@
- 
+.card {
+  background-color: var(--background-secondary);
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  /* Fix height to prevent overflow */
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
+
+.desc {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0 0 24px;
+  line-height: 1.4;
+}
+
+.button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button:hover {
+  filter: brightness(1.1);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Wrapper for the chat list with fixed height */
+.chatListWrapper {
+  max-height: 50vh; /* Set a fixed height for the chat list */
+  overflow-y: auto; /* Enable scrolling */
+  margin-bottom: 20px;
+  border-radius: 8px;
+} 

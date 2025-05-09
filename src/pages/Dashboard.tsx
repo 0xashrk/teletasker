@@ -11,6 +11,7 @@ import ConnectTelegram from '../components/ConnectTelegram';
 import Loader from '../components/Loader';
 import styles from './Dashboard.module.css';
 import { removeMonitoredChat } from '../services/api';
+import ChatSelectionModal from '../components/ChatSelectionModal';
 
 const CHAT_LIMIT = 5;
 
@@ -120,39 +121,16 @@ const Dashboard: React.FC = () => {
 
     if (!showModes) {
       return (
-        <div className={styles.card}>
-          <h2 className={styles.title}>Select Chats</h2>
-          <p className={styles.desc}>
-            Choose up to {CHAT_LIMIT} chats for your AI assistant to manage.
-          </p>
-          {isLoadingChats ? (
-            <div className={styles.loading}>Loading your chats...</div>
-          ) : chatError ? (
-            <div className={styles.error}>
-              {chatError}
-              <button 
-                className={styles.retryButton}
-                onClick={() => setConnected(true)} // This will trigger a re-fetch
-              >
-                Retry
-              </button>
-            </div>
-          ) : (
-            <ChatList
-              chats={chats}
-              selectedChats={selectedChats}
-              chatLimit={CHAT_LIMIT}
-              onToggleChat={handleToggleChat}
-            />
-          )}
-          <button 
-            className={styles.button}
-            disabled={selectedChats.length === 0 || isLoadingChats}
-            onClick={handleContinue}
-          >
-            {selectedChats.length === 0 ? 'Select chats to continue' : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
-          </button>
-        </div>
+        <ChatSelectionModal
+          chats={chats}
+          selectedChats={selectedChats}
+          chatLimit={CHAT_LIMIT}
+          onToggleChat={handleToggleChat}
+          onContinue={handleContinue}
+          isLoading={isLoadingChats}
+          error={chatError}
+          onRetry={() => setConnected(true)}
+        />
       );
     }
 
