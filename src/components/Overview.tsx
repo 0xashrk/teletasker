@@ -261,10 +261,6 @@ const Overview: React.FC<OverviewProps> = ({
   }, [fetchChatSummaries, selectedChatId]);
 
   // Get unread task count for a chat
-  const getUnreadTaskCount = useCallback((chatId: string): number => {
-    const chatSummary = getChatFromCache(chatId);
-    return chatSummary?.unread_task_count || 0;
-  }, [getChatFromCache]);
 
   // Filter content based on selected chat
   const content = useMemo(() => {
@@ -364,7 +360,7 @@ const Overview: React.FC<OverviewProps> = ({
         </div>
         
         {/* Debugging panel - remove this in production */}
-        {process.env.NODE_ENV === 'development' && (
+        {/* {process.env.NODE_ENV === 'development' && (
           <div style={{ margin: '0 24px', padding: '8px', background: 'rgba(0,0,0,0.1)', fontSize: '12px' }}>
             <div>Last fetched: {new Date(lastFetchTime).toLocaleTimeString() || 'Never'}</div>
             <div>Chats loaded: {chatSummaries.length}</div>
@@ -376,7 +372,7 @@ const Overview: React.FC<OverviewProps> = ({
               Refresh Data
             </button>
           </div>
-        )}
+        )} */}
         
         <div className={styles.contentList}>
           {/* Animated content with key-based transitions */}
