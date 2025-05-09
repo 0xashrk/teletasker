@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './Overview.module.css';
 import ChatList from './ChatList';
@@ -7,6 +7,7 @@ import AssistantModeConfig from './AssistantModeConfig';
 import { ChatConfig } from '../hooks/useChatSelection';
 import Sidebar from './Sidebar';
 import ChatSelectionModal from './ChatSelectionModal';
+import { getChatTasks, pollChatProcessingStatus, ChatTask, ChatProcessingStatus } from '../services/api';
 
 interface Chat {
   id: string;
@@ -53,6 +54,19 @@ interface OverviewProps {
   removeMonitoredChat: (chatId: string) => Promise<void>;
 }
 
+// Helper to convert API tasks to our Task interface
+const mapApiTasksToTasks = (apiTasks: ChatTask[]): Task[] => {
+  return apiTasks.map(task => ({
+    id: task.id.toString(),
+    chatId: task.chat_id.toString(),
+    text: task.text,
+    source: task.source,
+    time: new Date(task.created_at).toLocaleString(),
+    status: task.status,
+    extractedFrom: task.extracted_from
+  }));
+};
+
 const Overview: React.FC<OverviewProps> = ({
   chats,
   selectedChatId,
@@ -70,16 +84,81 @@ const Overview: React.FC<OverviewProps> = ({
 }) => {
   const [showChatSelection, setShowChatSelection] = useState(false);
   const [showModeSelection, setShowModeSelection] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // State for tasks and processing status
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [processingStatuses, setProcessingStatuses] = useState<Record<string, ChatProcessingStatus>>({});
+  const [isLoadingTasks, setIsLoadingTasks] = useState(false);
+  const [taskError, setTaskError] = useState<string | null>(null);
   
   // Get the currently selected chat
   const selectedChat = selectedChatId 
     ? chats.find(chat => chat.id === selectedChatId)
     : null;
 
-  // Here we would fetch actual tasks and messages based on the selected chat
-  // For now, using empty arrays until we integrate with real data API
-  const tasks: Task[] = [];
-  const messages: Message[] = [];
+  // Fetch tasks for a specific chat
+  const fetchTasksForChat = useCallback(async (chatId: string) => {
+    setIsLoadingTasks(true);
+    setTaskError(null);
+    
+    try {
+      const apiTasks = await getChatTasks(chatId);
+      const mappedTasks = mapApiTasksToTasks(apiTasks);
+      
+      setTasks(prevTasks => {
+        // Remove existing tasks for this chat
+        const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
+        // Add new tasks
+        return [...otherTasks, ...mappedTasks];
+      });
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      setTaskError('Failed to load tasks. Please try again.');
+    } finally {
+      setIsLoadingTasks(false);
+    }
+  }, []);
+
+  // Start polling for chat status
+  const startPollingChatStatus = useCallback((chatId: string) => {
+    pollChatProcessingStatus(
+      chatId,
+      // Status update callback
+      (status) => {
+        setProcessingStatuses(prev => ({
+          ...prev,
+          [chatId]: status
+        }));
+      },
+      // Complete callback - fetch tasks
+      (tasks) => {
+        const mappedTasks = mapApiTasksToTasks(tasks);
+        setTasks(prevTasks => {
+          // Remove existing tasks for this chat
+          const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
+          // Add new tasks
+          return [...otherTasks, ...mappedTasks];
+        });
+      },
+      // Error callback
+      (error) => {
+        console.error(`Error polling chat ${chatId}:`, error);
+        setTaskError(`Failed to process chat: ${error.message}`);
+      }
+    );
+  }, []);
+
+  // Fetch tasks when the selected chat changes
+  useEffect(() => {
+    if (selectedChatId && selectedChat?.mode === 'observe') {
+      fetchTasksForChat(selectedChatId);
+      
+      // Check processing status
+      startPollingChatStatus(selectedChatId);
+    }
+  }, [selectedChatId, selectedChat, fetchTasksForChat, startPollingChatStatus]);
 
   // Select the appropriate content based on the chat mode
   const content = selectedChatId && selectedChat
@@ -97,6 +176,19 @@ const Overview: React.FC<OverviewProps> = ({
   const handleModeSelectionDone = () => {
     setShowModeSelection(false);
   };
+  
+  // Improved save configurations handler
+  const handleSaveConfigurations = () => {
+    setIsSaving(true);
+    return onSaveConfigurations()
+      .finally(() => {
+        setIsSaving(false);
+      });
+  };
+
+  // Get the processing status for the selected chat
+  const selectedChatStatus = selectedChatId ? processingStatuses[selectedChatId] : null;
+  const isProcessing = selectedChatStatus?.status === 'processing';
 
   return (
     <div className={styles.overview}>
@@ -115,7 +207,11 @@ const Overview: React.FC<OverviewProps> = ({
           <h3 className={styles.contentTitle}>
             {selectedChat ? (
               selectedChat.mode === 'observe' ? (
-                <>Tasks from {selectedChat.name} <span className={styles.count}>({content.length})</span></>
+                <>
+                  Tasks from {selectedChat.name} 
+                  <span className={styles.count}>({content.length})</span>
+                  {isProcessing && <span className={styles.processingStatus}>Processing...</span>}
+                </>
               ) : (
                 <>Messages from {selectedChat.name} <span className={styles.count}>({content.length})</span></>
               )
@@ -126,7 +222,19 @@ const Overview: React.FC<OverviewProps> = ({
         </div>
         
         <div className={styles.contentList}>
-          {content.length > 0 ? (
+          {isLoadingTasks ? (
+            <div className={styles.loading}>Loading tasks...</div>
+          ) : taskError ? (
+            <div className={styles.error}>
+              {taskError}
+              <button 
+                className={styles.retryButton}
+                onClick={() => selectedChatId && fetchTasksForChat(selectedChatId)}
+              >
+                Retry
+              </button>
+            </div>
+          ) : content.length > 0 ? (
             <div className={selectedChat?.mode === 'observe' || !selectedChat ? styles.taskList : styles.messageList}>
               {(selectedChat?.mode === 'observe' || !selectedChat)
                 ? (content as Task[]).map(task => (
@@ -173,16 +281,27 @@ const Overview: React.FC<OverviewProps> = ({
             </div>
           ) : (
             <div className={styles.emptyState}>
-              <span className={styles.emptyStateIcon}>
-                {selectedChat?.mode === 'observe' || !selectedChat ? '📋' : '💬'}
-              </span>
-              <p className={styles.emptyStateText}>
-                {selectedChat 
-                  ? selectedChat.mode === 'observe'
-                    ? `No tasks extracted yet from ${selectedChat.name}. The AI assistant will analyze messages and extract tasks as they appear.`
-                    : `No messages yet from ${selectedChat.name}. The AI assistant will automatically respond when new messages arrive.`
-                  : 'No tasks extracted yet. The AI assistant will analyze messages and extract tasks as they appear in your chats.'}
-              </p>
+              {isProcessing ? (
+                <>
+                  <span className={styles.emptyStateIcon}>⏳</span>
+                  <p className={styles.emptyStateText}>
+                    Processing chat messages... This may take a few moments.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <span className={styles.emptyStateIcon}>
+                    {selectedChat?.mode === 'observe' || !selectedChat ? '📋' : '💬'}
+                  </span>
+                  <p className={styles.emptyStateText}>
+                    {selectedChat 
+                      ? selectedChat.mode === 'observe'
+                        ? `No tasks extracted yet from ${selectedChat.name}. The AI assistant will analyze messages and extract tasks as they appear.`
+                        : `No messages yet from ${selectedChat.name}. The AI assistant will automatically respond when new messages arrive.`
+                      : 'No tasks extracted yet. The AI assistant will analyze messages and extract tasks as they appear in your chats.'}
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -212,8 +331,8 @@ const Overview: React.FC<OverviewProps> = ({
               chatConfigs={chatConfigs}
               onSetMode={onSetMode}
               onStart={handleModeSelectionDone}
-              onSaveConfigurations={onSaveConfigurations}
-              isLoading={isLoading}
+              onSaveConfigurations={handleSaveConfigurations}
+              isLoading={isLoading || isSaving}
             />
           </div>
         </div>,

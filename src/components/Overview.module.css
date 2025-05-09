@@ -565,4 +565,29 @@
   color: #ff3b30;
   font-size: 0.95rem;
   text-align: center;
+}
+
+.processingStatus {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(0, 122, 255, 0.1);
+  color: var(--accent-color);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 8px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
 } 

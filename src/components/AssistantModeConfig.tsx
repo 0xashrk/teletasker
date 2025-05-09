@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './AssistantModeConfig.module.css';
 
 interface Chat {
@@ -32,14 +32,30 @@ const AssistantModeConfig: React.FC<AssistantModeConfigProps> = ({
   onSaveConfigurations,
   isLoading = false,
 }) => {
-  const handleStart = async () => {
-    try {
-      await onSaveConfigurations();
-      onStart();
-    } catch (error) {
-      console.error('Error saving chat configurations:', error);
-      // You could add error handling UI here
+  // Local state to track saving progress 
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleStart = () => {
+    if (chatConfigs.length !== selectedChats.length) {
+      return; // Do nothing if not all chats are configured
     }
+
+    // Proceed immediately to the dashboard
+    onStart();
+    
+    // Then start the saving process in the background
+    setIsSaving(true);
+    
+    // Fire and forget - don't wait for completion
+    onSaveConfigurations()
+      .catch(error => {
+        console.error('Error saving chat configurations:', error);
+        // In a real app, you'd want to show a toast or notification here
+        // that the configurations couldn't be saved
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
   };
 
   return (
@@ -81,11 +97,11 @@ const AssistantModeConfig: React.FC<AssistantModeConfigProps> = ({
 
       <button 
         className={styles.startBtn}
-        disabled={isLoading || chatConfigs.length !== selectedChats.length}
+        disabled={isLoading || isSaving || chatConfigs.length !== selectedChats.length}
         onClick={handleStart}
       >
-        {isLoading ? (
-          "Saving configurations..."
+        {isLoading || isSaving ? (
+          "Setting up your assistant..."
         ) : chatConfigs.length === selectedChats.length ? (
           "Start AI Assistant"
         ) : (
