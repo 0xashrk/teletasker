@@ -117,12 +117,27 @@ const Overview: React.FC<OverviewProps> = ({
   const [hasMore, setHasMore] = useState(false);
   
   // Animation state for smooth transitions
+  const [animate, setAnimate] = useState(true);
   const [fadeKey, setFadeKey] = useState(selectedChatId || 'all');
+  const [previousTasks, setPreviousTasks] = useState<Task[]>([]);
   
   // Update the fadeKey when selectedChatId changes to trigger animation
   useEffect(() => {
     setFadeKey(selectedChatId || 'all');
+    setAnimate(true); // Enable animation when chat changes
+    
+    // Disable animation after it plays
+    const timer = setTimeout(() => {
+      setAnimate(false);
+    }, 500);
+    
+    return () => clearTimeout(timer);
   }, [selectedChatId]);
+  
+  // Track which tasks are new when data refreshes
+  useEffect(() => {
+    setPreviousTasks(tasks);
+  }, [tasks]);
   
   // Get the currently selected chat
   const selectedChat = selectedChatId 
@@ -134,11 +149,12 @@ const Overview: React.FC<OverviewProps> = ({
     refresh?: boolean;
     specificChatIds?: string[];
     page?: number;
+    silent?: boolean;
   } = {}) => {
-    // Skip fetch if not forced and we've fetched recently (within last 30 seconds)
+    // Skip fetch if not forced and we've fetched recently (within last 60 seconds)
     const now = Date.now();
     const cacheAge = now - lastFetchTime;
-    const isCacheValid = cacheAge < 30000; // 30 seconds
+    const isCacheValid = cacheAge < 60000; // 60 seconds
 
     if (isCacheValid && !options.refresh && chatSummaries.length > 0) {
       console.log('Using cached chat summaries - cache is still fresh');
@@ -159,8 +175,25 @@ const Overview: React.FC<OverviewProps> = ({
       }
     }
     
-    setIsLoadingChats(true);
+    // Only show loading state if not silent refresh
+    if (!options.silent) {
+      setIsLoadingChats(true);
+      // Only enable animation for explicit (non-silent) refreshes
+      if (options.refresh) {
+        setAnimate(true);
+        // Use requestAnimationFrame for smoother timing
+        requestAnimationFrame(() => {
+          // Reset animation flag after animation completes
+          setTimeout(() => {
+            setAnimate(false);
+          }, 500);
+        });
+      }
+    }
     setError(null);
+    
+    // Store current tasks to compare for finding new tasks later
+    const currentTasks = [...tasks];
     
     try {
       // Prepare request parameters
@@ -210,23 +243,29 @@ const Overview: React.FC<OverviewProps> = ({
       console.error('Error fetching chat summaries:', error);
       setError('Failed to load data: ' + (error.message || 'Unknown error'));
     } finally {
-      setIsLoadingChats(false);
+      if (!options.silent) {
+        setIsLoadingChats(false);
+      }
     }
-  }, [chatSummaries, currentPage, lastFetchTime]);
+  }, [chatSummaries, currentPage, lastFetchTime, tasks]);
 
   // Initial data load
   useEffect(() => {
     // Fetch data on initial load
     fetchChatSummaries();
     
-    // Set up interval for periodic refresh (every 30 seconds)
+    // Set up interval for periodic refresh (every 60 seconds instead of 30)
     const intervalId = setInterval(() => {
-      console.log('Performing periodic data refresh');
-      fetchChatSummaries({ refresh: true });
-    }, 30000);
+      // Skip refresh if already loading data to prevent UI glitches
+      if (!isLoadingChats) {
+        console.log('Performing periodic data refresh');
+        // Use a silent refresh approach that doesn't trigger loading states
+        fetchChatSummaries({ refresh: true, silent: true });
+      }
+    }, 60000); // Increased from 30000 to 60000 ms (1 minute)
     
     return () => clearInterval(intervalId);
-  }, [fetchChatSummaries]);
+  }, [fetchChatSummaries, isLoadingChats]);
 
   // Handle page change for pagination
   const handlePageChange = (newPage: number) => {
@@ -376,7 +415,11 @@ const Overview: React.FC<OverviewProps> = ({
         
         <div className={styles.contentList}>
           {/* Animated content with key-based transitions */}
-          <div key={fadeKey} className={styles.animatedContent}>
+          <div 
+            key={fadeKey} 
+            className={styles.animatedContent}
+            data-animate={animate ? "true" : "false"}
+          >
             {isLoadingChats ? (
               <div className={styles.loading}>Loading data...</div>
             ) : error ? (
@@ -392,48 +435,64 @@ const Overview: React.FC<OverviewProps> = ({
             ) : content.length > 0 ? (
               <div className={selectedChat?.mode === 'observe' || !selectedChat ? styles.taskList : styles.messageList}>
                 {(selectedChat?.mode === 'observe' || !selectedChat)
-                  ? (content as Task[]).map(task => (
-                      <div key={task.id} className={styles.taskItem}>
-                        <div className={styles.taskHeader}>
-                          <span className={styles.taskSource}>Priority: {task.source}</span>
-                          <span className={styles.taskTime}>{task.time}</span>
-                        </div>
-                        <div className={styles.taskText}>{task.text}</div>
-                        {task.extractedFrom && (
-                          <div className={styles.extractedFrom}>
-                            <div className={styles.extractedHeader}>Reasoning:</div>
-                            <div className={styles.extractedText}>{task.extractedFrom}</div>
+                  ? (content as Task[]).map(task => {
+                      // Check if this task is new (not in previousTasks)
+                      const isNewTask = !previousTasks.some(t => t.id === task.id);
+                      
+                      return (
+                        <div 
+                          key={task.id} 
+                          className={styles.taskItem}
+                          data-new={isNewTask ? "true" : "false"}
+                        >
+                          <div className={styles.taskHeader}>
+                            <span className={styles.taskSource}>Priority: {task.source}</span>
+                            <span className={styles.taskTime}>{task.time}</span>
                           </div>
-                        )}
-                        <div className={styles.taskMeta}>
-                          <span className={`${styles.taskStatus} ${styles[task.status]}`}>
-                            {task.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))
-                  : (content as Message[]).map(message => (
-                      <div key={message.id} className={styles.messageItem}>
-                        <div className={styles.messageHeader}>
-                          <span className={styles.messageSender}>{message.sender}</span>
-                          <span className={styles.messageTime}>{message.time}</span>
-                        </div>
-                        <div className={styles.messageText}>{message.text}</div>
-                        {message.aiResponse && (
-                          <div className={styles.aiResponse}>
-                            <div className={styles.aiResponseHeader}>
-                              <span className={styles.aiIcon}>🤖</span>
-                              AI Response
+                          <div className={styles.taskText}>{task.text}</div>
+                          {task.extractedFrom && (
+                            <div className={styles.extractedFrom}>
+                              <div className={styles.extractedHeader}>Reasoning:</div>
+                              <div className={styles.extractedText}>{task.extractedFrom}</div>
                             </div>
-                            <div className={styles.aiResponseText}>{message.aiResponse.text}</div>
-                            <div className={styles.aiReasoning}>
-                              <div className={styles.reasoningHeader}>Reasoning</div>
-                              <div className={styles.reasoningText}>{message.aiResponse.reasoning}</div>
-                            </div>
+                          )}
+                          <div className={styles.taskMeta}>
+                            <span className={`${styles.taskStatus} ${styles[task.status]}`}>
+                              {task.status}
+                            </span>
                           </div>
-                        )}
-                      </div>
-                    ))
+                        </div>
+                      );
+                    })
+                  : (content as Message[]).map(message => {
+                      // Similar logic for messages
+                      return (
+                        <div 
+                          key={message.id} 
+                          className={styles.messageItem}
+                          data-new={false} // Add data-new attribute for messages if needed
+                        >
+                          <div className={styles.messageHeader}>
+                            <span className={styles.messageSender}>{message.sender}</span>
+                            <span className={styles.messageTime}>{message.time}</span>
+                          </div>
+                          <div className={styles.messageText}>{message.text}</div>
+                          {message.aiResponse && (
+                            <div className={styles.aiResponse}>
+                              <div className={styles.aiResponseHeader}>
+                                <span className={styles.aiIcon}>🤖</span>
+                                AI Response
+                              </div>
+                              <div className={styles.aiResponseText}>{message.aiResponse.text}</div>
+                              <div className={styles.aiReasoning}>
+                                <div className={styles.reasoningHeader}>Reasoning</div>
+                                <div className={styles.reasoningText}>{message.aiResponse.reasoning}</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
                 }
               </div>
             ) : (

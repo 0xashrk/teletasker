@@ -85,11 +85,11 @@
   border-radius: 8px;
   padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), 
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), 
               box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
               background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: center;
-  will-change: transform, box-shadow, background-color;
+  will-change: transform, box-shadow, background-color, opacity;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
@@ -262,11 +262,11 @@
   border-radius: 8px;
   padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), 
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), 
               box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
               background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: center;
-  will-change: transform, box-shadow, background-color;
+  will-change: transform, box-shadow, background-color, opacity;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
@@ -543,12 +543,44 @@
 
 /* Add fade animation for content transitions */
 .animatedContent {
-  animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: opacity, transform, filter;
+  will-change: opacity, transform;
   width: 100%;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   transform-origin: center top;
+}
+
+/* Apply animation only when explicitly triggered with the data-animate attribute */
+.animatedContent[data-animate="true"] {
+  animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Transition for task and message items for smoother updates */
+.taskItem, .messageItem {
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), 
+              box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center;
+  will-change: transform, box-shadow, background-color, opacity;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* New item animation */
+@keyframes fadeInNew {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply only to newly added items */
+.taskItem[data-new="true"], .messageItem[data-new="true"] {
+  animation: fadeInNew 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Pagination controls */
