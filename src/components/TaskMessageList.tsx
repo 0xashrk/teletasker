@@ -1,8 +1,8 @@
 import React from 'react';
-import styles from './ContentList.module.css';
+import styles from './TaskMessageList.module.css';
 import { Task, Message, Chat } from '../types';
 
-interface ContentListProps {
+interface TaskMessageListProps {
   isLoadingTasks: boolean;
   taskError: string | null;
   content: (Task | Message)[];
@@ -11,7 +11,7 @@ interface ContentListProps {
   fetchTasksForChat: (chatId: string) => void;
 }
 
-export const ContentList: React.FC<ContentListProps> = ({
+export const TaskMessageList: React.FC<TaskMessageListProps> = ({
   isLoadingTasks,
   taskError,
   content,
@@ -19,6 +19,7 @@ export const ContentList: React.FC<ContentListProps> = ({
   isProcessing,
   fetchTasksForChat,
 }) => {
+  // Add type guard to help TypeScript understand our type checks
   const isTask = (item: Task | Message): item is Task => {
     return 'source' in item && 'extractedFrom' in item;
   };

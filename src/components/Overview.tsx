@@ -9,7 +9,7 @@ import Sidebar from './Sidebar';
 import ChatSelectionModal from './ChatSelectionModal';
 import CopyTasksButton from './CopyTasksButton';
 import { getChatTasks, pollChatProcessingStatus, ChatTask, ChatProcessingStatus } from '../services/api';
-import { ContentList } from './ContentList';
+import { TaskMessageList } from './TaskMessageList';
 import { Chat, Task, Message } from '../types';
 
 interface OverviewProps {
@@ -267,7 +267,7 @@ const Overview: React.FC<OverviewProps> = ({
         )} */}
         
         <div className={styles.contentList}>
-          <ContentList
+          <TaskMessageList
             isLoadingTasks={isLoadingTasks}
             taskError={taskError}
             content={content}
