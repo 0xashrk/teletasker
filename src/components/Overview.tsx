@@ -11,6 +11,7 @@ import CopyTasksButton from './CopyTasksButton';
 import { getChatTasks, pollChatProcessingStatus, ChatTask, ChatProcessingStatus } from '../services/api';
 import { TaskMessageList } from './TaskMessageList';
 import { Chat, Task, Message } from '../types';
+import { getCachedTasks, setCachedTasks, clearTaskCache } from '../utils/taskCache';
 
 interface OverviewProps {
   chats: Chat[];
@@ -98,6 +99,16 @@ const Overview: React.FC<OverviewProps> = ({
     setIsLoadingTasks(true);
     setTaskError(null);
     
+    // Try to get cached tasks first
+    const cachedTasks = getCachedTasks(chatId);
+    if (cachedTasks) {
+      setTasks(prevTasks => {
+        const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
+        return [...otherTasks, ...cachedTasks];
+      });
+      setIsLoadingTasks(false);
+    }
+    
     try {
       const apiTasks = await getChatTasks(chatId);
       console.log('API Tasks received:', apiTasks);
@@ -108,11 +119,19 @@ const Overview: React.FC<OverviewProps> = ({
         // Remove existing tasks for this chat
         const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
         // Add new tasks
-        return [...otherTasks, ...mappedTasks];
+        const newTasks = [...otherTasks, ...mappedTasks];
+        // Cache the new tasks
+        setCachedTasks(mappedTasks, chatId);
+        return newTasks;
       });
     } catch (error) {
       console.error('Error fetching tasks:', error);
       setTaskError('Failed to load tasks. Please try again.');
+      
+      // If we have cached tasks, keep showing them
+      if (!cachedTasks) {
+        setTasks(prevTasks => prevTasks.filter(task => task.chatId !== chatId));
+      }
     } finally {
       setIsLoadingTasks(false);
     }
@@ -128,6 +147,11 @@ const Overview: React.FC<OverviewProps> = ({
           ...prev,
           [chatId]: status
         }));
+        
+        // Clear cache when processing starts or errors
+        if (status.status === 'processing' || status.status === 'error') {
+          clearTaskCache(chatId);
+        }
       },
       // Complete callback - fetch tasks
       (tasks) => {
@@ -135,7 +159,8 @@ const Overview: React.FC<OverviewProps> = ({
         setTasks(prevTasks => {
           // Remove existing tasks for this chat
           const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
-          // Add new tasks
+          // Add new tasks and cache them
+          setCachedTasks(mappedTasks, chatId);
           return [...otherTasks, ...mappedTasks];
         });
       },
@@ -160,6 +185,13 @@ const Overview: React.FC<OverviewProps> = ({
       setIsLoadingTasks(true);
       setTaskError(null);
       
+      // Try to get cached tasks for all chats first
+      const cachedAllTasks = getCachedTasks(null);
+      if (cachedAllTasks) {
+        setTasks(cachedAllTasks);
+        setIsLoadingTasks(false);
+      }
+      
       // Get all observe mode chats
       const observeChats = chats.filter(chat => chat.mode === 'observe');
       
@@ -169,10 +201,17 @@ const Overview: React.FC<OverviewProps> = ({
           // Flatten and map all tasks
           const allTasks = allTasksArrays.flatMap(mapApiTasksToTasks);
           setTasks(allTasks);
+          // Cache all tasks
+          setCachedTasks(allTasks, null);
         })
         .catch(error => {
           console.error('Error fetching all tasks:', error);
           setTaskError('Failed to load tasks. Please try again.');
+          
+          // If we have cached tasks, keep showing them
+          if (!cachedAllTasks) {
+            setTasks([]);
+          }
         })
         .finally(() => {
           setIsLoadingTasks(false);
