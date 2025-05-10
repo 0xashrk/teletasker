@@ -248,10 +248,6 @@
   padding: 2px 6px;
   border-radius: 10px;
   min-width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .messageList {
@@ -639,31 +635,31 @@
 /* Header actions */
 .headerActions {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 16px;
 }
 
 .refreshButton {
-  background: var(--background-secondary);
-  border: 1px solid var(--border-color);
+  background: none;
+  border: none;
+  padding: 8px;
   border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  color: var(--text-primary);
-  transition: all 0.2s ease;
-  margin-right: 8px;
   cursor: pointer;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
-  font-weight: 500;
+  gap: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .refreshButton:hover {
-  background: var(--background-hover);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .refreshButton:active {
-  transform: translateY(1px);
+  transform: scale(0.98);
 }
 
 .refreshButton:disabled {
@@ -672,33 +668,38 @@
 }
 
 .lastUpdated {
-  font-size: 0.75rem;
-  color: var(--text-tertiary);
-  text-align: center;
-  padding: 8px 0;
-  margin-top: 8px;
-  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .pollingIndicator {
-  color: var(--accent-color);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-color);
   animation: pulse 2s infinite;
 }
 
 .processingDetails {
-  font-size: 0.8rem;
-  color: var(--text-tertiary);
-  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 8px;
 }
 
 @keyframes pulse {
   0% {
-    opacity: 0.6;
+    transform: scale(0.95);
+    opacity: 0.5;
   }
   50% {
-    opacity: 1;
+    transform: scale(1.05);
+    opacity: 0.8;
   }
   100% {
-    opacity: 0.6;
+    transform: scale(0.95);
+    opacity: 0.5;
   }
 } 

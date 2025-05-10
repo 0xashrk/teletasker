@@ -9,35 +9,8 @@ import Sidebar from './Sidebar';
 import ChatSelectionModal from './ChatSelectionModal';
 import CopyTasksButton from './CopyTasksButton';
 import { getChatTasks, pollChatProcessingStatus, ChatTask, ChatProcessingStatus } from '../services/api';
-
-interface Chat {
-  id: string;
-  name: string;
-  avatar: string;
-  mode: 'observe' | 'automate';
-}
-
-interface Task {
-  id: string;
-  chatId: string;
-  text: string;
-  source: string;
-  time: string;
-  status: 'pending' | 'completed';
-  extractedFrom: string; // The original message text
-}
-
-interface Message {
-  id: string;
-  chatId: string;
-  text: string;
-  sender: string;
-  time: string;
-  aiResponse?: {
-    text: string;
-    reasoning: string;
-  };
-}
+import { ContentList } from './ContentList';
+import { Chat, Task, Message } from '../types';
 
 interface OverviewProps {
   chats: Chat[];
@@ -47,7 +20,7 @@ interface OverviewProps {
   availableChats: TelegramChat[];
   selectedChats: string[];
   chatLimit: number;
-  onToggleChat: (id: string) => void;
+  onToggleChat: (chatId: string) => void;
   chatConfigs: ChatConfig[];
   onSetMode: (chatId: string, mode: 'observe' | 'automate') => void;
   onSaveConfigurations: () => Promise<void>;
@@ -110,7 +83,7 @@ const Overview: React.FC<OverviewProps> = ({
   
   // Get the currently selected chat
   const selectedChat = selectedChatId 
-    ? chats.find(chat => chat.id === selectedChatId)
+    ? chats.find(chat => chat.id === selectedChatId) || null
     : null;
 
   // Let's debug what's being returned from the API
@@ -177,12 +150,35 @@ const Overview: React.FC<OverviewProps> = ({
   // Fetch tasks when the selected chat changes
   useEffect(() => {
     if (selectedChatId && selectedChat?.mode === 'observe') {
+      // Fetch tasks for a specific chat
       fetchTasksForChat(selectedChatId);
       
       // Check processing status
       startPollingChatStatus(selectedChatId);
+    } else if (!selectedChatId) {
+      // When no chat is selected, fetch tasks for all monitored chats
+      setIsLoadingTasks(true);
+      setTaskError(null);
+      
+      // Get all observe mode chats
+      const observeChats = chats.filter(chat => chat.mode === 'observe');
+      
+      // Fetch tasks for all observe mode chats
+      Promise.all(observeChats.map(chat => getChatTasks(chat.id)))
+        .then(allTasksArrays => {
+          // Flatten and map all tasks
+          const allTasks = allTasksArrays.flatMap(mapApiTasksToTasks);
+          setTasks(allTasks);
+        })
+        .catch(error => {
+          console.error('Error fetching all tasks:', error);
+          setTaskError('Failed to load tasks. Please try again.');
+        })
+        .finally(() => {
+          setIsLoadingTasks(false);
+        });
     }
-  }, [selectedChatId, selectedChat, fetchTasksForChat, startPollingChatStatus]);
+  }, [selectedChatId, selectedChat, fetchTasksForChat, startPollingChatStatus, chats]);
 
   // Select the appropriate content based on the chat mode
   const content = selectedChatId && selectedChat
@@ -192,11 +188,11 @@ const Overview: React.FC<OverviewProps> = ({
     : tasks;
 
   // Debug content
-  useEffect(() => {
-    console.log('Filtered content for display:', content);
-    console.log('Selected chat ID:', selectedChatId);
-    console.log('All tasks:', tasks);
-  }, [content, selectedChatId, tasks]);
+  // useEffect(() => {
+  //   console.log('Filtered content for display:', content);
+  //   console.log('Selected chat ID:', selectedChatId);
+  //   console.log('All tasks:', tasks);
+  // }, [content, selectedChatId, tasks]);
 
   // Handlers for the chat selection flow
   const handleChatSelectionDone = () => {
@@ -256,7 +252,7 @@ const Overview: React.FC<OverviewProps> = ({
         </div>
         
         {/* Debugging panel - remove this in production */}
-        {process.env.NODE_ENV === 'development' && (
+        {/* {process.env.NODE_ENV === 'development' && (
           <div style={{ margin: '0 24px', padding: '8px', background: 'rgba(0,0,0,0.1)', fontSize: '12px' }}>
             <div>Selected Chat ID: {selectedChatId || 'none'}</div>
             <div>Content Items: {content.length}</div>
@@ -268,93 +264,17 @@ const Overview: React.FC<OverviewProps> = ({
               Refresh Tasks
             </button>
           </div>
-        )}
+        )} */}
         
         <div className={styles.contentList}>
-          {isLoadingTasks ? (
-            <div className={styles.loading}>Loading tasks...</div>
-          ) : taskError ? (
-            <div className={styles.error}>
-              {taskError}
-              <button 
-                className={styles.retryButton}
-                onClick={() => selectedChatId && fetchTasksForChat(selectedChatId)}
-              >
-                Retry
-              </button>
-            </div>
-          ) : content.length > 0 ? (
-            <div className={selectedChat?.mode === 'observe' || !selectedChat ? styles.taskList : styles.messageList}>
-              {(selectedChat?.mode === 'observe' || !selectedChat)
-                ? (content as Task[]).map(task => (
-                    <div key={task.id} className={styles.taskItem}>
-                      <div className={styles.taskHeader}>
-                        <span className={styles.taskSource}>Priority: {task.source}</span>
-                        <span className={styles.taskTime}>{task.time}</span>
-                      </div>
-                      <div className={styles.taskText}>{task.text}</div>
-                      {task.extractedFrom && (
-                        <div className={styles.extractedFrom}>
-                          <div className={styles.extractedHeader}>Reasoning:</div>
-                          <div className={styles.extractedText}>{task.extractedFrom}</div>
-                        </div>
-                      )}
-                      <div className={styles.taskMeta}>
-                        <span className={`${styles.taskStatus} ${styles[task.status]}`}>
-                          {task.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                : (content as Message[]).map(message => (
-                    <div key={message.id} className={styles.messageItem}>
-                      <div className={styles.messageHeader}>
-                        <span className={styles.messageSender}>{message.sender}</span>
-                        <span className={styles.messageTime}>{message.time}</span>
-                      </div>
-                      <div className={styles.messageText}>{message.text}</div>
-                      {message.aiResponse && (
-                        <div className={styles.aiResponse}>
-                          <div className={styles.aiResponseHeader}>
-                            <span className={styles.aiIcon}>🤖</span>
-                            AI Response
-                          </div>
-                          <div className={styles.aiResponseText}>{message.aiResponse.text}</div>
-                          <div className={styles.aiReasoning}>
-                            <div className={styles.reasoningHeader}>Reasoning</div>
-                            <div className={styles.reasoningText}>{message.aiResponse.reasoning}</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))
-              }
-            </div>
-          ) : (
-            <div className={styles.emptyState}>
-              {isProcessing ? (
-                <>
-                  <span className={styles.emptyStateIcon}>⏳</span>
-                  <p className={styles.emptyStateText}>
-                    Processing chat messages... This may take a few moments.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <span className={styles.emptyStateIcon}>
-                    {selectedChat?.mode === 'observe' || !selectedChat ? '📋' : '💬'}
-                  </span>
-                  <p className={styles.emptyStateText}>
-                    {selectedChat 
-                      ? selectedChat.mode === 'observe'
-                        ? `No tasks extracted yet from ${selectedChat.name}. The AI assistant will analyze messages and extract tasks as they appear.`
-                        : `No messages yet from ${selectedChat.name}. The AI assistant will automatically respond when new messages arrive.`
-                      : 'No tasks extracted yet. The AI assistant will analyze messages and extract tasks as they appear in your chats.'}
-                  </p>
-                </>
-              )}
-            </div>
-          )}
+          <ContentList
+            isLoadingTasks={isLoadingTasks}
+            taskError={taskError}
+            content={content}
+            selectedChat={selectedChat}
+            isProcessing={isProcessing}
+            fetchTasksForChat={fetchTasksForChat}
+          />
         </div>
       </div>
       
