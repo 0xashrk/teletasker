@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './TaskMessageList.module.css';
 import { Task, Message, Chat } from '../types';
 
@@ -24,6 +24,55 @@ export const TaskMessageList: React.FC<TaskMessageListProps> = ({
     return 'source' in item && 'extractedFrom' in item;
   };
 
+  // Keep track of which tasks we've already seen
+  const [seenTaskIds, setSeenTaskIds] = useState<Set<string>>(new Set());
+  const [visibleItems, setVisibleItems] = useState<number>(0);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (!selectedChat) {
+      if (isFirstRender.current) {
+        // First render - animate everything
+        setVisibleItems(0);
+        const timer = setTimeout(() => {
+          setVisibleItems(content.length);
+          // Mark all current tasks as seen
+          setSeenTaskIds(new Set(content.filter(isTask).map(task => task.id)));
+        }, 100);
+        isFirstRender.current = false;
+        return () => clearTimeout(timer);
+      } else {
+        // Subsequent updates - only animate new tasks
+        const currentTasks = content.filter(isTask);
+        const newTaskIds = currentTasks
+          .filter(task => !seenTaskIds.has(task.id))
+          .map(task => task.id);
+
+        if (newTaskIds.length > 0) {
+          setSeenTaskIds(prev => new Set([...Array.from(prev), ...newTaskIds]));
+        }
+        setVisibleItems(content.length);
+      }
+    } else {
+      // Reset for individual chat view
+      setVisibleItems(content.length);
+      setSeenTaskIds(new Set());
+      isFirstRender.current = true;
+    }
+  }, [content, selectedChat]);
+
+  // Helper to determine if a task should be animated
+  const shouldAnimateTask = (taskId: string, index: number): boolean => {
+    if (selectedChat) return false;
+    return !seenTaskIds.has(taskId) || index >= visibleItems;
+  };
+
+  // Helper to get animation delay index
+  const getAnimationIndex = (index: number): string => {
+    if (index > 9) return "10+";
+    return index.toString();
+  };
+
   return (
     <div className={styles.contentList}>
       {isLoadingTasks ? (
@@ -41,8 +90,15 @@ export const TaskMessageList: React.FC<TaskMessageListProps> = ({
       ) : content.length > 0 ? (
         <div className={selectedChat?.mode === 'observe' || !selectedChat ? styles.taskList : styles.messageList}>
           {(selectedChat?.mode === 'observe' || !selectedChat)
-            ? content.filter(isTask).map(task => (
-                <div key={task.id} className={styles.taskItem}>
+            ? content.filter(isTask).map((task, index) => (
+                <div 
+                  key={task.id} 
+                  className={`${styles.taskItem} ${shouldAnimateTask(task.id, index) ? styles.animatedTask : ''}`}
+                  data-index={shouldAnimateTask(task.id, index) ? getAnimationIndex(index) : undefined}
+                  style={{
+                    visibility: !selectedChat && index >= visibleItems ? 'hidden' : 'visible'
+                  }}
+                >
                   <div className={styles.taskHeader}>
                     <span className={styles.taskSource}>Priority: {task.source}</span>
                     <span className={styles.taskTime}>{task.time}</span>

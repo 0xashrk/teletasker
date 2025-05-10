@@ -15,6 +15,17 @@
   }
 }
 
+@keyframes staggeredFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .contentList {
   flex: 1;
   overflow-y: auto;
@@ -54,6 +65,25 @@
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
+
+/* Animation styles only for the all tasks view */
+.animatedTask {
+  opacity: 0;
+  animation: staggeredFadeIn 0.5s ease-out forwards;
+}
+
+/* Animation delay classes only apply to animated tasks */
+.animatedTask[data-index="0"] { animation-delay: 0s; }
+.animatedTask[data-index="1"] { animation-delay: 0.1s; }
+.animatedTask[data-index="2"] { animation-delay: 0.2s; }
+.animatedTask[data-index="3"] { animation-delay: 0.3s; }
+.animatedTask[data-index="4"] { animation-delay: 0.4s; }
+.animatedTask[data-index="5"] { animation-delay: 0.5s; }
+.animatedTask[data-index="6"] { animation-delay: 0.6s; }
+.animatedTask[data-index="7"] { animation-delay: 0.7s; }
+.animatedTask[data-index="8"] { animation-delay: 0.8s; }
+.animatedTask[data-index="9"] { animation-delay: 0.9s; }
+.animatedTask[data-index="10+"] { animation-delay: 1s; }
 
 .taskItem:hover, .messageItem:hover {
   transform: translateY(-4px) scale(1.01) rotateX(1deg);
