@@ -66,8 +66,8 @@
 .contentList {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
-  max-height: calc(100vh - 100px);
+  height: calc(100vh - 64px); /* Adjust based on your header height */
+  min-height: 0;
   perspective: 1000px; /* For 3D effect */
 }
 
