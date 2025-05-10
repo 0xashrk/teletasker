@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './Overview.module.css';
 import ChatList from './ChatList';
@@ -8,13 +8,7 @@ import { ChatConfig } from '../hooks/useChatSelection';
 import Sidebar from './Sidebar';
 import ChatSelectionModal from './ChatSelectionModal';
 import CopyTasksButton from './CopyTasksButton';
-import { 
-  ChatTask, 
-  ChatProcessingStatus,
-  getChatProcessingStatus,
-  getChatTasks,
-  ChatInfo
-} from '../services/api';
+import { getChatTasks, pollChatProcessingStatus, ChatTask, ChatProcessingStatus } from '../services/api';
 
 interface Chat {
   id: string;
@@ -62,7 +56,7 @@ interface OverviewProps {
 }
 
 // Helper to convert API tasks to our Task interface
-const mapApiTasksToTasks = (apiTasks: ChatTask[], chatId: string): Task[] => {
+const mapApiTasksToTasks = (apiTasks: ChatTask[]): Task[] => {
   if (!apiTasks || !Array.isArray(apiTasks)) {
     console.error('Invalid API tasks data:', apiTasks);
     return [];
@@ -71,10 +65,14 @@ const mapApiTasksToTasks = (apiTasks: ChatTask[], chatId: string): Task[] => {
   return apiTasks.map(task => {
     // Safely extract data with fallbacks
     const id = task.id?.toString() || Math.random().toString(36).substring(2, 10);
+    const chatId = task.chat_id?.toString() || 'unknown';
+    
+    // For debugging
+    console.log('Mapping task:', task);
     
     return {
       id,
-      chatId: chatId.toString(),
+      chatId,
       text: task.description || 'No task description',
       source: task.priority || 'Unknown',
       time: task.created_at ? new Date(task.created_at).toLocaleString() : 'Unknown time',
@@ -83,16 +81,6 @@ const mapApiTasksToTasks = (apiTasks: ChatTask[], chatId: string): Task[] => {
     };
   });
 };
-
-// Chat status cache object with lastChecked timestamp
-interface ChatStatusCache {
-  chatId: string;
-  status: ChatProcessingStatus | null;
-  lastChecked: number;
-  tasks: Task[];
-  isPolling: boolean;
-  error: string | null;
-}
 
 const Overview: React.FC<OverviewProps> = ({
   chats,
@@ -113,328 +101,103 @@ const Overview: React.FC<OverviewProps> = ({
   const [showModeSelection, setShowModeSelection] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
-  // State for chats, tasks and processing status
+  // State for tasks and processing status
   const [tasks, setTasks] = useState<Task[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoadingChats, setIsLoadingChats] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Cache for chat status and tasks
-  const [chatStatusCache, setChatStatusCache] = useState<Record<string, ChatStatusCache>>({});
-  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
-  
-  // Polling timeouts ref
-  const pollingTimeouts = useRef<Record<string, NodeJS.Timeout>>({});
-  
-  // Animation state for smooth transitions
-  const [animate, setAnimate] = useState(true);
-  const [fadeKey, setFadeKey] = useState(selectedChatId || 'all');
-  const [previousTasks, setPreviousTasks] = useState<Task[]>([]);
-  
-  // Update the fadeKey when selectedChatId changes to trigger animation
-  useEffect(() => {
-    setFadeKey(selectedChatId || 'all');
-    setAnimate(true); // Enable animation when chat changes
-    
-    // Disable animation after it plays
-    const timer = setTimeout(() => {
-      setAnimate(false);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [selectedChatId]);
-  
-  // Track which tasks are new when data refreshes
-  useEffect(() => {
-    setPreviousTasks(tasks);
-  }, [tasks]);
-  
-  // Clean up polling on unmount
-  useEffect(() => {
-    return () => {
-      // Clear all polling timeouts
-      Object.values(pollingTimeouts.current).forEach(timeout => {
-        clearTimeout(timeout);
-      });
-    };
-  }, []);
+  const [processingStatuses, setProcessingStatuses] = useState<Record<string, ChatProcessingStatus>>({});
+  const [isLoadingTasks, setIsLoadingTasks] = useState(false);
+  const [taskError, setTaskError] = useState<string | null>(null);
   
   // Get the currently selected chat
   const selectedChat = selectedChatId 
     ? chats.find(chat => chat.id === selectedChatId)
     : null;
 
-  // Initialize chat in cache if needed
-  const initializeChatInCache = useCallback((chatId: string) => {
-    setChatStatusCache(prev => {
-      if (prev[chatId]) {
-        // Already exists
-        return prev;
-      }
+  // Let's debug what's being returned from the API
+  useEffect(() => {
+    if (tasks.length > 0) {
+      console.log('Current tasks:', tasks);
+    }
+  }, [tasks]);
+
+  // Fetch tasks for a specific chat
+  const fetchTasksForChat = useCallback(async (chatId: string) => {
+    setIsLoadingTasks(true);
+    setTaskError(null);
+    
+    try {
+      const apiTasks = await getChatTasks(chatId);
+      console.log('API Tasks received:', apiTasks);
+      const mappedTasks = mapApiTasksToTasks(apiTasks);
+      console.log('Mapped tasks:', mappedTasks);
       
-      // Create new entry
-      return {
-        ...prev,
-        [chatId]: {
-          chatId,
-          status: null,
-          lastChecked: 0,
-          tasks: [],
-          isPolling: false,
-          error: null
-        }
-      };
-    });
+      setTasks(prevTasks => {
+        // Remove existing tasks for this chat
+        const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
+        // Add new tasks
+        return [...otherTasks, ...mappedTasks];
+      });
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      setTaskError('Failed to load tasks. Please try again.');
+    } finally {
+      setIsLoadingTasks(false);
+    }
   }, []);
 
-  // Fetch chat status directly
-  const fetchChatStatus = useCallback(async (chatId: string) => {
-    initializeChatInCache(chatId);
-    
-    // Mark as loading
-    setChatStatusCache(prev => ({
-      ...prev,
-      [chatId]: {
-        ...prev[chatId],
-        isPolling: true
-      }
-    }));
-    
-    try {
-      // Fetch status directly
-      const status = await getChatProcessingStatus(chatId);
-      const now = Date.now();
-      
-      // Check if we already have tasks
-      const existingTasks = chatStatusCache[chatId]?.tasks || [];
-      
-      // Update cache
-      setChatStatusCache(prev => ({
-        ...prev,
-        [chatId]: {
-          ...prev[chatId],
-          status,
-          lastChecked: now,
-          error: null,
-          isPolling: status.status === 'processing' // Keep polling if processing
-        }
-      }));
-      
-      if (status.status === 'completed' && existingTasks.length === 0) {
-        // If completed and no tasks, fetch tasks
-        fetchChatTasks(chatId);
-      } else if (status.status === 'processing') {
-        // If processing, schedule next poll
-        scheduleNextPoll(chatId);
-      }
-      
-      // Update global lastFetchTime
-      setLastFetchTime(now);
-    } catch (error: any) {
-      console.error(`Error fetching status for chat ${chatId}:`, error);
-      
-      // Update cache with error
-      setChatStatusCache(prev => ({
-        ...prev,
-        [chatId]: {
-          ...prev[chatId],
-          error: `Failed to fetch status: ${error.message || 'Unknown error'}`,
-          isPolling: false // Stop polling on error
-        }
-      }));
-    }
-  }, [chatStatusCache, initializeChatInCache]);
-
-  // Fetch chat tasks directly
-  const fetchChatTasks = useCallback(async (chatId: string) => {
-    initializeChatInCache(chatId);
-    
-    // Mark as loading
-    setChatStatusCache(prev => ({
-      ...prev,
-      [chatId]: {
-        ...prev[chatId],
-        isPolling: true
-      }
-    }));
-    
-    try {
-      // Fetch tasks directly
-      const apiTasks = await getChatTasks(chatId);
-      
-      // Convert to our format
-      const chatTasks = mapApiTasksToTasks(apiTasks, chatId);
-      const now = Date.now();
-      
-      // Update cache with tasks
-      setChatStatusCache(prev => ({
-        ...prev,
-        [chatId]: {
-          ...prev[chatId],
-          tasks: chatTasks,
-          lastChecked: now,
-          isPolling: false, // Stop polling
-          error: null
-        }
-      }));
-      
-      // Update tasks state for UI
-      setTasks(prev => {
-        // Remove any existing tasks for this chat
-        const filteredTasks = prev.filter(task => task.chatId !== chatId);
-        // Add new tasks
-        return [...filteredTasks, ...chatTasks];
-      });
-      
-      // Update global lastFetchTime
-      setLastFetchTime(now);
-    } catch (error: any) {
-      console.error(`Error fetching tasks for chat ${chatId}:`, error);
-      
-      // Update cache with error
-      setChatStatusCache(prev => ({
-        ...prev,
-        [chatId]: {
-          ...prev[chatId],
-          error: `Failed to fetch tasks: ${error.message || 'Unknown error'}`,
-          isPolling: false // Stop polling on error
-        }
-      }));
-    }
-  }, [initializeChatInCache]);
-
-  // Schedule next poll for a chat
-  const scheduleNextPoll = useCallback((chatId: string) => {
-    // Clear any existing timeout
-    if (pollingTimeouts.current[chatId]) {
-      clearTimeout(pollingTimeouts.current[chatId]);
-    }
-    
-    // Only poll if chat is marked for polling
-    if (!chatStatusCache[chatId]?.isPolling) {
-      return;
-    }
-    
-    // Set timeout for next poll (3 seconds)
-    pollingTimeouts.current[chatId] = setTimeout(() => {
-      fetchChatStatus(chatId);
-    }, 3000);
-  }, [chatStatusCache, fetchChatStatus]);
-
-  // Start polling for a chat
-  const startPollingChat = useCallback((chatId: string) => {
-    if (!chatId) return;
-    
-    const cache = chatStatusCache[chatId];
-    
-    // If already polling or completed, don't start again
-    if (cache?.isPolling || (cache?.status?.status === 'completed' && cache?.tasks.length > 0)) {
-      return;
-    }
-    
-    // Fetch status which will trigger polling if needed
-    fetchChatStatus(chatId);
-  }, [chatStatusCache, fetchChatStatus]);
-
-  // Handle newly added chats
-  useEffect(() => {
-    // For each chat in chats list, initialize in cache
-    chats.forEach(chat => {
-      initializeChatInCache(chat.id);
-      
-      // If we haven't checked this chat's status recently, do it now
-      const cache = chatStatusCache[chat.id];
-      const now = Date.now();
-      const cacheAge = now - (cache?.lastChecked || 0);
-      
-      if ((!cache?.lastChecked || cacheAge > 60000) && // Not checked or older than 60 seconds
-          (!cache?.tasks.length || !cache?.status)) {  // No tasks or status
-        fetchChatStatus(chat.id);
-      }
-    });
-  }, [chats, chatStatusCache, initializeChatInCache, fetchChatStatus]);
-
-  // When a chat is selected, ensure its data is loaded
-  useEffect(() => {
-    if (selectedChatId) {
-      // Initialize if needed
-      initializeChatInCache(selectedChatId);
-      
-      const cache = chatStatusCache[selectedChatId];
-      const now = Date.now();
-      const cacheAge = now - (cache?.lastChecked || 0);
-      
-      // If we haven't checked this chat's status recently and no tasks, do it now
-      if ((!cache?.lastChecked || cacheAge > 60000) && // Not checked or older than 60 seconds 
-          (!cache?.tasks.length)) {                   // No tasks  
-        fetchChatStatus(selectedChatId);
-      }
-      // If processing, ensure we're polling
-      else if (cache?.status?.status === 'processing' && !cache?.isPolling) {
-        startPollingChat(selectedChatId);
-      }
-    }
-  }, [selectedChatId, chatStatusCache, initializeChatInCache, fetchChatStatus, startPollingChat]);
-
-  // Update tasks when cache changes
-  useEffect(() => {
-    // Compile tasks from all chats in cache
-    const allTasks: Task[] = [];
-    
-    Object.values(chatStatusCache).forEach(cache => {
-      if (cache.tasks.length > 0) {
-        allTasks.push(...cache.tasks);
-      }
-    });
-    
-    setTasks(allTasks);
-  }, [chatStatusCache]);
-
-  // Handle manual refresh button
-  const handleRefresh = useCallback(() => {
-    if (selectedChatId) {
-      // Just fetch current chat
-      fetchChatTasks(selectedChatId);
-    } else {
-      // Fetch all chats
-      setIsLoadingChats(true);
-      
-      // Create fetch promises for all chats
-      const fetchPromises = chats.map(chat => fetchChatTasks(chat.id));
-      
-      // Wait for all to complete
-      Promise.all(fetchPromises)
-        .catch(error => {
-          console.error('Error refreshing all chats:', error);
-          setError('Failed to refresh some chats');
-        })
-        .finally(() => {
-          setIsLoadingChats(false);
+  // Start polling for chat status
+  const startPollingChatStatus = useCallback((chatId: string) => {
+    pollChatProcessingStatus(
+      chatId,
+      // Status update callback
+      (status) => {
+        setProcessingStatuses(prev => ({
+          ...prev,
+          [chatId]: status
+        }));
+      },
+      // Complete callback - fetch tasks
+      (tasks) => {
+        const mappedTasks = mapApiTasksToTasks(tasks);
+        setTasks(prevTasks => {
+          // Remove existing tasks for this chat
+          const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
+          // Add new tasks
+          return [...otherTasks, ...mappedTasks];
         });
-    }
-  }, [selectedChatId, chats, fetchChatTasks]);
-
-  // Filter content based on selected chat
-  const content = useMemo(() => {
-    if (selectedChatId && selectedChat) {
-      if (selectedChat.mode === 'observe') {
-        return tasks.filter(task => task.chatId === selectedChatId);
-      } else {
-        return messages.filter(msg => msg.chatId === selectedChatId);
+      },
+      // Error callback
+      (error) => {
+        console.error(`Error polling chat ${chatId}:`, error);
+        setTaskError(`Failed to process chat: ${error.message}`);
       }
-    } else {
-      return tasks;
-    }
-  }, [selectedChatId, selectedChat, tasks, messages]);
+    );
+  }, []);
 
-  // Get the processing status for the selected chat
-  const isProcessing = useMemo(() => {
-    if (!selectedChatId) return false;
-    
-    const cache = chatStatusCache[selectedChatId];
-    return cache?.status?.status === 'processing';
-  }, [selectedChatId, chatStatusCache]);
-  
+  // Fetch tasks when the selected chat changes
+  useEffect(() => {
+    if (selectedChatId && selectedChat?.mode === 'observe') {
+      fetchTasksForChat(selectedChatId);
+      
+      // Check processing status
+      startPollingChatStatus(selectedChatId);
+    }
+  }, [selectedChatId, selectedChat, fetchTasksForChat, startPollingChatStatus]);
+
+  // Select the appropriate content based on the chat mode
+  const content = selectedChatId && selectedChat
+    ? selectedChat.mode === 'observe'
+      ? tasks.filter(task => task.chatId === selectedChatId)
+      : messages.filter(msg => msg.chatId === selectedChatId)
+    : tasks;
+
+  // Debug content
+  useEffect(() => {
+    console.log('Filtered content for display:', content);
+    console.log('Selected chat ID:', selectedChatId);
+    console.log('All tasks:', tasks);
+  }, [content, selectedChatId, tasks]);
+
   // Handlers for the chat selection flow
   const handleChatSelectionDone = () => {
     setShowChatSelection(false);
@@ -443,27 +206,20 @@ const Overview: React.FC<OverviewProps> = ({
 
   const handleModeSelectionDone = () => {
     setShowModeSelection(false);
-    
-    // Force refresh of all newly added chats
-    selectedChats.forEach(chatId => {
-      startPollingChat(chatId);
-    });
   };
   
   // Improved save configurations handler
   const handleSaveConfigurations = () => {
     setIsSaving(true);
     return onSaveConfigurations()
-      .then(() => {
-        // After saving, start polling new chats
-        selectedChats.forEach(chatId => {
-          startPollingChat(chatId);
-        });
-      })
       .finally(() => {
         setIsSaving(false);
       });
   };
+
+  // Get the processing status for the selected chat
+  const selectedChatStatus = selectedChatId ? processingStatuses[selectedChatId] : null;
+  const isProcessing = selectedChatStatus?.status === 'processing';
 
   return (
     <div className={styles.overview}>
@@ -495,149 +251,114 @@ const Overview: React.FC<OverviewProps> = ({
             )}
           </h3>
           <div className={styles.headerActions}>
-            <button
-              className={styles.refreshButton}
-              onClick={handleRefresh}
-              disabled={isLoadingChats}
-            >
-              Refresh
-            </button>
-            {(!selectedChat || selectedChat.mode === 'observe') && (
-              <CopyTasksButton 
-                tasks={tasks}
-                selectedChatId={selectedChatId}
-              />
-            )}
+            <CopyTasksButton tasks={tasks} selectedChatId={selectedChatId} />
           </div>
         </div>
         
-        <div className={styles.contentList}>
-          {/* Animated content with key-based transitions */}
-          <div 
-            key={fadeKey} 
-            className={styles.animatedContent}
-            data-animate={animate ? "true" : "false"}
-          >
-            {isLoadingChats ? (
-              <div className={styles.loading}>Loading data...</div>
-            ) : error ? (
-              <div className={styles.error}>
-                {error}
-                <button 
-                  className={styles.retryButton}
-                  onClick={handleRefresh}
-                >
-                  Retry
-                </button>
-              </div>
-            ) : content.length > 0 ? (
-              <div className={selectedChat?.mode === 'observe' || !selectedChat ? styles.taskList : styles.messageList}>
-                {(selectedChat?.mode === 'observe' || !selectedChat)
-                  ? (content as Task[]).map(task => {
-                      // Check if this task is new (not in previousTasks)
-                      const isNewTask = !previousTasks.some(t => t.id === task.id);
-                      
-                      return (
-                        <div 
-                          key={task.id} 
-                          className={styles.taskItem}
-                          data-new={isNewTask ? "true" : "false"}
-                        >
-                          <div className={styles.taskHeader}>
-                            <span className={styles.taskSource}>Priority: {task.source}</span>
-                            <span className={styles.taskTime}>{task.time}</span>
-                          </div>
-                          <div className={styles.taskText}>{task.text}</div>
-                          {task.extractedFrom && (
-                            <div className={styles.extractedFrom}>
-                              <div className={styles.extractedHeader}>Reasoning:</div>
-                              <div className={styles.extractedText}>{task.extractedFrom}</div>
-                            </div>
-                          )}
-                          <div className={styles.taskMeta}>
-                            <span className={`${styles.taskStatus} ${styles[task.status]}`}>
-                              {task.status}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })
-                  : (content as Message[]).map(message => {
-                      // Similar logic for messages
-                      return (
-                        <div 
-                          key={message.id} 
-                          className={styles.messageItem}
-                          data-new={false} // Add data-new attribute for messages if needed
-                        >
-                          <div className={styles.messageHeader}>
-                            <span className={styles.messageSender}>{message.sender}</span>
-                            <span className={styles.messageTime}>{message.time}</span>
-                          </div>
-                          <div className={styles.messageText}>{message.text}</div>
-                          {message.aiResponse && (
-                            <div className={styles.aiResponse}>
-                              <div className={styles.aiResponseHeader}>
-                                <span className={styles.aiIcon}>🤖</span>
-                                AI Response
-                              </div>
-                              <div className={styles.aiResponseText}>{message.aiResponse.text}</div>
-                              <div className={styles.aiReasoning}>
-                                <div className={styles.reasoningHeader}>Reasoning</div>
-                                <div className={styles.reasoningText}>{message.aiResponse.reasoning}</div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })
-                }
-              </div>
-            ) : (
-              <div className={styles.emptyState}>
-                {isProcessing ? (
-                  <>
-                    <span className={styles.emptyStateIcon}>⏳</span>
-                    <p className={styles.emptyStateText}>
-                      Processing chat messages... This may take a few moments.
-                    </p>
-                    <p className={styles.processingDetails}>
-                      The AI assistant is analyzing messages and extracting tasks.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <span className={styles.emptyStateIcon}>
-                      {selectedChat?.mode === 'observe' || !selectedChat ? '📋' : '💬'}
-                    </span>
-                    <p className={styles.emptyStateText}>
-                      {selectedChat 
-                        ? selectedChat.mode === 'observe'
-                          ? `No tasks extracted yet from ${selectedChat.name}. The AI assistant will analyze messages and extract tasks as they appear.`
-                          : `No messages yet from ${selectedChat.name}. The AI assistant will automatically respond when new messages arrive.`
-                        : 'No tasks extracted yet. The AI assistant will analyze messages and extract tasks as they appear in your chats.'}
-                    </p>
-                  </>
-                )}
-              </div>
-            )}
+        {/* Debugging panel - remove this in production */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{ margin: '0 24px', padding: '8px', background: 'rgba(0,0,0,0.1)', fontSize: '12px' }}>
+            <div>Selected Chat ID: {selectedChatId || 'none'}</div>
+            <div>Content Items: {content.length}</div>
+            <div>All Tasks: {tasks.length}</div>
+            <button 
+              onClick={() => selectedChatId && fetchTasksForChat(selectedChatId)}
+              style={{ padding: '4px 8px', margin: '4px 0', fontSize: '12px' }}
+            >
+              Refresh Tasks
+            </button>
           </div>
-          
-          {/* Last updated indicator */}
-          {lastFetchTime > 0 && (
-            <div className={styles.lastUpdated}>
-              Last updated: {new Date(lastFetchTime).toLocaleTimeString()}
-              {isProcessing && (
-                <span className={styles.pollingIndicator}>
-                  {' '}• Updating...
-                </span>
+        )}
+        
+        <div className={styles.contentList}>
+          {isLoadingTasks ? (
+            <div className={styles.loading}>Loading tasks...</div>
+          ) : taskError ? (
+            <div className={styles.error}>
+              {taskError}
+              <button 
+                className={styles.retryButton}
+                onClick={() => selectedChatId && fetchTasksForChat(selectedChatId)}
+              >
+                Retry
+              </button>
+            </div>
+          ) : content.length > 0 ? (
+            <div className={selectedChat?.mode === 'observe' || !selectedChat ? styles.taskList : styles.messageList}>
+              {(selectedChat?.mode === 'observe' || !selectedChat)
+                ? (content as Task[]).map(task => (
+                    <div key={task.id} className={styles.taskItem}>
+                      <div className={styles.taskHeader}>
+                        <span className={styles.taskSource}>Priority: {task.source}</span>
+                        <span className={styles.taskTime}>{task.time}</span>
+                      </div>
+                      <div className={styles.taskText}>{task.text}</div>
+                      {task.extractedFrom && (
+                        <div className={styles.extractedFrom}>
+                          <div className={styles.extractedHeader}>Reasoning:</div>
+                          <div className={styles.extractedText}>{task.extractedFrom}</div>
+                        </div>
+                      )}
+                      <div className={styles.taskMeta}>
+                        <span className={`${styles.taskStatus} ${styles[task.status]}`}>
+                          {task.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                : (content as Message[]).map(message => (
+                    <div key={message.id} className={styles.messageItem}>
+                      <div className={styles.messageHeader}>
+                        <span className={styles.messageSender}>{message.sender}</span>
+                        <span className={styles.messageTime}>{message.time}</span>
+                      </div>
+                      <div className={styles.messageText}>{message.text}</div>
+                      {message.aiResponse && (
+                        <div className={styles.aiResponse}>
+                          <div className={styles.aiResponseHeader}>
+                            <span className={styles.aiIcon}>🤖</span>
+                            AI Response
+                          </div>
+                          <div className={styles.aiResponseText}>{message.aiResponse.text}</div>
+                          <div className={styles.aiReasoning}>
+                            <div className={styles.reasoningHeader}>Reasoning</div>
+                            <div className={styles.reasoningText}>{message.aiResponse.reasoning}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+              }
+            </div>
+          ) : (
+            <div className={styles.emptyState}>
+              {isProcessing ? (
+                <>
+                  <span className={styles.emptyStateIcon}>⏳</span>
+                  <p className={styles.emptyStateText}>
+                    Processing chat messages... This may take a few moments.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <span className={styles.emptyStateIcon}>
+                    {selectedChat?.mode === 'observe' || !selectedChat ? '📋' : '💬'}
+                  </span>
+                  <p className={styles.emptyStateText}>
+                    {selectedChat 
+                      ? selectedChat.mode === 'observe'
+                        ? `No tasks extracted yet from ${selectedChat.name}. The AI assistant will analyze messages and extract tasks as they appear.`
+                        : `No messages yet from ${selectedChat.name}. The AI assistant will automatically respond when new messages arrive.`
+                      : 'No tasks extracted yet. The AI assistant will analyze messages and extract tasks as they appear in your chats.'}
+                  </p>
+                </>
               )}
             </div>
           )}
         </div>
       </div>
       
-      {/* Modals */}
+      {/* Use ChatSelectionModal component instead of inline implementation */}
       {showChatSelection && createPortal(
         <div className={styles.modalOverlay}>
           <ChatSelectionModal
@@ -652,6 +373,7 @@ const Overview: React.FC<OverviewProps> = ({
         document.body
       )}
 
+      {/* Mode selection modal */}
       {showModeSelection && createPortal(
         <div className={styles.modalOverlay}>
           <div className={styles.card}>
