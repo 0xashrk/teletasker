@@ -3,7 +3,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoginButton from './LoginButton';
-import Pricing from './Pricing';
+import Pricing from './homepage/Pricing';
 import './HomePage.css';
 
 const HomePage: React.FC = () => {
