@@ -250,6 +250,7 @@ export interface ChatTask {
   reasoning: string;
   completed: boolean;
   created_at: string;
+  message_date: string;
 }
 
 // Chat processing status endpoint

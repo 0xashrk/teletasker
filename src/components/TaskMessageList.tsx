@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './TaskMessageList.module.css';
-import { Task, Message, Chat } from '../types';
+import { Task, Message, Chat } from '../types/index';
 
 // Helper function to extract URLs and format them
 const extractUrls = (text: string): { url: string; display: string; icon: string }[] => {
@@ -167,10 +167,13 @@ export const TaskMessageList: React.FC<TaskMessageListProps> = ({
                 >
                   <div className={styles.taskHeader}>
                     <span className={styles.taskSource}>Priority: {task.source}</span>
-                    <span className={styles.taskTime}>{task.time}</span>
+                    <div className={styles.taskTimes}>
+                      <span className={styles.taskTime} title="Task created">📅 {task.time}</span>
+                      <span className={styles.messageTime} title="Original message">💬 {task.messageDate}</span>
+                    </div>
                   </div>
                   <div className={styles.taskText}>
-                    {task.text.split(/(https?:\/\/[^\s]+)/).map((part, index) => {
+                    {task.text.split(/(https?:\/\/[^\s]+)/).map((part: string, index: number) => {
                       if (part.match(/(https?:\/\/[^\s]+)/)) {
                         const { display, icon, url } = extractUrls(part)[0];
                         return (

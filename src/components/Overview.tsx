@@ -10,7 +10,7 @@ import ChatSelectionModal from './ChatSelectionModal';
 import CopyTasksButton from './CopyTasksButton';
 import { getChatTasks, pollChatProcessingStatus, ChatTask, ChatProcessingStatus } from '../services/api';
 import { TaskMessageList } from './TaskMessageList';
-import { Chat, Task, Message } from '../types';
+import { Chat, Task, Message } from '../types/index';
 import { getCachedTasks, setCachedTasks, clearTaskCache } from '../utils/taskCache';
 
 interface OverviewProps {
@@ -41,15 +41,17 @@ const mapApiTasksToTasks = (apiTasks: ChatTask[]): Task[] => {
     const id = task.id?.toString() || Math.random().toString(36).substring(2, 10);
     const chatId = task.chat_id?.toString() || 'unknown';
     
-    // For debugging
-    console.log('Mapping task:', task);
+    // Format dates
+    const createdAt = task.created_at ? new Date(task.created_at).toLocaleString() : 'Unknown time';
+    const messageDate = task.message_date ? new Date(task.message_date).toLocaleString() : 'Unknown time';
     
     return {
       id,
       chatId,
       text: task.description || 'No task description',
       source: task.priority || 'Unknown',
-      time: task.created_at ? new Date(task.created_at).toLocaleString() : 'Unknown time',
+      time: createdAt,
+      messageDate: messageDate,
       status: task.completed ? 'completed' : 'pending',
       extractedFrom: task.reasoning || 'No source message'
     };

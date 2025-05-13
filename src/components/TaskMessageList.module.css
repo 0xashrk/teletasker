@@ -102,9 +102,23 @@
   color: var(--text-primary);
 }
 
+.taskTimes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
 .taskTime, .messageTime {
   font-size: 12px;
   color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.taskTime:hover, .messageTime:hover {
+  color: var(--text-primary);
 }
 
 .taskText {

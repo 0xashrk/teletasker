@@ -11,6 +11,7 @@ export interface Task {
   text: string;
   source: string;
   time: string;
+  messageDate: string;
   status: 'pending' | 'completed';
   extractedFrom: string;
 }
