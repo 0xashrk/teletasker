@@ -107,11 +107,17 @@
   color: var(--text-secondary);
 }
 
-.taskText, .messageText {
+.taskText {
+  display: inline;
   font-size: 14px;
   color: var(--text-primary);
-  line-height: 1.5;
+  line-height: 1.4;
   margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+.taskText span {
+  white-space: pre-wrap;
 }
 
 .extractedFrom {
@@ -286,54 +292,71 @@
 .taskLinks {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 8px;
+  gap: 6px;
+  margin-left: 4px;
 }
 
 .linkButton {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.1);
+  gap: 3px;
+  background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.08);
   color: var(--accent-color, #007AFF);
-  border: 1px solid rgba(var(--accent-color-rgb, 0, 122, 255), 0.2);
-  border-radius: 16px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 500;
+  border: 0.5px solid rgba(var(--accent-color-rgb, 0, 122, 255), 0.15);
+  border-radius: 4px;
+  padding: 0 6px;
+  height: 20px;
+  margin: 0 1px;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   white-space: nowrap;
-  max-width: 200px;
+  max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  vertical-align: baseline;
+  position: relative;
+  top: 0;
 }
 
 .linkButton:hover {
-  background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.15);
-  border-color: rgba(var(--accent-color-rgb, 0, 122, 255), 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.12);
+  border-color: rgba(var(--accent-color-rgb, 0, 122, 255), 0.25);
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .linkButton:active {
-  transform: translateY(0);
-  background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.2);
+  transform: translateY(0) scale(0.98);
+  background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.16);
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .linkIcon {
-  font-size: 14px;
-  opacity: 0.8;
+  font-size: 12px;
+  position: relative;
+  top: 0;
+  opacity: 0.9;
+  line-height: 1;
 }
 
-.taskText {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--text-primary);
-  line-height: 1.5;
-  margin-bottom: 16px;
+@media (prefers-color-scheme: dark) {
+  .linkButton {
+    background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.15);
+    border-color: rgba(var(--accent-color-rgb, 0, 122, 255), 0.25);
+  }
+  
+  .linkButton:hover {
+    background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.2);
+    border-color: rgba(var(--accent-color-rgb, 0, 122, 255), 0.3);
+  }
+  
+  .linkButton:active {
+    background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.25);
+  }
 } 

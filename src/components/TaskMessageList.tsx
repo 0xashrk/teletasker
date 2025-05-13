@@ -3,7 +3,7 @@ import styles from './TaskMessageList.module.css';
 import { Task, Message, Chat } from '../types';
 
 // Helper function to extract URLs and format them
-const extractUrls = (text: string): { url: string; display: string }[] => {
+const extractUrls = (text: string): { url: string; display: string; icon: string }[] => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const matches = text.match(urlRegex) || [];
   
@@ -12,21 +12,58 @@ const extractUrls = (text: string): { url: string; display: string }[] => {
       const urlObj = new URL(url);
       // Remove 'www.' if present and get the hostname
       let display = urlObj.hostname.replace(/^www\./, '');
+      let icon = '🔗';
       
       // If it's a known platform, make it more readable
       if (display.includes('tally.so')) {
-        display = 'Tally Form';
+        display = 'Form';
+        icon = '📝';
       } else if (display.includes('github.com')) {
         display = 'GitHub';
+        icon = '🐙';
       } else if (display.includes('notion.so')) {
         display = 'Notion';
+        icon = '📔';
       } else if (display.includes('discord.com')) {
         display = 'Discord';
+        icon = '💬';
+      } else if (display.includes('figma.com')) {
+        display = 'Figma';
+        icon = '🎨';
+      } else if (display.includes('docs.google.com')) {
+        display = 'Google Doc';
+        icon = '📄';
+      } else if (display.includes('sheets.google.com')) {
+        display = 'Google Sheet';
+        icon = '📊';
+      } else if (display.includes('drive.google.com')) {
+        display = 'Google Drive';
+        icon = '📁';
+      } else if (display.includes('youtube.com') || display.includes('youtu.be')) {
+        display = 'YouTube';
+        icon = '▶️';
+      } else if (display.includes('meet.google.com')) {
+        display = 'Google Meet';
+        icon = '📹';
+      } else if (display.includes('calendar.google.com')) {
+        display = 'Calendar';
+        icon = '📅';
+      } else if (display.includes('slack.com')) {
+        display = 'Slack';
+        icon = '💬';
+      } else if (display.includes('zoom.us')) {
+        display = 'Zoom';
+        icon = '🎥';
+      } else {
+        // For unknown URLs, show the domain without TLD
+        display = display.split('.')[0];
+        // Capitalize first letter
+        display = display.charAt(0).toUpperCase() + display.slice(1);
       }
       
-      return { url, display };
+      return { url, display, icon };
     } catch (e) {
-      return { url, display: url };
+      return { url, display: url, icon: '🔗' };
     }
   });
 };
@@ -135,27 +172,25 @@ export const TaskMessageList: React.FC<TaskMessageListProps> = ({
                   <div className={styles.taskText}>
                     {task.text.split(/(https?:\/\/[^\s]+)/).map((part, index) => {
                       if (part.match(/(https?:\/\/[^\s]+)/)) {
-                        const { display } = extractUrls(part)[0];
+                        const { display, icon, url } = extractUrls(part)[0];
                         return (
                           <a
                             key={index}
-                            href={part}
+                            href={url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={styles.linkButton}
-                            title={part} // Show full URL on hover
+                            title={url}
                           >
-                            <span className={styles.linkIcon}>
-                              {display === 'Tally Form' ? '📝' : 
-                               display === 'GitHub' ? '🐙' :
-                               display === 'Notion' ? '📔' :
-                               display === 'Discord' ? '💬' : '🔗'}
-                            </span>
+                            <span className={styles.linkIcon}>{icon}</span>
                             {display}
                           </a>
                         );
                       }
-                      return <span key={index}>{part}</span>;
+                      // Add a space after the link if the next part starts with a space
+                      const nextPart = task.text.split(/(https?:\/\/[^\s]+)/)[index + 1];
+                      const needsSpace = nextPart && !nextPart.startsWith(' ');
+                      return <span key={index}>{part}{needsSpace ? ' ' : ''}</span>;
                     })}
                   </div>
                   {task.extractedFrom && (
