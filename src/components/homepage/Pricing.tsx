@@ -5,7 +5,6 @@ interface PricingTier {
   name: string;
   price: string;
   chatLimit: string;
-  replyLimit: string;
   features: string[];
   hookLever: string;
   isRecommended?: boolean;
@@ -13,67 +12,47 @@ interface PricingTier {
 
 const pricingTiers: PricingTier[] = [
   {
-    name: 'Trial',
+    name: 'Try it free',
     price: '$0',
     chatLimit: '5 chats',
-    replyLimit: '200 replies',
     features: [
-      '7 days free trial',
-      'GPT-4.1 Mini powered',
-      'Basic task extraction',
-      'Standard support'
+      'Monitor up to 5 chats',
+      'Essential task extraction',
+      '7-day trial'
     ],
     hookLever: 'Risk-free trial; build habit, show the magic'
   },
   {
-    name: 'Starter',
-    price: '$9',
+    name: 'Essential',
+    price: '$10',
     chatLimit: '25 chats',
-    replyLimit: '800 replies',
     features: [
-      'Everything in Trial, plus:',
-      'Extended chat history',
-      'Priority support',
-      'Custom task templates'
+      'Monitor up to 25 chats',
+      'Comprehensive task tracking',
+      'Perfect for personal use'
     ],
     hookLever: 'Low friction entry; clear upgrade path',
     isRecommended: true
   },
   {
     name: 'Pro',
-    price: '$19',
+    price: '$20',
     chatLimit: 'Unlimited',
-    replyLimit: '2,000 replies',
     features: [
-      'Everything in Starter, plus:',
-      'Advanced memory system',
-      'Better controls',
-      'API access'
+      'Monitor unlimited chats',
+      'Scale without restrictions',
+      'Ideal for power users'
     ],
     hookLever: 'For BDs/power users'
-  },
-  // {
-  //   name: 'Team',
-  //   price: '$39',
-  //   chatLimit: 'Unlimited + shared inbox',
-  //   replyLimit: '5,000 replies',
-  //   features: [
-  //     'Everything in Pro, plus:',
-  //     'Shared team inbox',
-  //     'Admin controls',
-  //     'SSO & advanced security',
-  //     'Priority support'
-  //   ],
-  //   hookLever: 'Slack-style admin access'
-  // }
+  }
 ];
 
 const Pricing: React.FC = () => {
   return (
     <section className={styles.pricing}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Simple, transparent pricing</h2>
-        <p className={styles.subtitle}>Start with a 7-day trial. No credit card required.</p>
+        <h2 className={styles.title}>Choose your plan</h2>
+        <p className={styles.subtitle}>Try Teletasker free for 7 days</p>
       </div>
       
       <div className={styles.tiersContainer}>
@@ -83,25 +62,21 @@ const Pricing: React.FC = () => {
             className={`${styles.tier} ${tier.isRecommended ? styles.recommended : ''}`}
           >
             {tier.isRecommended && (
-              <div className={styles.recommendedBadge}>Recommended</div>
+              <div className={styles.recommendedBadge}>Best Value</div>
             )}
             
             <div className={styles.tierHeader}>
               <h3 className={styles.tierName}>{tier.name}</h3>
               <div className={styles.priceContainer}>
                 <span className={styles.price}>{tier.price}</span>
-                {tier.name !== 'Trial' && <span className={styles.period}>/month</span>}
+                {tier.name !== 'Try it free' && <span className={styles.period}>/mo</span>}
               </div>
             </div>
 
             <div className={styles.limits}>
               <div className={styles.limit}>
-                <span className={styles.limitLabel}>Chat Limit:</span>
                 <span className={styles.limitValue}>{tier.chatLimit}</span>
-              </div>
-              <div className={styles.limit}>
-                <span className={styles.limitLabel}>Reply Cap:</span>
-                <span className={styles.limitValue}>{tier.replyLimit}</span>
+                <span className={styles.limitLabel}>monitored</span>
               </div>
             </div>
 
@@ -115,20 +90,20 @@ const Pricing: React.FC = () => {
             </ul>
 
             <button className={`${styles.button} ${tier.isRecommended ? styles.recommendedButton : ''}`}>
-              {tier.name === 'Trial' ? 'Start Free Trial' : 'Choose Plan'}
+              {tier.name === 'Try it free' ? 'Start your free trial' : 'Get started'}
             </button>
           </div>
         ))}
       </div>
 
-      <div className={styles.addon}>
+      {/* <div className={styles.addon}>
         <div className={styles.addonContent}>
-          <h3 className={styles.addonTitle}>Need voice or image replies?</h3>
+          <h3 className={styles.addonTitle}>Need more capabilities?</h3>
           <p className={styles.addonDesc}>
-            Add GPT-4o capabilities for just $0.04/reply
+            Add voice and image support for $0.04 per reply
           </p>
         </div>
-      </div>
+      </div> */}
     </section>
   );
 };
