@@ -8,7 +8,7 @@ interface PricingTier {
   replyLimit: string;
   features: string[];
   hookLever: string;
-  isPopular?: boolean;
+  isRecommended?: boolean;
 }
 
 const pricingTiers: PricingTier[] = [
@@ -37,7 +37,7 @@ const pricingTiers: PricingTier[] = [
       'Custom task templates'
     ],
     hookLever: 'Low friction entry; clear upgrade path',
-    isPopular: true
+    isRecommended: true
   },
   {
     name: 'Pro',
@@ -52,20 +52,20 @@ const pricingTiers: PricingTier[] = [
     ],
     hookLever: 'For BDs/power users'
   },
-  {
-    name: 'Team',
-    price: '$39',
-    chatLimit: 'Unlimited + shared inbox',
-    replyLimit: '5,000 replies',
-    features: [
-      'Everything in Pro, plus:',
-      'Shared team inbox',
-      'Admin controls',
-      'SSO & advanced security',
-      'Priority support'
-    ],
-    hookLever: 'Slack-style admin access'
-  }
+  // {
+  //   name: 'Team',
+  //   price: '$39',
+  //   chatLimit: 'Unlimited + shared inbox',
+  //   replyLimit: '5,000 replies',
+  //   features: [
+  //     'Everything in Pro, plus:',
+  //     'Shared team inbox',
+  //     'Admin controls',
+  //     'SSO & advanced security',
+  //     'Priority support'
+  //   ],
+  //   hookLever: 'Slack-style admin access'
+  // }
 ];
 
 const Pricing: React.FC = () => {
@@ -80,10 +80,10 @@ const Pricing: React.FC = () => {
         {pricingTiers.map((tier) => (
           <div 
             key={tier.name} 
-            className={`${styles.tier} ${tier.isPopular ? styles.popular : ''}`}
+            className={`${styles.tier} ${tier.isRecommended ? styles.recommended : ''}`}
           >
-            {tier.isPopular && (
-              <div className={styles.popularBadge}>Most Popular</div>
+            {tier.isRecommended && (
+              <div className={styles.recommendedBadge}>Recommended</div>
             )}
             
             <div className={styles.tierHeader}>
@@ -114,7 +114,7 @@ const Pricing: React.FC = () => {
               ))}
             </ul>
 
-            <button className={`${styles.button} ${tier.isPopular ? styles.popularButton : ''}`}>
+            <button className={`${styles.button} ${tier.isRecommended ? styles.recommendedButton : ''}`}>
               {tier.name === 'Trial' ? 'Start Free Trial' : 'Choose Plan'}
             </button>
           </div>

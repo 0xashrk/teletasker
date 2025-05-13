@@ -51,11 +51,11 @@
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
-.popular {
+.recommended {
   border: 2px solid var(--accent-color);
 }
 
-.popularBadge {
+.recommendedBadge {
   position: absolute;
   top: -12px;
   right: 24px;
@@ -160,13 +160,13 @@
   background: var(--background-primary);
 }
 
-.popularButton {
+.recommendedButton {
   background: var(--accent-color);
   color: white;
   border: none;
 }
 
-.popularButton:hover {
+.recommendedButton:hover {
   background: var(--accent-color);
   filter: brightness(1.1);
 }
