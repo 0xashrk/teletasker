@@ -104,13 +104,10 @@ const Overview: React.FC<OverviewProps> = ({
         const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
         return [...otherTasks, ...cachedTasks];
       });
-      // Only show loading if we don't have cached data
       setIsLoadingTasks(false);
     } else {
       setIsLoadingTasks(true);
     }
-    
-    setTaskError(null);
     
     try {
       const apiTasks = await getChatTasks(chatId);
@@ -121,15 +118,12 @@ const Overview: React.FC<OverviewProps> = ({
       setTasks(prevTasks => {
         const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
         const newTasks = [...otherTasks, ...mappedTasks];
-        // Cache the new tasks
         setCachedTasks(mappedTasks, chatId);
         return newTasks;
       });
     } catch (error) {
       console.error('Error fetching tasks:', error);
-      // Only show error if we don't have cached data
       if (!cachedTasks) {
-        setTaskError('Failed to load tasks. Please try again.');
         setTasks(prevTasks => prevTasks.filter(task => task.chatId !== chatId));
       }
     } finally {
@@ -139,97 +133,73 @@ const Overview: React.FC<OverviewProps> = ({
 
   // Start polling for chat status
   const startPollingChatStatus = useCallback((chatId: string) => {
+    let isPolling = true; // Add flag to control polling
+
     pollChatProcessingStatus(
       chatId,
       // Status update callback
       (status) => {
+        console.log('Processing status update:', status);
         setProcessingStatuses(prev => ({
           ...prev,
           [chatId]: status
         }));
         
-        // Clear cache when processing starts or errors
-        if (status.status === 'processing' || status.status === 'error') {
-          clearTaskCache(chatId);
+        // Handle different status cases
+        switch (status.status) {
+          case 'processing':
+            clearTaskCache(chatId);
+            setTaskError(null);
+            break;
+          case 'error':
+            clearTaskCache(chatId);
+            setTaskError(status.error_message || 'Unknown error occurred');
+            break;
+          case 'completed':
+            setTaskError(null);
+            if (isPolling) {
+              fetchTasksForChat(chatId);
+              isPolling = false; // Stop polling once completed
+            }
+            break;
+          default:
+            setTaskError(null);
         }
       },
       // Complete callback - fetch tasks
       (tasks) => {
+        if (!isPolling) return; // Skip if we're no longer polling
         const mappedTasks = mapApiTasksToTasks(tasks);
         setTasks(prevTasks => {
-          // Remove existing tasks for this chat
           const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
-          // Add new tasks and cache them
           setCachedTasks(mappedTasks, chatId);
           return [...otherTasks, ...mappedTasks];
         });
       },
-      // Error callback
+      // Error callback - only for critical polling failures
       (error) => {
-        console.error(`Error polling chat ${chatId}:`, error);
-        setTaskError(`Failed to process chat: ${error.message}`);
+        console.error(`Critical polling error for chat ${chatId}:`, error);
       }
     );
-  }, []);
+
+    // Cleanup function to stop polling
+    return () => {
+      isPolling = false;
+    };
+  }, [fetchTasksForChat]);
 
   // Fetch tasks when the selected chat changes
   useEffect(() => {
     if (selectedChatId && selectedChat?.mode === 'observe') {
-      // Fetch tasks for a specific chat
-      fetchTasksForChat(selectedChatId);
+      // Start polling first to get the current status
+      const stopPolling = startPollingChatStatus(selectedChatId);
       
-      // Check processing status
-      startPollingChatStatus(selectedChatId);
-    } else if (!selectedChatId) {
-      // When no chat is selected, fetch tasks for all monitored chats
-      const cachedAllTasks = getCachedTasks(null);
-      
-      // If we have cached tasks, show them immediately
-      if (cachedAllTasks) {
-        setTasks(cachedAllTasks);
-        setIsLoadingTasks(false);
-      } else {
-        setIsLoadingTasks(true);
-      }
-      
-      setTaskError(null);
-      
-      // Get all observe mode chats
-      const observeChats = chats.filter(chat => chat.mode === 'observe');
-      
-      // Fetch tasks for all observe mode chats
-      Promise.all(observeChats.map(chat => getChatTasks(chat.id)))
-        .then(allTasksArrays => {
-          // Flatten and map all tasks
-          const allTasks = allTasksArrays.flatMap(mapApiTasksToTasks);
-          
-          // Update tasks and cache
-          setTasks(prevTasks => {
-            // If we're updating from cache, merge with existing tasks
-            if (cachedAllTasks) {
-              const newTaskIds = new Set(allTasks.map(task => task.id));
-              const existingTasks = prevTasks.filter(task => !newTaskIds.has(task.id));
-              return [...existingTasks, ...allTasks];
-            }
-            return allTasks;
-          });
-          
-          // Cache all tasks
-          setCachedTasks(allTasks, null);
-        })
-        .catch(error => {
-          console.error('Error fetching all tasks:', error);
-          // Only show error if we don't have cached data
-          if (!cachedAllTasks) {
-            setTaskError('Failed to load tasks. Please try again.');
-            setTasks([]);
-          }
-        })
-        .finally(() => {
-          setIsLoadingTasks(false);
-        });
+      // Return cleanup function
+      return () => {
+        stopPolling();
+      };
     }
-  }, [selectedChatId, selectedChat, fetchTasksForChat, startPollingChatStatus, chats]);
+  }, [selectedChatId, selectedChat, startPollingChatStatus]);
 
   // Select the appropriate content based on the chat mode
   const content = selectedChatId && selectedChat
