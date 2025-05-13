@@ -2,6 +2,35 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './TaskMessageList.module.css';
 import { Task, Message, Chat } from '../types';
 
+// Helper function to extract URLs and format them
+const extractUrls = (text: string): { url: string; display: string }[] => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const matches = text.match(urlRegex) || [];
+  
+  return matches.map(url => {
+    try {
+      const urlObj = new URL(url);
+      // Remove 'www.' if present and get the hostname
+      let display = urlObj.hostname.replace(/^www\./, '');
+      
+      // If it's a known platform, make it more readable
+      if (display.includes('tally.so')) {
+        display = 'Tally Form';
+      } else if (display.includes('github.com')) {
+        display = 'GitHub';
+      } else if (display.includes('notion.so')) {
+        display = 'Notion';
+      } else if (display.includes('discord.com')) {
+        display = 'Discord';
+      }
+      
+      return { url, display };
+    } catch (e) {
+      return { url, display: url };
+    }
+  });
+};
+
 interface TaskMessageListProps {
   isLoadingTasks: boolean;
   taskError: string | null;
@@ -103,7 +132,32 @@ export const TaskMessageList: React.FC<TaskMessageListProps> = ({
                     <span className={styles.taskSource}>Priority: {task.source}</span>
                     <span className={styles.taskTime}>{task.time}</span>
                   </div>
-                  <div className={styles.taskText}>{task.text}</div>
+                  <div className={styles.taskText}>
+                    {task.text.split(/(https?:\/\/[^\s]+)/).map((part, index) => {
+                      if (part.match(/(https?:\/\/[^\s]+)/)) {
+                        const { display } = extractUrls(part)[0];
+                        return (
+                          <a
+                            key={index}
+                            href={part}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.linkButton}
+                            title={part} // Show full URL on hover
+                          >
+                            <span className={styles.linkIcon}>
+                              {display === 'Tally Form' ? '📝' : 
+                               display === 'GitHub' ? '🐙' :
+                               display === 'Notion' ? '📔' :
+                               display === 'Discord' ? '💬' : '🔗'}
+                            </span>
+                            {display}
+                          </a>
+                        );
+                      }
+                      return <span key={index}>{part}</span>;
+                    })}
+                  </div>
                   {task.extractedFrom && (
                     <div className={styles.extractedFrom}>
                       <div className={styles.extractedHeader}>Reasoning:</div>
