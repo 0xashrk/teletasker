@@ -89,7 +89,7 @@
   background-color: var(--background-tertiary);
 }
 
-.taskHeader, .messageHeader {
+.taskHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -102,23 +102,20 @@
   color: var(--text-primary);
 }
 
-.taskTimes {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: flex-end;
-}
-
-.taskTime, .messageTime {
-  font-size: 12px;
+.taskTime {
+  font-size: 13px;
   color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  transition: color 0.2s ease;
+  cursor: default;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(var(--text-secondary-rgb, 120, 120, 128), 0.08);
+  letter-spacing: -0.01em;
 }
 
-.taskTime:hover, .messageTime:hover {
+.taskTime:hover {
   color: var(--text-primary);
+  background: rgba(var(--text-secondary-rgb, 120, 120, 128), 0.12);
 }
 
 .taskText {

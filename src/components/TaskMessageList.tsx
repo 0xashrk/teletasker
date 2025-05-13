@@ -167,9 +167,8 @@ export const TaskMessageList: React.FC<TaskMessageListProps> = ({
                 >
                   <div className={styles.taskHeader}>
                     <span className={styles.taskSource}>Priority: {task.source}</span>
-                    <div className={styles.taskTimes}>
-                      <span className={styles.taskTime} title="Task created">📅 {task.time}</span>
-                      <span className={styles.messageTime} title="Original message">💬 {task.messageDate}</span>
+                    <div className={styles.taskTime} title={`Created ${task.time}`}>
+                      {task.messageDate}
                     </div>
                   </div>
                   <div className={styles.taskText}>
