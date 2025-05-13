@@ -1,0 +1,210 @@
+/* Inherit system colors from root */
+.pricing {
+  padding: 80px 24px;
+  background: var(--background-primary);
+  color: var(--text-primary);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, var(--accent-color), #4fb3ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tiersContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.tier {
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tier:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.popular {
+  border: 2px solid var(--accent-color);
+}
+
+.popularBadge {
+  position: absolute;
+  top: -12px;
+  right: 24px;
+  background: var(--accent-color);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.tierHeader {
+  margin-bottom: 24px;
+}
+
+.tierName {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.priceContainer {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.price {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.period {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.limits {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--background-tertiary);
+  border-radius: 12px;
+}
+
+.limit {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.limit:last-child {
+  margin-bottom: 0;
+}
+
+.limitLabel {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.limitValue {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.checkmark {
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+.button {
+  width: 100%;
+  padding: 12px 24px;
+  border: 1px solid var(--border-color);
+  background: var(--background-tertiary);
+  color: var(--text-primary);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  background: var(--background-primary);
+}
+
+.popularButton {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+}
+
+.popularButton:hover {
+  background: var(--accent-color);
+  filter: brightness(1.1);
+}
+
+.addon {
+  margin-top: 48px;
+  text-align: center;
+  padding: 24px;
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.addonTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.addonDesc {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .pricing {
+    padding: 48px 16px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .tiersContainer {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+} 

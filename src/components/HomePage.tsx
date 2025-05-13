@@ -3,6 +3,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoginButton from './LoginButton';
+import Pricing from './Pricing';
 import './HomePage.css';
 
 const HomePage: React.FC = () => {
@@ -104,6 +105,9 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Pricing Section */}
+      <Pricing />
 
       {/* Waitlist Section */}
       <section className="waitlist">
