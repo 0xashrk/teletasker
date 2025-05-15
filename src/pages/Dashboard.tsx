@@ -10,7 +10,7 @@ import Overview from '../components/Overview';
 import ConnectTelegram from '../components/ConnectTelegram';
 import Loader from '../components/Loader';
 import styles from './Dashboard.module.css';
-import { removeMonitoredChat } from '../services/api';
+import { removeMonitoredChat, getMonitoredChats } from '../services/api';
 import ChatSelectionModal from '../components/ChatSelectionModal';
 
 const CHAT_LIMIT = 5;
@@ -63,13 +63,11 @@ const Dashboard: React.FC = () => {
   // Modify the existing useEffect
   useEffect(() => {
     const checkExistingConfiguration = async () => {
-      // Wait for chat selection to be initialized
-      if (!chatSelectionInitialized) return;
+      // Wait for both chat selection initialization and loading to complete
+      if (!chatSelectionInitialized || isLoading || isLoadingChats) return;
       
       try {
         if (isTelegramConnected) {
-          setConnected(true);
-          
           // Only auto-navigate to Overview on initial load, not when selectedChats changes during onboarding
           if (initialLoadRef.current && selectedChats.length > 0) {
             setShowModes(true);
@@ -86,7 +84,14 @@ const Dashboard: React.FC = () => {
     };
 
     checkExistingConfiguration();
-  }, [isTelegramConnected, selectedChats, chatSelectionInitialized]);
+  }, [isTelegramConnected, selectedChats, chatSelectionInitialized, isLoading, isLoadingChats]);
+
+  // Separate effect to handle connection state
+  useEffect(() => {
+    if (isTelegramConnected) {
+      setConnected(true);
+    }
+  }, [isTelegramConnected]);
 
   const handleConnect = () => {
     setConnected(true);
