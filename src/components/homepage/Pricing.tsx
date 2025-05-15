@@ -43,6 +43,7 @@ const pricingTiers: PricingTier[] = [
       'Monitor unlimited Telegram chats',
       'Full task extraction features',
       'Multiple Notion workspaces (coming soon)',
+      'Auto reply to messages (coming soon)',
       'Priority feature requests',
       'Early access to new features',
       'Everything in Essential'
