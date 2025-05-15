@@ -16,8 +16,8 @@ const pricingTiers: PricingTier[] = [
     price: '$0',
     chatLimit: '5 chats',
     features: [
-      'Monitor up to 5 chats',
-      'Essential task extraction',
+      'Monitor up to 5 Telegram chats',
+      'Full task extraction features',
       '7-day trial'
     ],
     hookLever: 'Risk-free trial; build habit, show the magic'
@@ -27,9 +27,10 @@ const pricingTiers: PricingTier[] = [
     price: '$10',
     chatLimit: '25 chats',
     features: [
-      'Monitor up to 25 chats',
-      'Comprehensive task tracking',
-      'Perfect for personal use'
+      'Monitor up to 25 Telegram chats',
+      'Full task extraction features',
+      'Notion workspace integration (coming soon)',
+      'Everything in Trial'
     ],
     hookLever: 'Low friction entry; clear upgrade path',
     isRecommended: true
@@ -39,9 +40,12 @@ const pricingTiers: PricingTier[] = [
     price: '$20',
     chatLimit: 'Unlimited',
     features: [
-      'Monitor unlimited chats',
-      'Scale without restrictions',
-      'Ideal for power users'
+      'Monitor unlimited Telegram chats',
+      'Full task extraction features',
+      'Multiple Notion workspaces (coming soon)',
+      'Priority feature requests',
+      'Early access to new features',
+      'Everything in Essential'
     ],
     hookLever: 'For BDs/power users'
   }
