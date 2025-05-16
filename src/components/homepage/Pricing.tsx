@@ -38,9 +38,9 @@ const pricingTiers: PricingTier[] = [
   {
     name: 'Pro',
     price: '$20',
-    chatLimit: 'Unlimited',
+    chatLimit: '200 chats',
     features: [
-      'Monitor unlimited Telegram chats',
+      'Monitor up to 200 Telegram chats',
       'Full task extraction features',
       'Multiple Notion workspaces (coming soon)',
       'Auto reply to messages (coming soon)',
