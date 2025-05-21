@@ -346,4 +346,22 @@ export const pollChatProcessingStatus = async (
   poll();
 };
 
+/**
+ * Update the completed status of a task
+ * @param taskId - The ID of the task to update
+ * @param completed - The new completed status (true/false)
+ * @returns The updated task object
+ */
+export const updateTaskCompletedStatus = async (taskId: number, completed: boolean): Promise<any> => {
+  try {
+    const response = await localApi.patch(`/tasks/task/${taskId}/completed`, null, {
+      params: { completed }
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error updating task completed status:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export default localApi;
