@@ -41,3 +41,17 @@
 
 \* Based on OpenAI pricing for GPT-4.1 Mini / GPT-4o  
 † Approximate margin after LLM usage, excluding infra and auth costs
+
+
+### Potential Pricing Strategy v5 — based on task analysis requests
+
+| Plan         | Price / month   | Hidden model   | Chat limit               | Task Analysis Requests | Cost / request* | Max cost / user | Gross margin† | Hook lever                                      |
+|--------------|------------------|----------------|---------------------------|-------------------------|------------------|------------------|----------------|-------------------------------------------------|
+| **Trial**    | $0 (7 days)      | GPT‑4.1 Mini   | 5 chats                   | 200                     | $0.00094         | $0.19            | N/A            | Risk-free trial; try the magic hands-free       |
+| **Starter**  | $9               | GPT‑4.1 Mini   | 25 chats                  | 1,000                   | $0.00094         | $0.94            | **89.6%**      | Generous cap, low-friction productivity unlock  |
+| **Pro**      | $19              | GPT‑4.1 Mini   | 200 chats                 | 7,000                   | $0.00094         | $6.58            | **65.4%**      | For high-intent users; async, memory-enabled    |
+| **Team**     | $39 / seat       | GPT‑4.1 Mini   | Unlimited + shared inbox | 50,000                  | $0.00094         | $47.00           | ~20% (needs cap) | Slack-style setup with ops-level automation     |
+| **4o Add-on**| $0.04 / request  | GPT‑4o         | Uses tier’s chat access   | metered (opt-in only)   | $0.0115          | usage-based       | ~71% markup     | Only for advanced replies / voice / image       |
+
+\* Estimated on OpenAI GPT-4.1 Mini pricing  
+† Gross margin excludes infra, auth, hosting
