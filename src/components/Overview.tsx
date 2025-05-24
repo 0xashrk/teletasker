@@ -240,6 +240,15 @@ const Overview: React.FC<OverviewProps> = ({
   const selectedChatStatus = selectedChatId ? processingStatuses[selectedChatId] : null;
   const isProcessing = selectedChatStatus?.status === 'processing';
 
+  // Handle task status updates
+  const handleTaskUpdate = useCallback((taskId: string, completed: boolean) => {
+    setTasks(prevTasks => prevTasks.map(task => 
+      task.id === taskId 
+        ? { ...task, status: completed ? 'completed' : 'pending' }
+        : task
+    ));
+  }, []);
+
   return (
     <div className={styles.overview}>
       <Sidebar 
@@ -297,6 +306,7 @@ const Overview: React.FC<OverviewProps> = ({
             selectedChat={selectedChat}
             isProcessing={isProcessing}
             fetchTasksForChat={fetchTasksForChat}
+            onTaskUpdate={handleTaskUpdate}
           />
         </div>
       </div>

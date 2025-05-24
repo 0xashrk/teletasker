@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './TaskMessageList.module.css';
 import { Task, Message, Chat } from '../types/index';
+import { updateTaskCompletedStatus } from '../services/api';
 
 // Helper function to extract URLs and format them
 const extractUrls = (text: string): { url: string; display: string; icon: string }[] => {
@@ -75,6 +76,7 @@ interface TaskMessageListProps {
   selectedChat: Chat | null;
   isProcessing: boolean;
   fetchTasksForChat: (chatId: string) => void;
+  onTaskUpdate?: (taskId: string, completed: boolean) => void;
 }
 
 export const TaskMessageList: React.FC<TaskMessageListProps> = ({
@@ -84,6 +86,7 @@ export const TaskMessageList: React.FC<TaskMessageListProps> = ({
   selectedChat,
   isProcessing,
   fetchTasksForChat,
+  onTaskUpdate,
 }) => {
   // Add type guard to help TypeScript understand our type checks
   const isTask = (item: Task | Message): item is Task => {
@@ -94,6 +97,7 @@ export const TaskMessageList: React.FC<TaskMessageListProps> = ({
   const [seenTaskIds, setSeenTaskIds] = useState<Set<string>>(new Set());
   const [visibleItems, setVisibleItems] = useState<number>(0);
   const isFirstRender = useRef(true);
+  const [updatingTaskIds, setUpdatingTaskIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!selectedChat) {
@@ -137,6 +141,38 @@ export const TaskMessageList: React.FC<TaskMessageListProps> = ({
   const getAnimationIndex = (index: number): string => {
     if (index > 9) return "10+";
     return index.toString();
+  };
+
+  const handleTaskStatusUpdate = async (task: Task) => {
+    if (updatingTaskIds.has(task.id)) return; // Prevent double-clicks
+    
+    try {
+      setUpdatingTaskIds(prev => {
+        const newSet = new Set(prev);
+        newSet.add(task.id);
+        return newSet;
+      });
+      const newStatus = task.status === 'pending';
+      await updateTaskCompletedStatus(parseInt(task.id), newStatus);
+      
+      // Call the parent's update handler if provided
+      if (onTaskUpdate) {
+        onTaskUpdate(task.id, newStatus);
+      }
+      
+      // Refresh tasks for the chat if no update handler provided
+      if (!onTaskUpdate && selectedChat?.id) {
+        await fetchTasksForChat(selectedChat.id);
+      }
+    } catch (error) {
+      console.error('Error updating task status:', error);
+    } finally {
+      setUpdatingTaskIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(task.id);
+        return newSet;
+      });
+    }
   };
 
   return (
@@ -202,9 +238,13 @@ export const TaskMessageList: React.FC<TaskMessageListProps> = ({
                     </div>
                   )}
                   <div className={styles.taskMeta}>
-                    <span className={`${styles.taskStatus} ${styles[task.status]}`}>
-                      {task.status}
-                    </span>
+                    <button
+                      className={`${styles.taskStatus} ${styles[task.status]} ${updatingTaskIds.has(task.id) ? styles.updating : ''}`}
+                      onClick={() => handleTaskStatusUpdate(task)}
+                      disabled={updatingTaskIds.has(task.id)}
+                    >
+                      {updatingTaskIds.has(task.id) ? '...' : task.status}
+                    </button>
                   </div>
                 </div>
               ))
