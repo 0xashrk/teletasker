@@ -702,4 +702,47 @@
     transform: scale(0.95);
     opacity: 0.5;
   }
+}
+
+/* Custom Scrollbar Styles */
+.contentList::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.contentList::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.contentList::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, rgba(255, 255, 255, 0.2));
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+.contentList::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, rgba(255, 255, 255, 0.3));
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Firefox scrollbar styles */
+.contentList {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb, rgba(255, 255, 255, 0.2)) transparent;
+}
+
+/* For when the app is in light mode */
+@media (prefers-color-scheme: light) {
+  .contentList::-webkit-scrollbar-thumb {
+    --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
+  }
+  
+  .contentList {
+    scrollbar-color: var(--scrollbar-thumb, rgba(0, 0, 0, 0.2)) transparent;
+  }
 } 
