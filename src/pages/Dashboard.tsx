@@ -9,6 +9,7 @@ import AssistantModeConfig from '../components/AssistantModeConfig';
 import Overview from '../components/Overview';
 import ConnectTelegram from '../components/ConnectTelegram';
 import Loader from '../components/Loader';
+import UserMenu from '../components/UserMenu';
 import styles from './Dashboard.module.css';
 import { removeMonitoredChat, getMonitoredChats } from '../services/api';
 import ChatSelectionModal from '../components/ChatSelectionModal';
@@ -176,27 +177,21 @@ const Dashboard: React.FC = () => {
       <header className={styles.topbar}>
         <div className={styles.logo}>Teletasker</div>
         <div className={styles.userSection}>
-          <span className={styles.userEmail}>
-            {(() => {
-              // First check for email
+          <UserMenu 
+            username={(() => {
               if (user?.email?.address) {
                 return user.email.address;
               }
-              
-              // Then check for Twitter username
               if (user?.twitter?.username) {
                 return `@${user.twitter.username}`;
               }
-              
-              // Finally check linked accounts for Twitter
               const twitterAccount = user?.linkedAccounts?.find(account => account.type === 'twitter_oauth');
               if (twitterAccount?.type === 'twitter_oauth' && 'username' in twitterAccount) {
                 return `@${twitterAccount.username}`;
               }
-              
               return 'User';
             })()}
-          </span>
+          />
           <button className={styles.logoutBtn} onClick={handleLogout}>
             Log out
           </button>
