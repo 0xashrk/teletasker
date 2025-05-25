@@ -364,4 +364,53 @@ export const updateTaskCompletedStatus = async (taskId: number, completed: boole
   }
 };
 
+// Type definitions for the update events
+export interface TaskUpdate {
+  type: string;
+  chat_id: number;
+  timestamp: string;
+  data: {
+    new_task_count?: number;
+    [key: string]: any;
+  };
+}
+
+/**
+ * Creates an EventSource connection to receive real-time updates
+ * @returns A cleanup function to close the connection
+ */
+export const createUpdateStream = (onUpdate: (update: TaskUpdate) => void): () => void => {
+  const eventSource = new EventSource(`${API_BASE_URL}/tasks/updates/stream`);
+
+  eventSource.onmessage = (event) => {
+    try {
+      const update = JSON.parse(event.data);
+      onUpdate(update);
+    } catch (error) {
+      console.error('Error parsing update event:', error);
+    }
+  };
+
+  eventSource.onerror = (error) => {
+    console.error('EventSource error:', error);
+    // The browser will automatically try to reconnect
+  };
+
+  // Return cleanup function
+  return () => {
+    eventSource.close();
+  };
+};
+
+/**
+ * React hook for subscribing to real-time updates
+ * @param onUpdate Callback function to handle updates
+ */
+export const useUpdateStream = (onUpdate: (update: TaskUpdate) => void) => {
+  useEffect(() => {
+    const cleanup = createUpdateStream(onUpdate);
+    return cleanup;
+  }, [onUpdate]);
+};
+
 export default localApi;
