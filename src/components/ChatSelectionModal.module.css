@@ -29,6 +29,50 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   /* Add animation */
   animation: modalSlideIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  /* Custom scrollbar styles */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb, rgba(255, 255, 255, 0.2)) transparent;
+}
+
+/* Webkit scrollbar styles */
+.card::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.card::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.card::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, rgba(255, 255, 255, 0.2));
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+.card::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, rgba(255, 255, 255, 0.3));
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Light mode scrollbar */
+@media (prefers-color-scheme: light) {
+  .card {
+    --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  .card {
+    --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+  }
 }
 
 .title {
@@ -125,4 +169,32 @@
   overflow-y: auto; /* Enable scrolling */
   margin-bottom: 20px;
   border-radius: 8px;
+  /* Custom scrollbar styles */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb, rgba(255, 255, 255, 0.2)) transparent;
+}
+
+/* Webkit scrollbar styles for chat list wrapper */
+.chatListWrapper::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.chatListWrapper::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.chatListWrapper::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, rgba(255, 255, 255, 0.2));
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+.chatListWrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, rgba(255, 255, 255, 0.3));
+  border: 2px solid transparent;
+  background-clip: padding-box;
 } 
