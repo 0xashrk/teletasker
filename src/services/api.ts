@@ -379,10 +379,18 @@ export const useTaskUpdates = () => {
           eventSource.close();
         }
 
-        // Create new EventSource connection
-        eventSource = new EventSource(`${API_BASE_URL}/tasks/updates/stream`, {
-          withCredentials: true // Important for sending cookies/auth headers
-        });
+        // Get the current auth token
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+          setError('No authentication token available');
+          return;
+        }
+
+        // Create new EventSource connection with auth token in URL
+        const url = new URL(`${API_BASE_URL}/tasks/updates/stream`);
+        url.searchParams.append('token', token);
+        
+        eventSource = new EventSource(url.toString());
 
         // Connection opened
         eventSource.onopen = () => {
@@ -423,37 +431,24 @@ export const useTaskUpdates = () => {
     // Initial connection
     connectSSE();
 
+    // Listen for token expired events
+    const handleTokenExpired = () => {
+      // Reconnect when token is refreshed
+      setTimeout(connectSSE, 1000);
+    };
+    tokenExpiredEmitter.addEventListener(TOKEN_EXPIRED_EVENT, handleTokenExpired);
+
     // Cleanup on unmount
     return () => {
       if (eventSource) {
         eventSource.close();
         setIsConnected(false);
       }
+      tokenExpiredEmitter.removeEventListener(TOKEN_EXPIRED_EVENT, handleTokenExpired);
     };
   }, []); // Empty dependency array - only run on mount/unmount
 
   return { updates, error, isConnected };
-};
-
-// API function for manual SSE operations if needed
-export const taskUpdatesApi = {
-  connect: async () => {
-    try {
-      return await withRetry(async () => {
-        const response = await localApi.get('/tasks/updates/stream', {
-          headers: {
-            'Accept': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-          },
-          responseType: 'stream',
-        });
-        return response.data;
-      });
-    } catch (error: any) {
-      console.error('Error connecting to task updates stream:', error.response?.data);
-      throw error;
-    }
-  },
 };
 
 export default localApi;
