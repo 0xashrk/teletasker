@@ -384,7 +384,6 @@ export const useTaskUpdates = () => {
 
         // Get the current auth token
         const token = localStorage.getItem('auth_token');
-        console.log('Auth token available:', !!token);
         
         if (!token) {
           const error = 'No authentication token available';
@@ -396,7 +395,6 @@ export const useTaskUpdates = () => {
         // Create new EventSource connection with auth token in URL
         const url = new URL(`${API_BASE_URL}/tasks/updates/stream`);
         url.searchParams.append('token', token);
-        console.log('Connecting to SSE URL:', url.toString());
         
         eventSource = new EventSource(url.toString());
 
@@ -409,40 +407,31 @@ export const useTaskUpdates = () => {
 
         // Handle specific event types
         eventSource.addEventListener('update', (event) => {
-          console.log('Received update event:', event.data);
           try {
             const data = JSON.parse(event.data);
-            setUpdates(prev => [...prev, data]);
+            // Only process new_tasks events
+            if (data.type === 'new_tasks') {
+              console.log('New tasks created:', data);
+              setUpdates(prev => [...prev, data]);
+            }
           } catch (e) {
             console.error('Error parsing update event:', e);
           }
         });
 
-        // Handle ping events
+        // Handle ping events silently
         eventSource.addEventListener('ping', () => {
-          console.log('Received ping event');
-          // Update last ping time if needed
           setIsConnected(true);
         });
 
         // Handle errors
         eventSource.onerror = (event) => {
-          console.error('SSE Error:', event);
-          console.log('EventSource readyState:', eventSource?.readyState);
-          
-          // Check the connection state
           if (eventSource?.readyState === EventSource.CONNECTING) {
-            console.log('Connection in progress...');
             setError('Connecting...');
           } else if (eventSource?.readyState === EventSource.CLOSED) {
-            console.log('Connection closed, will attempt to reconnect');
             setError('Connection closed');
             setIsConnected(false);
-            
-            // Close the connection
             eventSource.close();
-            
-            // Attempt to reconnect after a delay
             setTimeout(connectSSE, 5000);
           }
         };
@@ -460,15 +449,12 @@ export const useTaskUpdates = () => {
 
     // Listen for token expired events
     const handleTokenExpired = () => {
-      console.log('Token expired, will reconnect after refresh');
-      // Reconnect when token is refreshed
       setTimeout(connectSSE, 1000);
     };
     tokenExpiredEmitter.addEventListener(TOKEN_EXPIRED_EVENT, handleTokenExpired);
 
     // Cleanup on unmount
     return () => {
-      console.log('Cleaning up SSE connection');
       if (eventSource) {
         eventSource.close();
         setIsConnected(false);

@@ -12,6 +12,7 @@ import { getChatTasks, pollChatProcessingStatus, ChatTask, ChatProcessingStatus,
 import { TaskMessageList } from './TaskMessageList';
 import { Chat, Task, Message } from '../types/index';
 import { getCachedTasks, setCachedTasks, clearTaskCache } from '../utils/taskCache';
+import Notifications from './Notifications';
 
 interface OverviewProps {
   chats: Chat[];
@@ -252,13 +253,47 @@ const Overview: React.FC<OverviewProps> = ({
     ));
   }, []);
 
-  // Log SSE updates and status changes
+  // Handle SSE updates
   useEffect(() => {
     if (updates.length > 0) {
       const latestUpdate = updates[updates.length - 1];
       console.log('Received SSE update:', latestUpdate);
+
+      // Handle different update types
+      switch (latestUpdate.type) {
+        case 'new_task': {
+          const chatId = latestUpdate.chat_id.toString();
+          // If we're viewing this chat or viewing all tasks, refresh the task list
+          if (!selectedChatId || selectedChatId === chatId) {
+            fetchTasksForChat(chatId);
+          }
+          break;
+        }
+        case 'new_tasks': {
+          const chatId = latestUpdate.chat_id.toString();
+          // If we're viewing this chat or viewing all tasks, refresh the task list
+          if (!selectedChatId || selectedChatId === chatId) {
+            fetchTasksForChat(chatId);
+          }
+          break;
+        }
+        case 'polling_update': {
+          const chatId = latestUpdate.chat_id.toString();
+          // Update processing status if we're viewing this chat
+          if (selectedChatId === chatId) {
+            setProcessingStatuses(prev => ({
+              ...prev,
+              [chatId]: {
+                ...prev[chatId],
+                processed_messages: latestUpdate.data.processed_messages
+              }
+            }));
+          }
+          break;
+        }
+      }
     }
-  }, [updates]);
+  }, [updates, selectedChatId, fetchTasksForChat]);
 
   useEffect(() => {
     console.log('SSE connection status:', { isConnected, error: sseError });
@@ -266,6 +301,7 @@ const Overview: React.FC<OverviewProps> = ({
 
   return (
     <div className={styles.overview}>
+      <Notifications updates={updates} />
       <Sidebar 
         chats={chats}
         selectedChatId={selectedChatId}
