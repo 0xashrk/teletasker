@@ -86,7 +86,7 @@ const socialProdApi = createJwtApi(SOCIAL_PRODUCTION_API_URL);
 const searchDevApi = createApi(SEARCH_DEV_API_URL);
 const portfolioPnLApi = createApi(PORTFOLIO_PNL_URL);
 
-const withRetry = async <T>(
+export const withRetry = async <T>(
   operation: () => Promise<T>,
   maxAttempts: number = 3
 ): Promise<T> => {
