@@ -364,16 +364,16 @@ const Overview: React.FC<OverviewProps> = ({
       
       {/* Use ChatSelectionModal component instead of inline implementation */}
       {showChatSelection && createPortal(
-        <div className={styles.modalOverlay}>
-          <ChatSelectionModal
-            chats={availableChats}
-            selectedChats={selectedChats}
-            chatLimit={chatLimit}
-            onToggleChat={onToggleChat}
-            onContinue={handleChatSelectionDone}
-            isLoading={isLoading}
-          />
-        </div>,
+        <ChatSelectionModal
+          chats={availableChats}
+          selectedChats={selectedChats}
+          chatLimit={chatLimit}
+          onToggleChat={onToggleChat}
+          onContinue={handleChatSelectionDone}
+          onClose={() => setShowChatSelection(false)}
+          isLoading={isLoading}
+          isDismissible={true}
+        />,
         document.body
       )}
 

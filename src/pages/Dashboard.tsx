@@ -136,6 +136,7 @@ const Dashboard: React.FC = () => {
           isLoading={isLoadingChats}
           error={chatError}
           onRetry={() => setConnected(true)}
+          isDismissible={false}
         />
       );
     }
