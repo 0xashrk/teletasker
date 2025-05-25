@@ -10,10 +10,13 @@
   border: none;
   color: var(--text-secondary);
   font-size: 0.95rem;
-  padding: 8px;
+  padding: 8px 12px;
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .usernameButton:hover {
@@ -21,25 +24,55 @@
   color: var(--text-primary);
 }
 
+.usernameButton::after {
+  content: "▾";
+  font-size: 12px;
+  opacity: 0.7;
+  margin-left: 2px;
+  transition: transform 0.2s ease;
+}
+
+.usernameButton:hover::after {
+  opacity: 1;
+}
+
 /* Dropdown menu styling */
 .menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
+  position: fixed;
   background-color: var(--background-secondary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 160px;
-  z-index: 1000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  min-width: 220px;
   overflow: hidden;
   animation: slideIn 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99999;
+}
+
+/* Menu header */
+.menuHeader {
+  padding: 12px 16px;
+  background-color: var(--background-tertiary);
+}
+
+.menuUsername {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Menu divider */
+.menuDivider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 4px 0;
 }
 
 /* Menu item styling */
 .menuItem {
-  display: block;
+  display: flex;
   width: 100%;
   padding: 10px 16px;
   text-align: left;
@@ -49,21 +82,32 @@
   font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  border-radius: 4px;
+  margin: 2px 4px;
+  width: calc(100% - 8px);
 }
 
 .menuItem:hover {
   background-color: var(--background-tertiary);
 }
 
+.logoutItem {
+  color: #ff453a;
+}
+
+.logoutItem:hover {
+  background-color: rgba(255, 69, 58, 0.1);
+}
+
 /* Animation keyframes */
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-8px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 

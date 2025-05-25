@@ -5,9 +5,10 @@ import UsageModal from './UsageModal';
 
 interface UserMenuProps {
   username: string;
+  onLogout: () => void;
 }
 
-const UserMenu: React.FC<UserMenuProps> = ({ username }) => {
+const UserMenu: React.FC<UserMenuProps> = ({ username, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUsageModal, setShowUsageModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -28,6 +29,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ username }) => {
   const handleUsageClick = () => {
     setShowUsageModal(true);
     setIsOpen(false);
+  };
+
+  const handleLogoutClick = () => {
+    setIsOpen(false);
+    onLogout();
   };
 
   // Get button position for menu placement
@@ -64,11 +70,22 @@ const UserMenu: React.FC<UserMenuProps> = ({ username }) => {
             right: `${right}px`
           }}
         >
+          <div className={styles.menuHeader}>
+            <span className={styles.menuUsername}>{username}</span>
+          </div>
+          <div className={styles.menuDivider} />
           <button 
             className={styles.menuItem}
             onClick={handleUsageClick}
           >
             Usage
+          </button>
+          <div className={styles.menuDivider} />
+          <button 
+            className={`${styles.menuItem} ${styles.logoutItem}`}
+            onClick={handleLogoutClick}
+          >
+            Log Out
           </button>
         </div>,
         document.body

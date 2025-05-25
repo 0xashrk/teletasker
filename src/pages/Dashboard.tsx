@@ -191,10 +191,8 @@ const Dashboard: React.FC = () => {
               }
               return 'User';
             })()}
+            onLogout={handleLogout}
           />
-          <button className={styles.logoutBtn} onClick={handleLogout}>
-            Log out
-          </button>
         </div>
       </header>
       <main className={styles.main}>
