@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './ChatSelectionModal.module.css';
 import ChatList from './ChatList';
@@ -29,12 +29,18 @@ const ChatSelectionModal: React.FC<ChatSelectionModalProps> = ({
   onRetry = () => {},
   isDismissible = false
 }) => {
-  // Sort chats by time/date in descending order (newest first)
-  const sortedChats = [...chats].sort((a, b) => {
-    const dateA = new Date(a.time).getTime();
-    const dateB = new Date(b.time).getTime();
-    return dateB - dateA;
-  });
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter and sort chats
+  const filteredAndSortedChats = [...chats]
+    .filter(chat => 
+      chat.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.time).getTime();
+      const dateB = new Date(b.time).getTime();
+      return dateB - dateA;
+    });
   
   // Handle overlay click only if dismissible and onClose is provided
   const handleOverlayClick = useCallback((e: React.MouseEvent) => {
@@ -42,6 +48,11 @@ const ChatSelectionModal: React.FC<ChatSelectionModalProps> = ({
       onClose();
     }
   }, [isDismissible, onClose]);
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   const modalContent = (
     <div className={styles.overlay} onClick={handleOverlayClick}>
@@ -64,15 +75,30 @@ const ChatSelectionModal: React.FC<ChatSelectionModalProps> = ({
             </button>
           </div>
         ) : (
-          // Wrap the ChatList in a fixed height container
-          <div style={{ maxHeight: '50vh', overflowY: 'auto', marginBottom: '20px' }}>
-            <ChatList
-              chats={sortedChats}
-              selectedChats={selectedChats}
-              chatLimit={chatLimit}
-              onToggleChat={onToggleChat}
-            />
-          </div>
+          <>
+            <div className={styles.searchContainer}>
+              <input
+                type="text"
+                placeholder="Search chats..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className={styles.searchInput}
+              />
+            </div>
+            <div className={styles.chatListWrapper}>
+              <ChatList
+                chats={filteredAndSortedChats}
+                selectedChats={selectedChats}
+                chatLimit={chatLimit}
+                onToggleChat={onToggleChat}
+              />
+              {filteredAndSortedChats.length === 0 && searchQuery && (
+                <div className={styles.noResults}>
+                  No chats found matching "{searchQuery}"
+                </div>
+              )}
+            </div>
+          </>
         )}
         
         <button 
