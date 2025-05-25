@@ -38,22 +38,23 @@ const UserMenu: React.FC<UserMenuProps> = ({ username, onLogout }) => {
 
   // Get button position for menu placement
   const getMenuPosition = () => {
-    if (!buttonRef.current) return { top: 0, right: 0 };
+    if (!buttonRef.current) return { top: 0, right: 0, width: 220 };
     const rect = buttonRef.current.getBoundingClientRect();
     return {
       top: rect.bottom + 4,
-      right: window.innerWidth - rect.right
+      right: window.innerWidth - rect.right,
+      width: rect.width
     };
   };
 
-  const { top, right } = getMenuPosition();
+  const { top, right, width } = getMenuPosition();
 
   return (
     <>
       <div className={styles.container}>
         <button 
           ref={buttonRef}
-          className={styles.usernameButton} 
+          className={`${styles.usernameButton} ${isOpen ? styles.active : ''}`}
           onClick={() => setIsOpen(!isOpen)}
         >
           {username}
@@ -67,13 +68,10 @@ const UserMenu: React.FC<UserMenuProps> = ({ username, onLogout }) => {
           style={{ 
             position: 'fixed',
             top: `${top}px`,
-            right: `${right}px`
+            right: `${right}px`,
+            minWidth: `${Math.max(220, width)}px`
           }}
         >
-          <div className={styles.menuHeader}>
-            <span className={styles.menuUsername}>{username}</span>
-          </div>
-          <div className={styles.menuDivider} />
           <button 
             className={styles.menuItem}
             onClick={handleUsageClick}

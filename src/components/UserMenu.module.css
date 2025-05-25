@@ -19,7 +19,8 @@
   gap: 4px;
 }
 
-.usernameButton:hover {
+.usernameButton:hover,
+.usernameButton.active {
   background-color: var(--background-tertiary);
   color: var(--text-primary);
 }
@@ -36,6 +37,16 @@
   opacity: 1;
 }
 
+.usernameButton.active {
+  background-color: var(--background-secondary);
+  border-radius: 6px 6px 0 0;
+}
+
+.usernameButton.active::after {
+  opacity: 1;
+  transform: rotate(180deg);
+}
+
 /* Dropdown menu styling */
 .menu {
   position: fixed;
@@ -43,12 +54,13 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  min-width: 220px;
   overflow: hidden;
   animation: slideIn 0.2s ease;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 99999;
+  padding: 4px;
+  margin-top: -6px;
 }
 
 /* Menu header */
