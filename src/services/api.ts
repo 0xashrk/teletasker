@@ -364,77 +364,96 @@ export const updateTaskCompletedStatus = async (taskId: number, completed: boole
   }
 };
 
-// Type definitions for the update events
-export interface TaskUpdate {
-  type: string;
-  chat_id: number;
-  timestamp: string;
-  data: {
-    new_task_count?: number;
-    [key: string]: any;
-  };
-}
+export const useTaskUpdates = () => {
+  const [updates, setUpdates] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
-/**
- * Creates an EventSource connection to receive real-time updates
- * @returns A cleanup function to close the connection
- */
-export const createUpdateStream = (onUpdate: (update: TaskUpdate) => void): () => void => {
-  let eventSource: EventSource | null = null;
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
 
-  const setupConnection = async () => {
-    try {
-      return await withRetry(async () => {
+    const connectSSE = async () => {
+      try {
+        // Close existing connection if any
         if (eventSource) {
           eventSource.close();
         }
 
-        eventSource = new EventSource(`${API_BASE_URL}/tasks/updates/stream`);
+        // Create new EventSource connection
+        eventSource = new EventSource(`${API_BASE_URL}/tasks/updates/stream`, {
+          withCredentials: true // Important for sending cookies/auth headers
+        });
 
+        // Connection opened
+        eventSource.onopen = () => {
+          setIsConnected(true);
+          setError(null);
+        };
+
+        // Handle updates
         eventSource.onmessage = (event) => {
           try {
-            const update = JSON.parse(event.data);
-            onUpdate(update);
-          } catch (error) {
-            console.error('Error parsing update event:', error);
+            const data = JSON.parse(event.data);
+            setUpdates(prev => [...prev, data]);
+          } catch (e) {
+            console.error('Error parsing SSE message:', e);
           }
         };
 
-        eventSource.onerror = (error) => {
-          console.error('EventSource error:', error);
-          // Let withRetry handle reconnection
-          throw error;
+        // Handle errors
+        eventSource.onerror = (event) => {
+          console.error('SSE Error:', event);
+          setError('Connection error occurred');
+          setIsConnected(false);
+          
+          // Close the connection on error
+          eventSource?.close();
+          
+          // Attempt to reconnect after a delay
+          setTimeout(connectSSE, 5000);
         };
 
-        return eventSource;
-      });
-    } catch (error: any) {
-      console.error('Error establishing SSE connection:', error.response?.data || error.message);
-      throw error;
-    }
-  };
+      } catch (error) {
+        setError('Failed to establish connection');
+        setIsConnected(false);
+        console.error('SSE Connection Error:', error);
+      }
+    };
 
-  // Initial connection setup
-  setupConnection();
+    // Initial connection
+    connectSSE();
 
-  // Return cleanup function
-  return () => {
-    if (eventSource) {
-      eventSource.close();
-      eventSource = null;
-    }
-  };
+    // Cleanup on unmount
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+        setIsConnected(false);
+      }
+    };
+  }, []); // Empty dependency array - only run on mount/unmount
+
+  return { updates, error, isConnected };
 };
 
-/**
- * React hook for subscribing to real-time updates
- * @param onUpdate Callback function to handle updates
- */
-export const useUpdateStream = (onUpdate: (update: TaskUpdate) => void) => {
-  useEffect(() => {
-    const cleanup = createUpdateStream(onUpdate);
-    return cleanup;
-  }, [onUpdate]);
+// API function for manual SSE operations if needed
+export const taskUpdatesApi = {
+  connect: async () => {
+    try {
+      return await withRetry(async () => {
+        const response = await localApi.get('/tasks/updates/stream', {
+          headers: {
+            'Accept': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+          },
+          responseType: 'stream',
+        });
+        return response.data;
+      });
+    } catch (error: any) {
+      console.error('Error connecting to task updates stream:', error.response?.data);
+      throw error;
+    }
+  },
 };
 
 export default localApi;
