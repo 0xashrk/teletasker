@@ -8,7 +8,7 @@ import { ChatConfig } from '../hooks/useChatSelection';
 import Sidebar from './Sidebar';
 import ChatSelectionModal from './ChatSelectionModal';
 import CopyTasksButton from './CopyTasksButton';
-import { getChatTasks, pollChatProcessingStatus, ChatTask, ChatProcessingStatus } from '../services/api';
+import { getChatTasks, pollChatProcessingStatus, ChatTask, ChatProcessingStatus, useTaskUpdates } from '../services/api';
 import { TaskMessageList } from './TaskMessageList';
 import { Chat, Task, Message } from '../types/index';
 import { getCachedTasks, setCachedTasks, clearTaskCache } from '../utils/taskCache';
@@ -89,10 +89,13 @@ const Overview: React.FC<OverviewProps> = ({
     ? chats.find(chat => chat.id === selectedChatId) || null
     : null;
 
+  // Add SSE connection
+  const { updates, error: sseError, isConnected } = useTaskUpdates();
+
   // Let's debug what's being returned from the API
   useEffect(() => {
     if (tasks.length > 0) {
-      console.log('Current tasks:', tasks);
+      // console.log('Current tasks:', tasks);
     }
   }, [tasks]);
 
@@ -113,9 +116,9 @@ const Overview: React.FC<OverviewProps> = ({
     
     try {
       const apiTasks = await getChatTasks(chatId);
-      console.log('API Tasks received:', apiTasks);
+      // console.log('API Tasks received:', apiTasks);
       const mappedTasks = mapApiTasksToTasks(apiTasks);
-      console.log('Mapped tasks:', mappedTasks);
+      // console.log('Mapped tasks:', mappedTasks);
       
       setTasks(prevTasks => {
         const otherTasks = prevTasks.filter(task => task.chatId !== chatId);
@@ -141,7 +144,7 @@ const Overview: React.FC<OverviewProps> = ({
       chatId,
       // Status update callback
       (status) => {
-        console.log('Processing status update:', status);
+        // console.log('Processing status update:', status);
         setProcessingStatuses(prev => ({
           ...prev,
           [chatId]: status
@@ -248,6 +251,18 @@ const Overview: React.FC<OverviewProps> = ({
         : task
     ));
   }, []);
+
+  // Log SSE updates and status changes
+  useEffect(() => {
+    if (updates.length > 0) {
+      const latestUpdate = updates[updates.length - 1];
+      console.log('Received SSE update:', latestUpdate);
+    }
+  }, [updates]);
+
+  useEffect(() => {
+    console.log('SSE connection status:', { isConnected, error: sseError });
+  }, [isConnected, sseError]);
 
   return (
     <div className={styles.overview}>

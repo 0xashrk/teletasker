@@ -258,7 +258,7 @@ export const getChatProcessingStatus = async (chatId: string | number): Promise<
   try {
     return await withRetry(async () => {
       const response = await localApi.get(`/tasks/chat/${chatId}/processing-status`);
-      console.log('Processing status response:', response.data);
+      // console.log('Processing status response:', response.data);
       return response.data;
     });
   } catch (error: any) {
@@ -273,7 +273,7 @@ export const getChatTasks = async (chatId: string | number): Promise<ChatTask[]>
     return await withRetry(async () => {
       // Using the exact endpoint format from the API documentation
       const response = await localApi.get(`/tasks/chat/${chatId}/tasks`);
-      console.log('Raw API response for tasks:', response);
+      // console.log('Raw API response for tasks:', response);
       
       // Check if the data is wrapped in a property
       const tasks = Array.isArray(response.data) 
@@ -324,7 +324,7 @@ export const pollChatProcessingStatus = async (
         if (onComplete) {
           try {
             const tasks = await getChatTasks(chatId);
-            console.log(`Fetched ${tasks.length} tasks for chat ${chatId} after completion`, tasks);
+            // console.log(`Fetched ${tasks.length} tasks for chat ${chatId} after completion`, tasks);
             onComplete(tasks);
           } catch (tasksError) {
             console.error('Error fetching tasks after completion:', tasksError);
