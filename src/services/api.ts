@@ -398,9 +398,7 @@ export const useTaskUpdates = () => {
         url.searchParams.append('token', token);
         console.log('Connecting to SSE URL:', url.toString());
         
-        eventSource = new EventSource(url.toString(), {
-          withCredentials: true
-        });
+        eventSource = new EventSource(url.toString());
 
         // Connection opened
         eventSource.onopen = () => {
@@ -409,16 +407,23 @@ export const useTaskUpdates = () => {
           setError(null);
         };
 
-        // Handle updates
-        eventSource.onmessage = (event) => {
-          console.log('Received SSE message:', event.data);
+        // Handle specific event types
+        eventSource.addEventListener('update', (event) => {
+          console.log('Received update event:', event.data);
           try {
             const data = JSON.parse(event.data);
             setUpdates(prev => [...prev, data]);
           } catch (e) {
-            console.error('Error parsing SSE message:', e);
+            console.error('Error parsing update event:', e);
           }
-        };
+        });
+
+        // Handle ping events
+        eventSource.addEventListener('ping', () => {
+          console.log('Received ping event');
+          // Update last ping time if needed
+          setIsConnected(true);
+        });
 
         // Handle errors
         eventSource.onerror = (event) => {
