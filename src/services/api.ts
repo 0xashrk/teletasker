@@ -380,25 +380,49 @@ export interface TaskUpdate {
  * @returns A cleanup function to close the connection
  */
 export const createUpdateStream = (onUpdate: (update: TaskUpdate) => void): () => void => {
-  const eventSource = new EventSource(`${API_BASE_URL}/tasks/updates/stream`);
+  let eventSource: EventSource | null = null;
 
-  eventSource.onmessage = (event) => {
+  const setupConnection = async () => {
     try {
-      const update = JSON.parse(event.data);
-      onUpdate(update);
-    } catch (error) {
-      console.error('Error parsing update event:', error);
+      return await withRetry(async () => {
+        if (eventSource) {
+          eventSource.close();
+        }
+
+        eventSource = new EventSource(`${API_BASE_URL}/tasks/updates/stream`);
+
+        eventSource.onmessage = (event) => {
+          try {
+            const update = JSON.parse(event.data);
+            onUpdate(update);
+          } catch (error) {
+            console.error('Error parsing update event:', error);
+          }
+        };
+
+        eventSource.onerror = (error) => {
+          console.error('EventSource error:', error);
+          // Let withRetry handle reconnection
+          throw error;
+        };
+
+        return eventSource;
+      });
+    } catch (error: any) {
+      console.error('Error establishing SSE connection:', error.response?.data || error.message);
+      throw error;
     }
   };
 
-  eventSource.onerror = (error) => {
-    console.error('EventSource error:', error);
-    // The browser will automatically try to reconnect
-  };
+  // Initial connection setup
+  setupConnection();
 
   // Return cleanup function
   return () => {
-    eventSource.close();
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
   };
 };
 
