@@ -192,4 +192,166 @@
 
 .addButton:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    border-right: none;
+    background: var(--background-primary);
+    padding-top: 56px; /* Account for mobile header */
+  }
+
+  .navigation {
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .navItem {
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    margin-bottom: 4px;
+    border-left: none;
+    background: var(--background-secondary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .navItem:hover {
+    transform: none;
+    background: var(--background-tertiary);
+  }
+
+  .navItem:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  .navItem.active {
+    background: rgba(0, 122, 255, 0.1);
+    border-left: none;
+    color: var(--accent-color);
+  }
+
+  .navIcon {
+    font-size: 18px;
+    margin-right: 12px;
+  }
+
+  .count {
+    background: var(--accent-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .sectionHeader {
+    padding: 16px;
+    margin-top: 8px;
+  }
+
+  .sectionTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .chatItem {
+    padding: 16px;
+    margin: 0 16px 8px;
+    border-radius: 12px;
+    background: var(--background-secondary);
+    border-left: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
+
+  .chatItem:hover {
+    transform: none;
+    background: var(--background-tertiary);
+  }
+
+  .chatItem:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  .chatItem.active {
+    background: rgba(0, 122, 255, 0.1);
+    border-left: none;
+  }
+
+  .chatAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    font-size: 20px;
+    margin-right: 16px;
+  }
+
+  .chatName {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .chatMode {
+    font-size: 13px;
+    opacity: 0.8;
+  }
+
+  .modeIcon {
+    font-size: 16px;
+    margin-right: 6px;
+  }
+
+  /* Always show remove button on mobile */
+  .removeButton {
+    opacity: 1;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .removeButton:active {
+    transform: scale(0.9);
+  }
+
+  .addButton {
+    width: 28px;
+    height: 28px;
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--accent-color);
+  }
+
+  .addButton:active {
+    transform: scale(0.9);
+  }
+
+  /* Custom scrollbar for mobile */
+  .activeChats::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .activeChats::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .activeChats::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+
+  /* Safe area adjustments for mobile */
+  .sidebar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 } 

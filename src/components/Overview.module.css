@@ -24,6 +24,17 @@
   min-height: 0;
   background: var(--background-primary);
   animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+
+/* Mobile Header - Hidden on desktop */
+.mobileHeader {
+  display: none;
+}
+
+/* Sidebar Container */
+.sidebarContainer {
+  display: contents;
 }
 
 /* Main Content Styles - Sidebar styles moved to Sidebar.module.css */
@@ -197,14 +208,163 @@
   max-width: 320px;
 }
 
-/* Responsive Design */
+/* Mobile Responsive Design */
 @media (max-width: 768px) {
   .overview {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Mobile Header */
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--background-secondary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    min-height: 56px;
+    box-sizing: border-box;
+  }
+
+  .backButton {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -8px;
+  }
+
+  .backButton:hover {
+    background: rgba(0, 122, 255, 0.1);
+  }
+
+  .backButton:active {
+    transform: scale(0.95);
+  }
+
+  .mobileTitle {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    text-align: center;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 16px;
+  }
+
+  .mobileHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Sidebar Container - Mobile Navigation */
+  .sidebarContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    background: var(--background-primary);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    display: block;
+  }
+
+  .sidebarVisible {
+    transform: translateX(0);
+  }
+
+  .sidebarHidden {
+    transform: translateX(-100%);
+  }
+
+  /* Content - Mobile Navigation */
+  .content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    background: var(--background-primary);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    height: 100%;
+  }
+
+  .contentVisible {
+    transform: translateX(0);
+  }
+
+  .contentHidden {
+    transform: translateX(100%);
+  }
+
+  /* Hide desktop content header on mobile when sidebar is visible */
+  .contentHeader {
+    display: none;
   }
 
   .contentList {
     padding: 16px;
+    height: calc(100vh - 56px); /* Account for mobile header */
+    padding-top: 0;
+  }
+
+  /* Mobile-specific task styling */
+  .taskItem {
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: none;
+    background: var(--background-secondary);
+  }
+
+  .taskItem:hover {
+    transform: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: var(--background-secondary);
+  }
+
+  .taskItem:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  /* Adjust task list for mobile */
+  .taskList {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px 0;
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .overview {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+  
+  .contentList {
+    padding: 20px;
   }
 }
 

@@ -78,6 +78,21 @@ const Overview: React.FC<OverviewProps> = ({
   const [showModeSelection, setShowModeSelection] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
+  // Mobile navigation state - start with sidebar visible on mobile
+  const [showSidebar, setShowSidebar] = useState(true);
+
+  // Handle window resize to reset mobile navigation state
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setShowSidebar(true); // Always show sidebar on desktop
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   // State for tasks and processing status
   const [tasks, setTasks] = useState<Task[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -92,6 +107,19 @@ const Overview: React.FC<OverviewProps> = ({
 
   // Add SSE connection
   const { updates, error: sseError, isConnected } = useTaskUpdates();
+
+  // Mobile navigation handlers
+  const handleMobileSelectChat = (chatId: string | null) => {
+    onSelectChat(chatId);
+    if (chatId) {
+      setShowSidebar(false); // Hide sidebar when selecting a chat on mobile
+    }
+  };
+
+  const handleMobileBackToSidebar = () => {
+    setShowSidebar(true);
+    // Don't deselect chat when going back - keep it selected for better UX
+  };
 
   // Let's debug what's being returned from the API
   useEffect(() => {
@@ -302,17 +330,45 @@ const Overview: React.FC<OverviewProps> = ({
   return (
     <div className={styles.overview}>
       <Notifications updates={updates} />
-      <Sidebar 
-        chats={chats}
-        selectedChatId={selectedChatId}
-        onSelectChat={onSelectChat}
-        onRemoveChat={onRemoveChat}
-        onAddChat={() => setShowChatSelection(true)}
-        tasksCount={tasks.length}
-        removeMonitoredChat={removeMonitoredChat}
-      />
+      
+      {/* Mobile Header */}
+      <div className={styles.mobileHeader}>
+        {!showSidebar && selectedChat && (
+          <button 
+            className={styles.backButton}
+            onClick={handleMobileBackToSidebar}
+            aria-label="Back to chats"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        )}
+        <h1 className={styles.mobileTitle}>
+          {!showSidebar && selectedChat ? selectedChat.name : 'Teletasker'}
+        </h1>
+        {!showSidebar && selectedChat && (
+          <div className={styles.mobileHeaderActions}>
+            <CopyTasksButton tasks={tasks} selectedChatId={selectedChatId} />
+          </div>
+        )}
+      </div>
 
-      <div className={styles.content}>
+      {/* Sidebar - conditionally shown on mobile */}
+      <div className={`${styles.sidebarContainer} ${showSidebar ? styles.sidebarVisible : styles.sidebarHidden}`}>
+        <Sidebar 
+          chats={chats}
+          selectedChatId={selectedChatId}
+          onSelectChat={handleMobileSelectChat}
+          onRemoveChat={onRemoveChat}
+          onAddChat={() => setShowChatSelection(true)}
+          tasksCount={tasks.length}
+          removeMonitoredChat={removeMonitoredChat}
+        />
+      </div>
+
+      {/* Content - conditionally shown on mobile */}
+      <div className={`${styles.content} ${!showSidebar ? styles.contentVisible : styles.contentHidden}`}>
         <div className={styles.contentHeader}>
           <h3 className={styles.contentTitle}>
             {selectedChat ? (

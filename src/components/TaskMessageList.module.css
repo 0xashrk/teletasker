@@ -414,4 +414,164 @@
   .linkButton:active {
     background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.25);
   }
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+  .contentList {
+    padding: 16px;
+    padding-top: 16px;
+  }
+  
+  .taskList {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .messageList {
+    gap: 12px;
+  }
+
+  .taskItem, .messageItem {
+    border-radius: 12px;
+    padding: 16px;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background: var(--background-secondary);
+  }
+
+  .taskItem:hover, .messageItem:hover {
+    transform: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: var(--background-secondary);
+  }
+
+  .taskItem:active, .messageItem:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  .taskHeader, .messageHeader {
+    margin-bottom: 8px;
+  }
+
+  .taskSource, .messageSender {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .taskTime, .messageTime {
+    font-size: 13px;
+  }
+
+  .taskText, .messageText {
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+
+  .extractedFrom {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+
+  .extractedHeader {
+    font-size: 11px;
+  }
+
+  .extractedText {
+    font-size: 13px;
+  }
+
+  .taskMeta {
+    margin-top: 12px;
+  }
+
+  .taskStatus {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  .taskStatus:active {
+    transform: scale(0.95);
+  }
+
+  .aiResponse {
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 12px;
+  }
+
+  .aiResponseText {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .aiReasoning {
+    padding: 10px;
+    border-radius: 6px;
+  }
+
+  .emptyState {
+    padding: 32px 16px;
+  }
+
+  .emptyStateIcon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .emptyStateText {
+    font-size: 15px;
+    max-width: 280px;
+  }
+
+  .loading {
+    height: 150px;
+    font-size: 15px;
+  }
+
+  .error {
+    height: 150px;
+    font-size: 15px;
+    padding: 24px 16px;
+  }
+
+  .retryButton {
+    padding: 12px 20px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+
+  /* Disable animations on mobile for better performance */
+  .animatedTask {
+    animation: none;
+    opacity: 1;
+  }
+
+  .taskItem, .messageItem {
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Mobile adjustments for link buttons */
+@media (max-width: 768px) {
+  .linkButton {
+    height: 24px;
+    padding: 0 8px;
+    font-size: 14px;
+    border-radius: 6px;
+    max-width: 200px;
+  }
+
+  .linkButton:active {
+    transform: scale(0.95);
+  }
+
+  .linkIcon {
+    font-size: 14px;
+  }
 } 
