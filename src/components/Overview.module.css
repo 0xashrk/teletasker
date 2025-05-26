@@ -228,8 +228,6 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     min-height: 56px;
     box-sizing: border-box;
     gap: 12px;
