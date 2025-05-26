@@ -178,97 +178,184 @@
 /* Mobile Responsive Design */
 @media (max-width: 768px) {
   .overlay {
-    padding: 16px;
-    align-items: flex-start;
-    padding-top: 60px; /* Account for mobile header */
+    padding: 0;
+    align-items: flex-end;
+    background-color: rgba(0, 0, 0, 0.6);
   }
 
   .modal {
     width: 100%;
     max-width: none;
     margin: 0;
-    border-radius: 12px;
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
+    border-radius: 20px 20px 0 0;
+    max-height: 85vh;
+    overflow: hidden;
+    animation: slideUpMobile 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
   }
 
   .header {
-    padding: 16px 20px;
-    position: sticky;
-    top: 0;
+    padding: 20px 20px 16px;
+    position: relative;
     background: var(--background-secondary);
-    z-index: 10;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
   }
 
   .title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
+    text-align: center;
+    margin-right: 0;
   }
 
   .closeButton {
-    font-size: 20px;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 18px;
     padding: 8px;
-  }
-
-  .content {
-    padding: 20px 16px;
-  }
-
-  .timeSaved {
-    padding: 20px 16px;
-    margin-bottom: 24px;
-  }
-
-  .timeSavedValue {
-    font-size: 2rem;
-  }
-
-  .timeSavedLabel {
-    font-size: 1rem;
-  }
-
-  .metricsGrid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 20px;
-  }
-
-  .metricCard {
-    padding: 16px;
-    border-radius: 10px;
+    min-width: 36px;
+    min-height: 36px;
     touch-action: manipulation;
-  }
-
-  .metricCard:hover {
-    transform: none; /* Disable hover transform on mobile */
-  }
-
-  .metricCard:active {
-    transform: scale(0.98);
-    transition: transform 0.1s ease;
-  }
-
-  .metricValue {
-    font-size: 1.5rem;
-  }
-
-  .metricLabel {
-    font-size: 0.9rem;
-  }
-
-  .metricSaving,
-  .metricTier {
-    font-size: 0.85rem;
-  }
-
-  /* Improve close button for mobile */
-  .closeButton {
-    min-width: 44px;
-    min-height: 44px;
-    touch-action: manipulation;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
   }
 
   .closeButton:active {
     transform: scale(0.95);
     transition: transform 0.1s ease;
+  }
+
+  .content {
+    padding: 0;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Mobile-first time saved section */
+  .timeSaved {
+    padding: 24px 20px;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(75, 179, 255, 0.05));
+    border-radius: 0;
+    animation: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .timeSavedValue {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    background: linear-gradient(90deg, var(--accent-color), #4fb3ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .timeSavedLabel {
+    font-size: 1rem;
+    color: var(--text-secondary);
+  }
+
+  /* Mobile metrics grid - 2x2 layout */
+  .metricsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    margin-top: 0;
+    background: var(--border-color);
+  }
+
+  .metricCard {
+    padding: 20px 16px;
+    border-radius: 0;
+    border: none;
+    background: var(--background-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    touch-action: manipulation;
+    transition: background-color 0.2s ease;
+  }
+
+  .metricCard:hover {
+    transform: none;
+  }
+
+  .metricCard:active {
+    background: var(--background-tertiary);
+    transition: background-color 0.1s ease;
+  }
+
+  .metricValue {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  .metricLabel {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .metricSaving {
+    font-size: 0.75rem;
+    color: #34c759;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .metricTier {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  /* Round the corners of the grid */
+  .metricCard:first-child {
+    border-radius: 0;
+  }
+  
+  .metricCard:nth-child(2) {
+    border-radius: 0;
+  }
+  
+  .metricCard:nth-child(3) {
+    border-radius: 0 0 0 20px;
+  }
+  
+  .metricCard:last-child {
+    border-radius: 0 0 20px 0;
+  }
+}
+
+@keyframes slideUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 } 
