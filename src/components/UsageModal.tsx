@@ -39,17 +39,45 @@ const UsageModal: React.FC<UsageModalProps> = ({ onClose }) => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
+        // console.log('UsageModal: Starting to fetch metrics...');
+        setLoading(true);
+        setError(null);
+        
         const data = await getUserMetrics();
+        // console.log('UsageModal: Metrics fetched successfully:', data);
         setMetrics(data);
-      } catch (err) {
-        setError('Failed to load usage metrics');
+      } catch (err: any) {
+        // console.error('UsageModal: Error fetching metrics:', err);
+        const errorMessage = err.message || 'Failed to load usage metrics';
+        setError(errorMessage);
       } finally {
+        // console.log('UsageModal: Finished fetching metrics');
         setLoading(false);
       }
     };
 
     fetchMetrics();
   }, []);
+
+  const handleRetry = () => {
+    // console.log('UsageModal: Retrying metrics fetch...');
+    setError(null);
+    setLoading(true);
+    
+    const fetchMetrics = async () => {
+      try {
+        const data = await getUserMetrics();
+        setMetrics(data);
+      } catch (err: any) {
+        const errorMessage = err.message || 'Failed to load usage metrics';
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMetrics();
+  };
 
   const calculateTimeSaved = (metrics: UserMetrics) => {
     const taskTime = metrics.total_tasks_extracted * TIME_SAVINGS.TASK_EXTRACTION;
@@ -72,7 +100,23 @@ const UsageModal: React.FC<UsageModalProps> = ({ onClose }) => {
           )}
 
           {error && (
-            <div className={styles.error}>{error}</div>
+            <div className={styles.error}>
+              <div>{error}</div>
+              <button 
+                onClick={handleRetry}
+                style={{
+                  marginTop: '10px',
+                  padding: '8px 16px',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Retry
+              </button>
+            </div>
           )}
 
           {metrics && (
