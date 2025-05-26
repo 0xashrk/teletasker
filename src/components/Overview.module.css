@@ -357,7 +357,7 @@
 
   .contentList {
     padding: 8px; /* Consistent with TaskMessageList */
-    padding-top: 16px; /* Consistent with TaskMessageList */
+    padding-top: 8px; /* Consistent with TaskMessageList */
     height: 100%; /* Full height of content area */
     background: var(--background-primary); /* Ensure proper background */
     overflow-y: auto;

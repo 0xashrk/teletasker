@@ -454,7 +454,7 @@
 @media (max-width: 768px) {
   .contentList {
     padding: 8px !important;
-    padding-top: 16px !important;
+    padding-top: 8px !important;
     background: var(--background-primary) !important;
     min-height: 100% !important;
     height: 100% !important;
