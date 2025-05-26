@@ -123,7 +123,8 @@ const Overview: React.FC<OverviewProps> = ({
 
   const handleMobileBackToSidebar = () => {
     setShowSidebar(true);
-    // Don't deselect chat when going back - keep it selected for better UX
+    // Deselect chat when going back to sidebar on mobile for cleaner UX
+    onSelectChat(null);
   };
 
   // Let's debug what's being returned from the API
