@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoginButton from './LoginButton';
 import Pricing from './homepage/Pricing';
-import './HomePage.css';
+import styles from './HomePage.module.css';
 
 const HomePage: React.FC = () => {
   const { authenticated } = usePrivy();
@@ -53,52 +53,52 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="home-page">
+    <div className={styles.homePage}>
       {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-content">
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
           <h1>
-            <span className="telegram-emoji">🤖</span> Your Telegram chats, turned into todos and replies
+            <span className={styles.telegramEmoji}>🤖</span> Your Telegram chats, turned into todos and replies
           </h1>
-          <p className="subheadline">
+          <p className={styles.subheadline}>
             Never miss a follow-up again. Your AI assistant reads your chats, replies to messages, and turns your Telegram chaos into a clean, synced task list — Notion, Linear, or wherever you work.
           </p>
           {/* TODO: Add login button */}
-          <div className="hero-actions">
-            <LoginButton variant="primary" className="hero-login-button" />
+          <div className={styles.heroActions}>
+            <LoginButton variant="primary" className={styles.heroLoginButton} />
           </div>
         </div>
       </section>
 
       {/* Mockup Section */}
-      <section className="mockup">
-        <div className="mockup-content">
-          <div className="mockup-container">
-            <div className="telegram-mockup">
-              <div className="chat-header">
-                <span className="chat-title">Telegram Group Chat</span>
+      <section className={styles.mockup}>
+        <div className={styles.mockupContent}>
+          <div className={styles.mockupContainer}>
+            <div className={styles.telegramMockup}>
+              <div className={styles.chatHeader}>
+                <span className={styles.chatTitle}>Telegram Group Chat</span>
               </div>
-              <div className="chat-messages">
-                <div className="message">
-                  <span className="sender">@Sarah</span>
+              <div className={styles.chatMessages}>
+                <div className={styles.message}>
+                  <span className={styles.sender}>@Sarah</span>
                   <p>Hey team, can you review the product specs by tomorrow?</p>
                 </div>
-                <div className="message">
-                  <span className="sender">@Alex</span>
+                <div className={styles.message}>
+                  <span className={styles.sender}>@Alex</span>
                   <p>Will do! I'll share my feedback first thing tomorrow 👍</p>
                 </div>
               </div>
             </div>
-            <div className="arrow">→</div>
-            <div className="task-mockup">
-              <div className="task-header">
-                <span className="task-title">Extracted Tasks</span>
+            <div className={styles.arrow}>→</div>
+            <div className={styles.taskMockup}>
+              <div className={styles.taskHeader}>
+                <span className={styles.taskTitle}>Extracted Tasks</span>
               </div>
-              <div className="task-list">
-                <div className="task">
-                  <span className="task-source">From @Sarah</span>
+              <div className={styles.taskList}>
+                <div className={styles.task}>
+                  <span className={styles.taskSource}>From @Sarah</span>
                   <p>Review product specs</p>
-                  <span className="task-due">Due: Tomorrow</span>
+                  <span className={styles.taskDue}>Due: Tomorrow</span>
                 </div>
               </div>
             </div>
@@ -110,31 +110,31 @@ const HomePage: React.FC = () => {
       <Pricing />
 
       {/* Waitlist Section */}
-      <section className="waitlist">
-        <div className="waitlist-content">
+      <section className={styles.waitlist}>
+        <div className={styles.waitlistContent}>
           <h2>Get early access</h2>
           {!authenticated ? (
-            <div className="waitlist-form">
+            <div className={styles.waitlistForm}>
               <button 
                 onClick={handleSignup}
-                className="signup-button"
+                className={styles.signupButton}
               >
                 Join the waitlist
               </button>
             </div>
           ) : (
-            <div className="success-message">
+            <div className={styles.successMessage}>
               <p>Welcome! You're now on the waitlist. 🚀</p>
-              <p className="subtext">We'll notify you when early access begins.</p>
+              <p className={styles.subtext}>We'll notify you when early access begins.</p>
             </div>
           )}
         </div>
       </section>
 
       {/* Social Proof Section */}
-      <section className="social-proof">
-        <div className="social-proof-content">
-          <p className="audience">
+      <section className={styles.socialProof}>
+        <div className={styles.socialProofContent}>
+          <p className={styles.audience}>
             Built for founders, ops leads, and Telegram power users who drop too many follow-ups.
           </p>
         </div>
