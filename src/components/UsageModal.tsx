@@ -15,10 +15,20 @@ const TIME_SAVINGS = {
 };
 
 const formatTimeSaved = (seconds: number): string => {
-  if (seconds < 60) return `${Math.round(seconds)} seconds`;
-  if (seconds < 3600) return `${Math.round(seconds / 60)} minutes`;
-  if (seconds < 86400) return `${Math.round(seconds / 3600)} hours`;
-  return `${Math.round(seconds / 86400)} days`;
+  const round = Math.round(seconds);
+  if (seconds < 60) {
+    return `${round} ${round === 1 ? 'second' : 'seconds'}`;
+  }
+  if (seconds < 3600) {
+    const minutes = Math.round(seconds / 60);
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+  }
+  if (seconds < 86400) {
+    const hours = Math.round(seconds / 3600);
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  }
+  const days = Math.round(seconds / 86400);
+  return `${days} ${days === 1 ? 'day' : 'days'}`;
 };
 
 const UsageModal: React.FC<UsageModalProps> = ({ onClose }) => {
