@@ -12,24 +12,8 @@ const PORTFOLIO_PNL_URL = "https://gains-bydmcxepbfc0gddw.westeurope-01.azureweb
 const SOCIAL_PRODUCTION_API_URL = "https://social-dmfjg7hqebfmb5ct.westeurope-01.azurewebsites.net/"
 const SEARCH_DEV_API_URL = 'http://127.0.0.1:8000';
 
-
-// Get the fixed Bearer token from environment variables
-const FIXED_BEARER_TOKEN = process.env.REACT_APP_SWIPE_KEY;
-
-if (!FIXED_BEARER_TOKEN) {
-  console.error('Fixed Bearer Token is not set correctly. Please check your .env file.');
-}
-
 export const TOKEN_EXPIRED_EVENT = 'token:expired';
 export const tokenExpiredEmitter = new EventTarget();
-
-const createApi = (baseURL: string) => axios.create({
-  baseURL,
-  headers: {
-    'Authorization': `Bearer ${FIXED_BEARER_TOKEN || ''}`,
-    'Content-Type': 'application/json',
-  },
-});
 
 const createJwtApi = (baseURL: string) => {
   const api = axios.create({
@@ -78,13 +62,10 @@ const createJwtApi = (baseURL: string) => {
 };
 
 const localApi = createJwtApi(API_BASE_URL);
-const socialBackendLegacyApi = createApi(SOCIAL_BACKEND_LEGACY_API_URL);
 const backendProdApi = createJwtApi(BACKEND_PRODUCTION_API_URL);
 const backendDevArApi = createJwtApi(BACKEND_DEV_AR_API_URL);
-const searchProdApi = createApi(SEARCH_PRODUCTION_API_URL);
 const socialProdApi = createJwtApi(SOCIAL_PRODUCTION_API_URL);
-const searchDevApi = createApi(SEARCH_DEV_API_URL);
-const portfolioPnLApi = createApi(PORTFOLIO_PNL_URL);
+
 
 export const withRetry = async <T>(
   operation: () => Promise<T>,
@@ -374,11 +355,11 @@ export const useTaskUpdates = () => {
 
     const connectSSE = async () => {
       try {
-        console.log('Initiating SSE connection...');
+        // console.log('Initiating SSE connection...');
         
         // Close existing connection if any
         if (eventSource) {
-          console.log('Closing existing connection...');
+          // console.log('Closing existing connection...');
           eventSource.close();
         }
 
@@ -400,7 +381,7 @@ export const useTaskUpdates = () => {
 
         // Connection opened
         eventSource.onopen = () => {
-          console.log('SSE connection opened successfully');
+          // console.log('SSE connection opened successfully');
           setIsConnected(true);
           setError(null);
         };
@@ -411,7 +392,7 @@ export const useTaskUpdates = () => {
             const data = JSON.parse(event.data);
             // Only process new_tasks events
             if (data.type === 'new_tasks') {
-              console.log('New tasks created:', data);
+              // console.log('New tasks created:', data);
               setUpdates(prev => [...prev, data]);
             }
           } catch (e) {

@@ -19,11 +19,11 @@ export const getUserMetrics = async (): Promise<UserMetrics> => {
     // Check if auth token exists before making the request
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      console.error('No authentication token found');
-      throw new Error('Authentication required. Please log in again.');
+    //   console.error('No authentication token');
+    //   throw new Error('Authentication required. Please log in again.');
     }
 
-    console.log('Fetching user metrics...');
+    // console.log('Fetching user metrics...');
     
     return await withRetry(async () => {
       // Add timeout to prevent hanging requests

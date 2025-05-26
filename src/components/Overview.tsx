@@ -330,7 +330,7 @@ const Overview: React.FC<OverviewProps> = ({
   }, [updates, selectedChatId, fetchTasksForChat]);
 
   useEffect(() => {
-    console.log('SSE connection status:', { isConnected, error: sseError });
+    // console.log('SSE connection status:', { isConnected, error: sseError });
   }, [isConnected, sseError]);
 
   return (

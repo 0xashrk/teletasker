@@ -22,7 +22,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ username, onLogout }) => {
         const metrics = await getUserMetrics();
         setUserTier(metrics.user_tier);
       } catch (error) {
-        console.error('Error fetching user tier:', error);
+        // console.error('Error fetching user tier:', error);
       }
     };
 
