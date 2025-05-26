@@ -194,6 +194,11 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* Hide floating button on desktop */
+.floatingAddButton {
+  display: none;
+}
+
 /* Mobile Responsive Design */
 @media (max-width: 768px) {
   .sidebar {
@@ -287,15 +292,39 @@
     transform: scale(0.9);
   }
 
-  .addButton {
-    width: 28px;
-    height: 28px;
-    background: rgba(0, 122, 255, 0.1);
-    color: var(--accent-color);
+  /* Hide the small add button in header on mobile */
+  .sectionHeader .addButton {
+    display: none;
   }
 
-  .addButton:active {
-    transform: scale(0.9);
+  /* Show Floating Action Button on Mobile */
+  .floatingAddButton {
+    display: flex;
+    position: fixed;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    right: 5px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--accent-color) 0%, #0056b3 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 32px;
+    font-weight: 200;
+    line-height: 1;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 122, 255, 0.4);
+    transition: all 0.2s ease;
+    z-index: 1000;
+    padding: 0;
+    margin: 0;
+  }
+
+  .floatingAddButton:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 12px rgba(0, 122, 255, 0.5);
   }
 
   /* Custom scrollbar for mobile */
