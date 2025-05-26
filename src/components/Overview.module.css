@@ -299,14 +299,14 @@
   /* Content - Mobile Navigation */
   .content {
     position: absolute;
-    top: 0;
+    top: 56px; /* Start below mobile header */
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 5;
     background: var(--background-primary);
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-    height: 100%;
+    height: calc(100% - 56px); /* Account for mobile header */
   }
 
   .contentVisible {
@@ -323,9 +323,9 @@
   }
 
   .contentList {
-    padding: 16px;
-    height: calc(100vh - 56px); /* Account for mobile header */
-    padding-top: 0;
+    padding: 20px 16px 16px; /* Add top padding to prevent cutoff */
+    height: 100%; /* Full height of content area */
+    padding-top: 20px; /* Ensure content starts with proper spacing */
   }
 
   /* Mobile-specific task styling */
@@ -353,7 +353,7 @@
   .taskList {
     grid-template-columns: 1fr;
     gap: 12px;
-    padding: 16px 0;
+    padding: 0; /* Remove extra padding from task list */
   }
 }
 

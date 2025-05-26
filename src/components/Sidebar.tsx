@@ -27,11 +27,24 @@ const Sidebar: React.FC<SidebarProps> = ({
   tasksCount,
   removeMonitoredChat,
 }) => {
+  // Check if we're on mobile
+  const isMobile = () => window.innerWidth <= 768;
+
+  const handleChatClick = (chatId: string) => {
+    if (isMobile()) {
+      // On mobile, always select the chat (don't toggle)
+      onSelectChat(chatId);
+    } else {
+      // On desktop, toggle selection (existing behavior)
+      onSelectChat(chatId === selectedChatId ? null : chatId);
+    }
+  };
+
   return (
     <div className={styles.sidebar}>
       <div className={styles.navigation}>
         <div 
-          className={`${styles.navItem} ${!selectedChatId ? styles.active : ''}`}
+          className={`${styles.navItem} ${!selectedChatId ? styles.active : ''} ${styles.allTasksItem}`}
           onClick={() => onSelectChat(null)}
         >
           <span className={styles.navIcon}>📋</span>
@@ -64,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           >
             <div 
               className={styles.chatContent}
-              onClick={() => onSelectChat(chat.id === selectedChatId ? null : chat.id)}
+              onClick={() => handleChatClick(chat.id)}
             >
               <span className={styles.chatAvatar}>{chat.avatar}</span>
               <div className={styles.chatInfo}>
