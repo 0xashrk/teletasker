@@ -172,83 +172,6 @@
   transition: color 0.3s ease;
 }
 
-/* Waitlist Styles */
-.waitlist {
-  padding: 4rem 2rem;
-  /* background-color: var(--background-secondary); */
-  text-align: center;
-}
-
-.waitlistContent {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.waitlist h2 {
-  font-size: 2rem;
-  color: var(--text-primary);
-  margin-bottom: 2rem;
-}
-
-.waitlistForm {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.waitlistForm input {
-  flex: 1;
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: var(--input-background);
-  color: var(--text-primary);
-}
-
-.waitlistForm input:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 4px rgba(var(--accent-primary-rgb), 0.15);
-}
-
-.signupButton {
-  background-color: var(--accent-primary);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-weight: 500;
-}
-
-.signupButton:hover {
-  background-color: var(--accent-primary-dark);
-}
-
-.successMessage {
-  background-color: var(--background-primary);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.successMessage p {
-  font-size: 1.2rem;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-}
-
-.subtext {
-  font-size: 1rem;
-  color: var(--text-secondary);
-}
-
 /* Social Proof Styles */
 .socialProof {
   padding: 6rem 2rem;
@@ -314,19 +237,6 @@
   .arrow {
     transform: rotate(90deg);
     margin: 1rem 0;
-  }
-
-  .waitlist {
-    padding: 3rem 1.5rem;
-  }
-  
-  .waitlist h2 {
-    font-size: 1.75rem;
-  }
-  
-  .signupButton {
-    padding: 0.875rem 1.5rem;
-    font-size: 1rem;
   }
 
   .socialProof {

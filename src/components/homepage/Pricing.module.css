@@ -126,7 +126,7 @@
 .features {
   list-style: none;
   padding: 0;
-  margin: 0 0 32px;
+  margin: 0;
 }
 
 .feature {
@@ -143,33 +143,7 @@
   font-weight: bold;
 }
 
-.button {
-  width: 100%;
-  padding: 12px 24px;
-  border: 1px solid var(--border-color);
-  background: var(--background-tertiary);
-  color: var(--text-primary);
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
 
-.button:hover {
-  background: var(--background-primary);
-}
-
-.recommendedButton {
-  background: var(--accent-color);
-  color: white;
-  border: none;
-}
-
-.recommendedButton:hover {
-  background: var(--accent-color);
-  filter: brightness(1.1);
-}
 
 .addon {
   margin-top: 48px;

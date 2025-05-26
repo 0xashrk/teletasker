@@ -56,8 +56,8 @@ const Pricing: React.FC = () => {
   return (
     <section className={styles.pricing}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Choose your plan</h2>
-        <p className={styles.subtitle}>Try Teletasker free for 7 days</p>
+        <h2 className={styles.title}>Simple, transparent pricing</h2>
+        <p className={styles.subtitle}>Start free, upgrade as you scale</p>
       </div>
       
       <div className={styles.tiersContainer}>
@@ -67,7 +67,7 @@ const Pricing: React.FC = () => {
             className={`${styles.tier} ${tier.isRecommended ? styles.recommended : ''}`}
           >
             {tier.isRecommended && (
-              <div className={styles.recommendedBadge}>Best Value</div>
+              <div className={styles.recommendedBadge}>Most Popular</div>
             )}
             
             <div className={styles.tierHeader}>
@@ -93,10 +93,6 @@ const Pricing: React.FC = () => {
                 </li>
               ))}
             </ul>
-
-            <button className={`${styles.button} ${tier.isRecommended ? styles.recommendedButton : ''}`}>
-              {tier.name === 'Try it free' ? 'Start your free trial' : 'Get started'}
-            </button>
           </div>
         ))}
       </div>

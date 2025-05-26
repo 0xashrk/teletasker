@@ -1,56 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import LoginButton from './LoginButton';
 import Pricing from './homepage/Pricing';
 import styles from './HomePage.module.css';
 
 const HomePage: React.FC = () => {
   const { authenticated } = usePrivy();
-  const { login } = useAuth();
   const navigate = useNavigate();
-  const [showWaitlistSuccess, setShowWaitlistSuccess] = useState(false);
-  const [isNewSignup, setIsNewSignup] = useState(false);
 
-  // Only redirect to dashboard if authenticated and not a new waitlist signup
+  // Redirect authenticated users to dashboard
   useEffect(() => {
-    // Check if user was previously on the dashboard (not a new signup)
-    const wasDashboardUser = localStorage.getItem('dashboard_user') === 'true';
-    
-    if (authenticated && wasDashboardUser) {
+    if (authenticated) {
+      // Set flag to indicate user should go to dashboard
+      localStorage.setItem('dashboard_user', 'true');
       navigate('/dashboard');
-    } else if (authenticated && isNewSignup) {
-      // Just show success message for new waitlist signups
-      setShowWaitlistSuccess(true);
-    } else if (authenticated) {
-      // User was authenticated before but we don't know if they're a dashboard user
-      // Let's check if they should see the waitlist success or go to dashboard
-      const checkExistingUser = async () => {
-        try {
-          // For now, just show waitlist success by default
-          setShowWaitlistSuccess(true);
-          // Can add API check here later if needed
-        } catch (error) {
-          console.error('Error checking user status:', error);
-        }
-      };
-      
-      checkExistingUser();
     }
-  }, [authenticated, navigate, isNewSignup]);
-
-  const handleSignup = async () => {
-    try {
-      setIsNewSignup(true);
-      console.log('Starting waitlist signup process...');
-      const result = await login();
-      console.log('Waitlist signup result:', result);
-    } catch (error) {
-      console.error('Error during signup:', error);
-      setIsNewSignup(false);
-    }
-  };
+  }, [authenticated, navigate]);
 
   return (
     <div className={styles.homePage}>
@@ -58,12 +24,11 @@ const HomePage: React.FC = () => {
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <h1>
-            <span className={styles.telegramEmoji}>🤖</span> Your Telegram chats, turned into todos and replies
+            Your Telegram chats, turned into todos and replies
           </h1>
-          <p className={styles.subheadline}>
-            Never miss a follow-up again. Your AI assistant reads your chats, replies to messages, and turns your Telegram chaos into a clean, synced task list — Notion, Linear, or wherever you work.
-          </p>
-          {/* TODO: Add login button */}
+                      <p className={styles.subheadline}>
+              Never miss a follow-up again. Your AI assistant reads your chats and turns your Telegram chaos into a clean task list, with Notion integration coming soon.
+            </p>
           <div className={styles.heroActions}>
             <LoginButton variant="primary" className={styles.heroLoginButton} />
           </div>
@@ -108,28 +73,6 @@ const HomePage: React.FC = () => {
 
       {/* Pricing Section */}
       <Pricing />
-
-      {/* Waitlist Section */}
-      <section className={styles.waitlist}>
-        <div className={styles.waitlistContent}>
-          <h2>Get early access</h2>
-          {!authenticated ? (
-            <div className={styles.waitlistForm}>
-              <button 
-                onClick={handleSignup}
-                className={styles.signupButton}
-              >
-                Join the waitlist
-              </button>
-            </div>
-          ) : (
-            <div className={styles.successMessage}>
-              <p>Welcome! You're now on the waitlist. 🚀</p>
-              <p className={styles.subtext}>We'll notify you when early access begins.</p>
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* Social Proof Section */}
       <section className={styles.socialProof}>
