@@ -235,4 +235,187 @@
   background: var(--scrollbar-thumb-hover, rgba(255, 255, 255, 0.3));
   border: 2px solid transparent;
   background-clip: padding-box;
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+  .overlay {
+    padding: 0;
+    align-items: flex-end;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  .card {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: slideUpMobile 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  /* Mobile header with drag indicator */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    z-index: 10;
+  }
+
+  .title {
+    font-size: 1.25rem;
+    text-align: center;
+    margin: 20px 0 8px;
+    padding: 0 24px;
+  }
+
+  .desc {
+    font-size: 0.95rem;
+    text-align: center;
+    margin: 0 0 20px;
+    padding: 0 24px;
+    line-height: 1.4;
+  }
+
+  /* Mobile search container */
+  .searchContainer {
+    margin: 0 0 16px;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    background: var(--background-secondary);
+    z-index: 5;
+    padding-top: 8px;
+  }
+
+  .searchInput {
+    padding: 14px 16px;
+    font-size: 16px; /* Prevent zoom on iOS */
+    border-radius: 12px;
+    background: var(--background-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .searchInput:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  }
+
+  /* Mobile chat list wrapper */
+  .chatListWrapper {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 0;
+    border-radius: 0;
+    padding: 8px 20px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbars on mobile for cleaner look */
+  .chatListWrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chatListWrapper {
+    scrollbar-width: none;
+  }
+
+  .noResults {
+    margin: 20px 0;
+    padding: 32px 20px;
+    background: var(--background-primary);
+    border-radius: 12px;
+    font-size: 15px;
+  }
+
+  /* Mobile button footer */
+  .card > .button {
+    margin: 0;
+    padding: 18px 20px;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom, 20px));
+    font-size: 17px;
+    border-radius: 0;
+    font-weight: 700;
+    min-height: 56px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent-color) 0%, #0056b3 100%);
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
+    border: none;
+    color: white;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  /* Add a subtle separator line above button */
+  .card > .button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .card > .button:active {
+    transform: scale(0.98);
+    box-shadow: 0 -1px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .card > .button:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.05);
+    cursor: not-allowed;
+  }
+
+  .card > .button:disabled::before {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .card > .button:disabled:active {
+    transform: none;
+  }
+
+  /* Loading state for mobile */
+  .loading {
+    padding: 60px 20px;
+    font-size: 1rem;
+  }
+
+  /* Error state for mobile */
+  .error {
+    padding: 40px 20px;
+    font-size: 1rem;
+  }
+
+  .retryButton {
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 8px;
+    min-height: 44px;
+    min-width: 120px;
+  }
+}
+
+@keyframes slideUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 } 
