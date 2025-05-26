@@ -7,6 +7,7 @@ export interface UserMetrics {
   total_tasks_extracted: number;
   unique_chats_analyzed: number;
   total_messages_analyzed: number;
+  user_tier: 'Free' | 'Essential' | 'Pro';
 }
 
 /**

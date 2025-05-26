@@ -65,14 +65,23 @@
 
 /* Menu header */
 .menuHeader {
-  padding: 12px 16px;
+  padding: 8px 16px;
   background-color: var(--background-tertiary);
+  margin: -4px -4px 4px -4px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.menuUsername {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text-primary);
+.menuTier {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.menuTier::before {
+  content: "•";
+  color: var(--accent-color);
 }
 
 /* Menu divider */

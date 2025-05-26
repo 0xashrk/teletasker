@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './UserMenu.module.css';
 import UsageModal from './UsageModal';
+import { getUserMetrics } from '../services/analytics_api';
 
 interface UserMenuProps {
   username: string;
@@ -11,8 +12,22 @@ interface UserMenuProps {
 const UserMenu: React.FC<UserMenuProps> = ({ username, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUsageModal, setShowUsageModal] = useState(false);
+  const [userTier, setUserTier] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const fetchUserTier = async () => {
+      try {
+        const metrics = await getUserMetrics();
+        setUserTier(metrics.user_tier);
+      } catch (error) {
+        console.error('Error fetching user tier:', error);
+      }
+    };
+
+    fetchUserTier();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -72,6 +87,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ username, onLogout }) => {
             minWidth: `${Math.max(220, width)}px`
           }}
         >
+          {userTier && (
+            <div className={styles.menuHeader}>
+              <span className={styles.menuTier}>{userTier}</span>
+            </div>
+          )}
           <button 
             className={styles.menuItem}
             onClick={handleUsageClick}
