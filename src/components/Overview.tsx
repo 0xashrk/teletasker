@@ -13,6 +13,7 @@ import { TaskMessageList } from './TaskMessageList';
 import { Chat, Task, Message } from '../types/index';
 import { getCachedTasks, setCachedTasks, clearTaskCache } from '../utils/taskCache';
 import Notifications from './Notifications';
+import UserMenu from './UserMenu';
 
 interface OverviewProps {
   chats: Chat[];
@@ -28,6 +29,8 @@ interface OverviewProps {
   onSaveConfigurations: () => Promise<void>;
   isLoading?: boolean;
   removeMonitoredChat: (chatId: string) => Promise<void>;
+  username?: string;
+  onLogout?: () => void;
 }
 
 // Helper to convert API tasks to our Task interface
@@ -73,6 +76,8 @@ const Overview: React.FC<OverviewProps> = ({
   onSaveConfigurations,
   isLoading = false,
   removeMonitoredChat,
+  username,
+  onLogout,
 }) => {
   const [showChatSelection, setShowChatSelection] = useState(false);
   const [showModeSelection, setShowModeSelection] = useState(false);
@@ -347,9 +352,13 @@ const Overview: React.FC<OverviewProps> = ({
         <h1 className={styles.mobileTitle}>
           {!showSidebar && selectedChat ? selectedChat.name : 'Teletasker'}
         </h1>
-        {!showSidebar && selectedChat && (
+        {!showSidebar && selectedChat ? (
           <div className={styles.mobileHeaderActions}>
             <CopyTasksButton tasks={tasks} selectedChatId={selectedChatId} />
+          </div>
+        ) : showSidebar && username && onLogout && (
+          <div className={styles.mobileHeaderActions}>
+            <UserMenu username={username} onLogout={onLogout} />
           </div>
         )}
       </div>

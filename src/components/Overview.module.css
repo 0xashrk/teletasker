@@ -222,7 +222,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 8px 16px;
     background: var(--background-secondary);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     position: sticky;
@@ -232,6 +232,7 @@
     -webkit-backdrop-filter: blur(20px);
     min-height: 56px;
     box-sizing: border-box;
+    gap: 12px;
   }
 
   .backButton {
@@ -246,6 +247,8 @@
     align-items: center;
     justify-content: center;
     margin-left: -8px;
+    margin-right: 4px;
+    flex-shrink: 0;
   }
 
   .backButton:hover {
@@ -261,18 +264,49 @@
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
-    text-align: center;
+    text-align: left;
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0 16px;
+    padding: 0 12px;
   }
 
   .mobileHeaderActions {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Mobile UserMenu adjustments */
+  .mobileHeaderActions .container {
+    position: relative;
+  }
+
+  .mobileHeaderActions .usernameButton {
+    font-size: 15px;
+    padding: 6px 10px;
+    color: var(--text-primary);
+    font-weight: 500;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: auto;
+    white-space: nowrap;
+  }
+
+  .mobileHeaderActions .usernameButton:hover,
+  .mobileHeaderActions .usernameButton.active {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .mobileHeaderActions .menu {
+    right: 0;
+    left: auto;
+    min-width: 220px;
+    margin-top: 4px;
   }
 
   /* Sidebar Container - Mobile Navigation */

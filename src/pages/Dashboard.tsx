@@ -169,6 +169,20 @@ const Dashboard: React.FC = () => {
         onSaveConfigurations={saveChatConfigurations}
         isLoading={isLoading}
         removeMonitoredChat={removeMonitoredChat}
+        username={(() => {
+          if (user?.email?.address) {
+            return user.email.address;
+          }
+          if (user?.twitter?.username) {
+            return `@${user.twitter.username}`;
+          }
+          const twitterAccount = user?.linkedAccounts?.find(account => account.type === 'twitter_oauth');
+          if (twitterAccount?.type === 'twitter_oauth' && 'username' in twitterAccount) {
+            return `@${twitterAccount.username}`;
+          }
+          return 'User';
+        })()}
+        onLogout={handleLogout}
       />
     );
   };
