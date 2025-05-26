@@ -1,3 +1,63 @@
+/* Light and Dark Mode System Colors */
+:root {
+  /* Dark Mode Colors */
+  --dark-gray-6: #000000;
+  --dark-gray-5: #111111;
+  --dark-gray-4: #1a1a1a;
+  --dark-gray-3: rgba(72, 72, 74, 1);
+  --dark-gray-2: rgba(142, 142, 147, 1);
+  --dark-gray-1: rgba(174, 174, 178, 1);
+  --dark-blue: rgba(0, 122, 255, 1);
+  --dark-white: rgba(255, 255, 255, 1);
+
+  /* Light Mode Colors */
+  --light-gray-6: rgba(242, 242, 247, 1);
+  --light-gray-5: rgba(229, 229, 234, 1);
+  --light-gray-4: rgba(209, 209, 214, 1);
+  --light-gray-3: rgba(199, 199, 204, 1);
+  --light-gray-2: rgba(174, 174, 178, 1);
+  --light-gray-1: rgba(142, 142, 147, 1);
+  --light-blue: rgba(0, 122, 255, 1);
+  --light-black: rgba(0, 0, 0, 1);
+
+  /* Default to Light Mode */
+  --system-gray-6: var(--light-gray-6);
+  --system-gray-5: var(--light-gray-5);
+  --system-gray-4: var(--light-gray-4);
+  --system-gray-3: var(--light-gray-3);
+  --system-gray-2: var(--light-gray-2);
+  --system-gray-1: var(--light-gray-1);
+  --system-blue: var(--light-blue);
+  --system-text: var(--light-black);
+  
+  /* Semantic Colors */
+  --background-primary: var(--system-gray-6);
+  --background-secondary: var(--system-gray-5);
+  --background-tertiary: var(--system-gray-4);
+  --text-primary: var(--system-text);
+  --text-secondary: var(--system-gray-1);
+  --border-color: var(--system-gray-4);
+  --accent-color: var(--system-blue);
+  --accent-color-rgb: 0, 122, 255;
+  --text-secondary-rgb: 142, 142, 147;
+}
+
+/* Dark Mode Override */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --system-gray-6: var(--dark-gray-6);
+    --system-gray-5: var(--dark-gray-5);
+    --system-gray-4: var(--dark-gray-4);
+    --system-gray-3: var(--dark-gray-3);
+    --system-gray-2: var(--dark-gray-2);
+    --system-gray-1: var(--dark-gray-1);
+    --system-blue: var(--dark-blue);
+    --system-text: var(--dark-white);
+    --accent-color-rgb: 0, 122, 255;
+    --text-secondary-rgb: 174, 174, 178;
+  }
+}
+
 @keyframes fadeIn {
   0% {
     opacity: 0;
@@ -54,7 +114,7 @@
   background: var(--background-secondary);
   border-radius: 8px;
   padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
   transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), 
               box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
               background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
@@ -109,13 +169,13 @@
   cursor: default;
   padding: 2px 8px;
   border-radius: 4px;
-  background: rgba(var(--text-secondary-rgb, 120, 120, 128), 0.08);
+  background: rgba(var(--text-secondary-rgb), 0.08);
   letter-spacing: -0.01em;
 }
 
 .taskTime:hover {
   color: var(--text-primary);
-  background: rgba(var(--text-secondary-rgb, 120, 120, 128), 0.12);
+  background: rgba(var(--text-secondary-rgb), 0.12);
 }
 
 .taskText {
@@ -136,7 +196,7 @@
   border-radius: 6px;
   padding: 12px;
   margin-bottom: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
 }
 
 .extractedHeader {
@@ -256,7 +316,7 @@
 }
 
 .aiReasoning {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--background-tertiary);
   border-radius: 4px;
   padding: 12px;
 }
@@ -334,16 +394,6 @@
   background: rgba(255, 59, 48, 0.2);
 }
 
-@media (max-width: 768px) {
-  .contentList {
-    padding: 16px;
-  }
-  
-  .taskList {
-    grid-template-columns: 1fr;
-  }
-}
-
 .taskLinks {
   display: inline-flex;
   align-items: center;
@@ -355,9 +405,9 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.08);
-  color: var(--accent-color, #007AFF);
-  border: 0.5px solid rgba(var(--accent-color-rgb, 0, 122, 255), 0.15);
+  background: rgba(var(--accent-color-rgb), 0.08);
+  color: var(--accent-color);
+  border: 0.5px solid rgba(var(--accent-color-rgb), 0.15);
   border-radius: 4px;
   padding: 0 6px;
   height: 20px;
@@ -380,15 +430,15 @@
 }
 
 .linkButton:hover {
-  background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.12);
-  border-color: rgba(var(--accent-color-rgb, 0, 122, 255), 0.25);
+  background: rgba(var(--accent-color-rgb), 0.12);
+  border-color: rgba(var(--accent-color-rgb), 0.25);
   transform: translateY(-1px) scale(1.01);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .linkButton:active {
   transform: translateY(0) scale(0.98);
-  background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.16);
+  background: rgba(var(--accent-color-rgb), 0.16);
   transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -400,150 +450,187 @@
   line-height: 1;
 }
 
-@media (prefers-color-scheme: dark) {
-  .linkButton {
-    background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.15);
-    border-color: rgba(var(--accent-color-rgb, 0, 122, 255), 0.25);
-  }
-  
-  .linkButton:hover {
-    background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.2);
-    border-color: rgba(var(--accent-color-rgb, 0, 122, 255), 0.3);
-  }
-  
-  .linkButton:active {
-    background: rgba(var(--accent-color-rgb, 0, 122, 255), 0.25);
-  }
-}
-
-/* Mobile Responsive Design */
+/* Mobile Responsive Design - Optimized task card layout */
 @media (max-width: 768px) {
   .contentList {
-    padding: 16px;
-    padding-top: 16px;
+    padding: 8px !important;
+    padding-top: 16px !important;
+    background: var(--background-primary) !important;
+    min-height: 100% !important;
+    height: 100% !important;
   }
   
   .taskList {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 8px;
   }
 
   .messageList {
-    gap: 12px;
+    gap: 8px;
   }
 
   .taskItem, .messageItem {
-    border-radius: 12px;
-    padding: 16px;
-    border: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     background: var(--background-secondary);
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
   }
 
   .taskItem:hover, .messageItem:hover {
     transform: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    background-color: var(--background-secondary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: var(--background-secondary);
   }
 
   .taskItem:active, .messageItem:active {
     transform: scale(0.98);
-    transition: transform 0.1s ease;
+    transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1);
+    background: var(--background-tertiary);
   }
 
   .taskHeader, .messageHeader {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
   }
 
   .taskSource, .messageSender {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .taskTime, .messageTime {
-    font-size: 13px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--background-tertiary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .taskText, .messageText {
     font-size: 15px;
-    line-height: 1.4;
-    margin-bottom: 12px;
+    line-height: 1.35;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
 
+  /* Hide reasoning section on mobile */
   .extractedFrom {
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-  }
-
-  .extractedHeader {
-    font-size: 11px;
-  }
-
-  .extractedText {
-    font-size: 13px;
+    display: none;
   }
 
   .taskMeta {
-    margin-top: 12px;
+    margin-top: 0px;
+    display: flex;
+    justify-content: flex-end;
   }
 
   .taskStatus {
     padding: 6px 12px;
-    font-size: 13px;
+    font-size: 12px;
     border-radius: 8px;
     font-weight: 600;
+    min-width: 70px;
+    text-align: center;
+    letter-spacing: 0.01em;
+    border: none;
   }
 
   .taskStatus:active {
     transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+
+  .pending {
+    background: rgba(255, 149, 0, 0.15);
+    color: #FF9500;
+  }
+
+  .completed {
+    background: rgba(52, 199, 89, 0.15);
+    color: #34C759;
   }
 
   .aiResponse {
-    padding: 12px;
-    border-radius: 8px;
-    margin-top: 12px;
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 16px;
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
   }
 
   .aiResponseText {
-    font-size: 15px;
-    margin-bottom: 8px;
+    font-size: 16px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+    color: var(--text-primary);
   }
 
   .aiReasoning {
-    padding: 10px;
-    border-radius: 6px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--background-tertiary);
   }
 
   .emptyState {
-    padding: 32px 16px;
+    padding: 60px 20px;
+    color: var(--text-secondary);
   }
 
   .emptyStateIcon {
     font-size: 28px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    opacity: 0.6;
   }
 
   .emptyStateText {
-    font-size: 15px;
+    font-size: 16px;
     max-width: 280px;
+    line-height: 1.4;
+    color: var(--text-secondary);
   }
 
   .loading {
-    height: 150px;
-    font-size: 15px;
+    height: 200px;
+    font-size: 16px;
+    color: var(--text-secondary);
   }
 
   .error {
-    height: 150px;
-    font-size: 15px;
-    padding: 24px 16px;
+    height: 200px;
+    font-size: 16px;
+    padding: 40px 20px;
+    color: #ff3b30;
   }
 
   .retryButton {
     padding: 12px 20px;
-    font-size: 15px;
-    border-radius: 8px;
+    font-size: 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+    border: 1px solid rgba(255, 59, 48, 0.2);
   }
 
   /* Disable animations on mobile for better performance */
@@ -553,25 +640,40 @@
   }
 
   .taskItem, .messageItem {
-    transition: transform 0.1s ease;
+    transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease;
   }
-}
 
-/* Mobile adjustments for link buttons */
-@media (max-width: 768px) {
+  /* Mobile adjustments for link buttons */
   .linkButton {
     height: 24px;
     padding: 0 8px;
     font-size: 14px;
     border-radius: 6px;
     max-width: 200px;
+    background: rgba(var(--accent-color-rgb), 0.08) !important;
+    color: var(--accent-color) !important;
+    border: 0.5px solid rgba(var(--accent-color-rgb), 0.15) !important;
   }
 
   .linkButton:active {
     transform: scale(0.95);
+    background: rgba(var(--accent-color-rgb), 0.12) !important;
   }
 
   .linkIcon {
     font-size: 14px;
+  }
+
+  /* Ensure no blue artifacts from other elements */
+  .taskItem *,
+  .messageItem * {
+    box-sizing: border-box;
+  }
+
+  .taskItem::before,
+  .messageItem::before,
+  .taskItem::after,
+  .messageItem::after {
+    display: none !important;
   }
 } 

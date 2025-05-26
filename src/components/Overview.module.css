@@ -338,9 +338,10 @@
     right: 0;
     bottom: 0;
     z-index: 5;
-    background: var(--background-primary);
+    background: var(--background-primary) !important;
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     height: calc(100% - 56px); /* Account for mobile header */
+    overflow: hidden;
   }
 
   .contentVisible {
@@ -357,9 +358,11 @@
   }
 
   .contentList {
-    padding: 20px 16px 16px; /* Add top padding to prevent cutoff */
+    padding: 8px; /* Consistent with TaskMessageList */
+    padding-top: 16px; /* Consistent with TaskMessageList */
     height: 100%; /* Full height of content area */
-    padding-top: 20px; /* Ensure content starts with proper spacing */
+    background: var(--background-primary); /* Ensure proper background */
+    overflow-y: auto;
   }
 
   /* Mobile-specific task styling */
