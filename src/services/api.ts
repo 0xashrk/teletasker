@@ -4,8 +4,9 @@ import { backOff } from 'exponential-backoff';
 import { useState, useEffect } from 'react';
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
+const BACKEND_PRODUCTION_API_URL = 'https://prod-backend-teletasker-csb6ggdxcgbvf4d6.westeurope-01.azurewebsites.net';
+
 const SOCIAL_BACKEND_LEGACY_API_URL = 'https://swipeit-backend-ehfpe8g7a5f7edam.westeurope-01.azurewebsites.net';
-const BACKEND_PRODUCTION_API_URL = 'https://swipeit-backend-preprod-avfqggardqazfkdw.westeurope-01.azurewebsites.net'
 const BACKEND_DEV_AR_API_URL = 'https://dev-ar-backend-weu-dphyazg4d3fmfpag.westeurope-01.azurewebsites.net'
 const SEARCH_PRODUCTION_API_URL = 'https://surf-b6hagnhrezhxedhs.uksouth-01.azurewebsites.net/'
 const PORTFOLIO_PNL_URL = "https://gains-bydmcxepbfc0gddw.westeurope-01.azurewebsites.net/"
@@ -61,8 +62,8 @@ const createJwtApi = (baseURL: string) => {
   return api;
 };
 
-const localApi = createJwtApi(API_BASE_URL);
-const backendProdApi = createJwtApi(BACKEND_PRODUCTION_API_URL);
+export const localApi = createJwtApi(API_BASE_URL);
+export const backendProdApi = createJwtApi(BACKEND_PRODUCTION_API_URL);
 const backendDevArApi = createJwtApi(BACKEND_DEV_AR_API_URL);
 const socialProdApi = createJwtApi(SOCIAL_PRODUCTION_API_URL);
 
@@ -89,7 +90,7 @@ export const withRetry = async <T>(
 export const testApiConnection = async () => {
   try {
     return await withRetry(async () => {
-      const response = await localApi.get('/api-test');
+      const response = await backendProdApi.get('/api-test');
       return response.data;
     });
   } catch (error: any) {
@@ -101,7 +102,7 @@ export const testApiConnection = async () => {
 export const sendTelegramVerificationCode = async (phoneNumber: string) => {
   try {
     return await withRetry(async () => {
-      const response = await localApi.post('/telethon/auth/send-code', {
+      const response = await backendProdApi.post('/telethon/auth/send-code', {
         phone_number: phoneNumber
       });
       return response.data;
@@ -115,7 +116,7 @@ export const sendTelegramVerificationCode = async (phoneNumber: string) => {
 export const verifyTelegramCode = async (phoneNumber: string, verificationCode: string) => {
   try {
     return await withRetry(async () => {
-      const response = await localApi.post('/telethon/auth/verify', {
+      const response = await backendProdApi.post('/telethon/auth/verify', {
         phone_number: phoneNumber,
         verification_code: verificationCode
       });
@@ -134,7 +135,7 @@ interface TelegramAuthStatus {
 export const checkTelegramAuthStatus = async (): Promise<TelegramAuthStatus> => {
   try {
     return await withRetry(async () => {
-      const response = await localApi.get('/telethon/auth/status');
+      const response = await backendProdApi.get('/telethon/auth/status');
       return response.data;
     });
   } catch (error: any) {
@@ -159,7 +160,7 @@ interface TelegramChat {
 export const getTelegramChats = async (): Promise<TelegramChat[]> => {
   try {
     return await withRetry(async () => {
-      const response = await localApi.get('/telethon/chats');
+      const response = await backendProdApi.get('/telethon/chats');
       return response.data;
     });
   } catch (error: any) {
@@ -172,7 +173,7 @@ export const getTelegramChats = async (): Promise<TelegramChat[]> => {
 export const addMonitoredChat = async (chatId: string | number): Promise<any> => {
   try {
     return await withRetry(async () => {
-      const response = await localApi.post(`/tasks/monitored-chats/${chatId}`);
+      const response = await backendProdApi.post(`/tasks/monitored-chats/${chatId}`);
       return response.data;
     });
   } catch (error: any) {
@@ -184,7 +185,7 @@ export const addMonitoredChat = async (chatId: string | number): Promise<any> =>
 export const getMonitoredChats = async (): Promise<any[]> => {
   try {
     return await withRetry(async () => {
-      const response = await localApi.get('/tasks/monitored-chats');
+      const response = await backendProdApi.get('/tasks/monitored-chats');
       return response.data;
     });
   } catch (error: any) {
@@ -196,7 +197,7 @@ export const getMonitoredChats = async (): Promise<any[]> => {
 export const removeMonitoredChat = async (chatId: string | number): Promise<any> => {
   try {
     return await withRetry(async () => {
-      const response = await localApi.delete(`/tasks/monitored-chats/${chatId}`);
+      const response = await backendProdApi.delete(`/tasks/monitored-chats/${chatId}`);
       return response.data;
     });
   } catch (error: any) {
@@ -238,7 +239,7 @@ export interface ChatTask {
 export const getChatProcessingStatus = async (chatId: string | number): Promise<ChatProcessingStatus> => {
   try {
     return await withRetry(async () => {
-      const response = await localApi.get(`/tasks/chat/${chatId}/processing-status`);
+      const response = await backendProdApi.get(`/tasks/chat/${chatId}/processing-status`);
       // console.log('Processing status response:', response.data);
       return response.data;
     });
@@ -253,7 +254,7 @@ export const getChatTasks = async (chatId: string | number): Promise<ChatTask[]>
   try {
     return await withRetry(async () => {
       // Using the exact endpoint format from the API documentation
-      const response = await localApi.get(`/tasks/chat/${chatId}/tasks`);
+      const response = await backendProdApi.get(`/tasks/chat/${chatId}/tasks`);
       // console.log('Raw API response for tasks:', response);
       
       // Check if the data is wrapped in a property
@@ -335,7 +336,7 @@ export const pollChatProcessingStatus = async (
  */
 export const updateTaskCompletedStatus = async (taskId: number, completed: boolean): Promise<any> => {
   try {
-    const response = await localApi.patch(`/tasks/task/${taskId}/completed`, null, {
+    const response = await backendProdApi.patch(`/tasks/task/${taskId}/completed`, null, {
       params: { completed }
     });
     return response.data;
@@ -447,4 +448,3 @@ export const useTaskUpdates = () => {
   return { updates, error, isConnected };
 };
 
-export default localApi;

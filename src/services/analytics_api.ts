@@ -1,5 +1,5 @@
 import { withRetry } from './api';
-import localApi from './api';
+import { backendProdApi } from './api';
 
 export interface UserMetrics {
   user_id: string;
@@ -31,7 +31,7 @@ export const getUserMetrics = async (): Promise<UserMetrics> => {
         setTimeout(() => reject(new Error('Request timeout after 10 seconds')), 10000);
       });
       
-      const requestPromise = localApi.get('/analytics/metrics');
+      const requestPromise = backendProdApi.get('/analytics/metrics');
       
       const response = await Promise.race([requestPromise, timeoutPromise]) as any;
     //   console.log('User metrics fetched successfully:', response.data);
