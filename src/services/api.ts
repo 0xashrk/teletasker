@@ -375,7 +375,7 @@ export const useTaskUpdates = () => {
         }
 
         // Create new EventSource connection with auth token in URL
-        const url = new URL(`${API_BASE_URL}/tasks/updates/stream`);
+        const url = new URL(`${BACKEND_PRODUCTION_API_URL}/tasks/updates/stream`);
         url.searchParams.append('token', token);
         
         eventSource = new EventSource(url.toString());
