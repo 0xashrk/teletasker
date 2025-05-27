@@ -5,7 +5,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTelegramChats } from '../hooks/useTelegramChats';
 import { useChatSelection } from '../hooks/useChatSelection';
 import ChatList from '../components/ChatList';
-import AssistantModeConfig from '../components/AssistantModeConfig';
 import Overview from '../components/Overview';
 import ConnectTelegram from '../components/ConnectTelegram';
 import Loader from '../components/Loader';
@@ -107,13 +106,25 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    // Auto-configure all selected chats with "Track" mode
+    selectedChats.forEach(chatId => {
+      handleSetMode(chatId, 'observe');
+    });
+    
+    // Skip AssistantModeConfig and go directly to Overview
     setShowModes(true);
+    setShowOverview(true);
+    
+    // Save configurations in the background
+    try {
+      await saveChatConfigurations();
+    } catch (error) {
+      console.error('Error saving chat configurations:', error);
+    }
   };
 
-  const handleStart = () => {
-    setShowOverview(true);
-  };
+
 
   const renderContent = () => {
     // Show loading state until initialization is complete
@@ -125,7 +136,7 @@ const Dashboard: React.FC = () => {
       return <ConnectTelegram onConnect={handleConnect} />;
     }
 
-    if (!showModes) {
+    if (!showOverview) {
       return (
         <ChatSelectionModal
           chats={chats}
@@ -137,19 +148,6 @@ const Dashboard: React.FC = () => {
           error={chatError}
           onRetry={() => setConnected(true)}
           isDismissible={false}
-        />
-      );
-    }
-
-    if (!showOverview) {
-      return (
-        <AssistantModeConfig
-          selectedChats={chats.filter(chat => selectedChats.includes(chat.id))}
-          chatConfigs={chatConfigs}
-          onSetMode={handleSetMode}
-          onStart={handleStart}
-          onSaveConfigurations={saveChatConfigurations}
-          isLoading={isLoading}
         />
       );
     }

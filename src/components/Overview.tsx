@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import styles from './Overview.module.css';
 import ChatList from './ChatList';
 import { TelegramChat } from '../hooks/useTelegramChats';
-import AssistantModeConfig from './AssistantModeConfig';
 import { ChatConfig } from '../hooks/useChatSelection';
 import Sidebar from './Sidebar';
 import ChatSelectionModal from './ChatSelectionModal';
@@ -80,7 +79,6 @@ const Overview: React.FC<OverviewProps> = ({
   onLogout,
 }) => {
   const [showChatSelection, setShowChatSelection] = useState(false);
-  const [showModeSelection, setShowModeSelection] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
   // Mobile navigation state - start with sidebar visible on mobile
@@ -256,14 +254,27 @@ const Overview: React.FC<OverviewProps> = ({
   // }, [content, selectedChatId, tasks]);
 
   // Handlers for the chat selection flow
-  const handleChatSelectionDone = () => {
+  const handleChatSelectionDone = async () => {
     setShowChatSelection(false);
-    setShowModeSelection(true);
+    
+    // Auto-configure all newly selected chats with "Track" mode
+    const newlySelectedChats = selectedChats.filter(chatId => 
+      !chatConfigs.find(config => config.id === chatId)
+    );
+    
+    newlySelectedChats.forEach(chatId => {
+      onSetMode(chatId, 'observe');
+    });
+    
+    // Save configurations in the background
+    try {
+      await onSaveConfigurations();
+    } catch (error) {
+      console.error('Error saving chat configurations:', error);
+    }
   };
 
-  const handleModeSelectionDone = () => {
-    setShowModeSelection(false);
-  };
+
   
   // Improved save configurations handler
   const handleSaveConfigurations = () => {
@@ -443,22 +454,7 @@ const Overview: React.FC<OverviewProps> = ({
         document.body
       )}
 
-      {/* Mode selection modal */}
-      {showModeSelection && createPortal(
-        <div className={styles.modalOverlay}>
-          <div className={styles.card}>
-            <AssistantModeConfig
-              selectedChats={availableChats.filter(chat => selectedChats.includes(chat.id))}
-              chatConfigs={chatConfigs}
-              onSetMode={onSetMode}
-              onStart={handleModeSelectionDone}
-              onSaveConfigurations={handleSaveConfigurations}
-              isLoading={isLoading || isSaving}
-            />
-          </div>
-        </div>,
-        document.body
-      )}
+
     </div>
   );
 };

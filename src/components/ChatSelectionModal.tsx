@@ -108,7 +108,7 @@ const ChatSelectionModal: React.FC<ChatSelectionModalProps> = ({
         >
           {selectedChats.length === 0 
             ? 'Select chats to continue' 
-            : `Continue with ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
+            : `Start tracking ${selectedChats.length} ${selectedChats.length === 1 ? 'chat' : 'chats'}`}
         </button>
       </div>
     </div>
