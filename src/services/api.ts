@@ -128,6 +128,21 @@ export const verifyTelegramCode = async (phoneNumber: string, verificationCode: 
   }
 };
 
+export const verifyTelegramPassword = async (phoneNumber: string, password: string) => {
+  try {
+    return await withRetry(async () => {
+      const response = await backendProdApi.post('/telethon/auth/verify-password', {
+        phone_number: phoneNumber,
+        password: password
+      });
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error verifying Telegram password:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 interface TelegramAuthStatus {
   logged_in: boolean;
 }

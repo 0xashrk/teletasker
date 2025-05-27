@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { sendTelegramVerificationCode, verifyTelegramCode } from '../services/api';
+import { sendTelegramVerificationCode, verifyTelegramCode, verifyTelegramPassword } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './ConnectTelegram.module.css';
 
@@ -20,6 +20,9 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState('');
   const [verificationInProgress, setVerificationInProgress] = useState(false);
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordVerificationInProgress, setPasswordVerificationInProgress] = useState(false);
 
   useEffect(() => {
     if (!isCheckingTelegramStatus && isTelegramConnected) {
@@ -54,9 +57,34 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
       setTelegramConnected(phoneNumber); // Store in AuthContext
       onConnect(); // Notify parent component
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to verify code');
+      const errorDetail = err.response?.data?.detail;
+      // Check for both API response and Telethon error patterns
+      if (errorDetail === 'TWO_FACTOR_REQUIRED' || 
+          (typeof errorDetail === 'string' && errorDetail.includes('Two-steps verification is enabled and a password is required'))) {
+        setShowPasswordInput(true);
+        setShowOtpInput(false);
+        setError(null);
+      } else {
+        setError(errorDetail || 'Failed to verify code');
+      }
     } finally {
       setVerificationInProgress(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setPasswordVerificationInProgress(true);
+
+    try {
+      await verifyTelegramPassword(phoneNumber, password);
+      setTelegramConnected(phoneNumber); // Store in AuthContext
+      onConnect(); // Notify parent component
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to verify password');
+    } finally {
+      setPasswordVerificationInProgress(false);
     }
   };
 
@@ -88,13 +116,15 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
     <div className={styles.card}>
       <h2 className={styles.title}>Connect to Telegram</h2>
       <p className={styles.desc}>
-        {!showOtpInput 
+        {!showOtpInput && !showPasswordInput
           ? 'Enter your Telegram phone number to connect your account.'
-          : `Enter the verification code sent to ${phoneNumber}`
+          : showOtpInput 
+          ? `Enter the verification code sent to ${phoneNumber}`
+          : 'Enter your Telegram 2FA password to complete authentication'
         }
       </p>
 
-      {!showOtpInput ? (
+      {!showOtpInput && !showPasswordInput ? (
         <form onSubmit={handlePhoneSubmit} className={styles.form}>
           <div className={styles.inputGroup}>
             <input
@@ -115,7 +145,7 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
             {isLoading ? 'Sending...' : 'Send Code'}
           </button>
         </form>
-      ) : (
+      ) : showOtpInput ? (
         <form onSubmit={handleOtpSubmit} className={styles.form}>
           <div className={styles.inputGroup}>
             <input
@@ -156,6 +186,54 @@ const ConnectTelegram: React.FC<ConnectTelegramProps> = ({ onConnect }) => {
               disabled={isLoading}
             >
               {isLoading ? 'Sending...' : 'Resend Code'}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <form onSubmit={handlePasswordSubmit} className={styles.form}>
+          <div className={styles.inputGroup}>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your 2FA password"
+              className={styles.input}
+              required
+            />
+            {error && <p className={styles.error}>{error}</p>}
+          </div>
+          <button 
+            type="submit" 
+            className={styles.button}
+            disabled={passwordVerificationInProgress || !password}
+          >
+            {passwordVerificationInProgress ? 'Verifying...' : 'Verify Password'}
+          </button>
+          <div className={styles.actionButtons}>
+            <button 
+              type="button"
+              className={styles.secondaryButton}
+              onClick={() => {
+                setShowPasswordInput(false);
+                setShowOtpInput(true);
+                setPassword('');
+                setError(null);
+              }}
+            >
+              Back to Code
+            </button>
+            <button 
+              type="button"
+              className={styles.secondaryButton}
+              onClick={() => {
+                setShowPasswordInput(false);
+                setShowOtpInput(false);
+                setPassword('');
+                setOtp('');
+                setError(null);
+              }}
+            >
+              Change Phone Number
             </button>
           </div>
         </form>
