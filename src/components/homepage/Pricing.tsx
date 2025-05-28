@@ -18,9 +18,8 @@ const pricingTiers: PricingTier[] = [
     features: [
       'Monitor up to 5 Telegram chats',
       'Full task extraction features',
-      '7-day trial'
     ],
-    hookLever: 'Risk-free trial; build habit, show the magic'
+    hookLever: 'Build habit, show the magic'
   },
   {
     name: 'Essential',
