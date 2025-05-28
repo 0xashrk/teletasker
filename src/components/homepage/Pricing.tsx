@@ -12,7 +12,7 @@ interface PricingTier {
 
 const pricingTiers: PricingTier[] = [
   {
-    name: 'Try it free',
+    name: 'Free',
     price: '$0',
     chatLimit: '5 chats',
     features: [
@@ -26,10 +26,10 @@ const pricingTiers: PricingTier[] = [
     price: '$10',
     chatLimit: '25 chats',
     features: [
-      'Monitor up to 25 Telegram chats',
+      'Monitor up to 50 Telegram chats',
       'Full task extraction features',
       'Notion workspace integration (coming soon)',
-      'Everything in Trial'
+      'Everything in Free'
     ],
     hookLever: 'Low friction entry; clear upgrade path',
     isRecommended: true
