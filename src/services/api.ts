@@ -3,8 +3,10 @@ import axios from 'axios';
 import { backOff } from 'exponential-backoff';
 import { useState, useEffect } from 'react';
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
-const BACKEND_PRODUCTION_API_URL = 'https://prod-backend-teletasker-csb6ggdxcgbvf4d6.westeurope-01.azurewebsites.net';
+// const API_BASE_URL = 'http://127.0.0.1:8000';
+const BACKEND_PRODUCTION_API_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://prod-backend-teletasker-csb6ggdxcgbvf4d6.westeurope-01.azurewebsites.net';
+// const BACKEND_PRODUCTION_API_URL = 'https://prod-backend-teletasker-csb6ggdxcgbvf4d6.westeurope-01.azurewebsites.net';
 
 const SOCIAL_BACKEND_LEGACY_API_URL = 'https://swipeit-backend-ehfpe8g7a5f7edam.westeurope-01.azurewebsites.net';
 const BACKEND_DEV_AR_API_URL = 'https://dev-ar-backend-weu-dphyazg4d3fmfpag.westeurope-01.azurewebsites.net'
