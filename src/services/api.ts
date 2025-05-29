@@ -199,6 +199,21 @@ export const addMonitoredChat = async (chatId: string | number): Promise<any> =>
   }
 };
 
+// New bulk function for adding multiple chats at once
+export const addMonitoredChats = async (chatIds: (string | number)[]): Promise<any> => {
+  try {
+    return await withRetry(async () => {
+      const response = await backendProdApi.post('/tasks/monitored-chats', {
+        chat_ids: chatIds.map(id => typeof id === 'string' ? parseInt(id) : id)
+      });
+      return response.data;
+    });
+  } catch (error: any) {
+    console.error('Error adding monitored chats:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export const getMonitoredChats = async (): Promise<any[]> => {
   try {
     return await withRetry(async () => {

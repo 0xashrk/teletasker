@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TelegramChat } from './useTelegramChats';
-import { addMonitoredChat, getMonitoredChats, removeMonitoredChat } from '../services/api';
+import { addMonitoredChat, addMonitoredChats, getMonitoredChats, removeMonitoredChat } from '../services/api';
 
 export interface ChatConfig {
   id: string;
@@ -115,14 +115,14 @@ export const useChatSelection = (
       // Find chats to remove (in currentIds but not in selectedChats)
       const chatsToRemove = currentIds.filter(id => !selectedChats.includes(id));
       
-      // Process removals
+      // Process removals (still individual calls until bulk remove endpoint is available)
       for (const chatId of chatsToRemove) {
         await removeMonitoredChat(chatId);
       }
       
-      // Process additions
-      for (const chatId of chatsToAdd) {
-        await addMonitoredChat(chatId);
+      // Process additions using bulk endpoint
+      if (chatsToAdd.length > 0) {
+        await addMonitoredChats(chatsToAdd);
       }
       
       return;
