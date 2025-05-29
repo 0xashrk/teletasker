@@ -1,15 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import styles from './CopyTasksButton.module.css';
-
-interface Task {
-  id: string;
-  chatId: string;
-  text: string;
-  source: string;
-  time: string;
-  status: 'pending' | 'completed';
-  extractedFrom: string;
-}
+import { Task } from '../types/index';
 
 interface CopyTasksButtonProps {
   tasks: Task[];

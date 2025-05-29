@@ -51,9 +51,13 @@ const mapApiTasksToTasks = (apiTasks: ChatTask[]): Task[] => {
     const id = task.id?.toString() || Math.random().toString(36).substring(2, 10);
     const chatId = task.chat_id?.toString() || 'unknown';
     
-    // Format dates
-    const createdAt = task.created_at ? new Date(task.created_at).toLocaleString() : 'Unknown time';
-    const messageDate = task.message_date ? new Date(task.message_date).toLocaleString() : 'Unknown time';
+    // Keep raw dates for sorting
+    const createdAtRaw = task.created_at ? new Date(task.created_at) : new Date(0);
+    const messageDateRaw = task.message_date ? new Date(task.message_date) : new Date(0);
+    
+    // Format dates for display
+    const createdAt = task.created_at ? createdAtRaw.toLocaleString() : 'Unknown time';
+    const messageDate = task.message_date ? messageDateRaw.toLocaleString() : 'Unknown time';
     
     return {
       id,
@@ -62,6 +66,9 @@ const mapApiTasksToTasks = (apiTasks: ChatTask[]): Task[] => {
       source: task.priority || 'Unknown',
       time: createdAt,
       messageDate: messageDate,
+      // Add raw dates for sorting
+      createdAtRaw: createdAtRaw,
+      messageDateRaw: messageDateRaw,
       status: task.completed ? 'completed' : 'pending',
       extractedFrom: task.reasoning || 'No source message'
     };
@@ -270,9 +277,26 @@ const Overview: React.FC<OverviewProps> = ({
 
     // Apply sorting
     return filteredTasks.sort((a, b) => {
-      // Parse the dates - try both message date and creation time
-      const dateA = new Date(a.messageDate || a.time || 0);
-      const dateB = new Date(b.messageDate || b.time || 0);
+      // Ensure we always get valid Date objects
+      let dateA: Date;
+      let dateB: Date;
+      
+      // Use raw dates if available and valid, otherwise parse display strings
+      if (a.messageDateRaw instanceof Date) {
+        dateA = a.messageDateRaw;
+      } else if (a.createdAtRaw instanceof Date) {
+        dateA = a.createdAtRaw;
+      } else {
+        dateA = new Date(a.messageDate || a.time || 0);
+      }
+      
+      if (b.messageDateRaw instanceof Date) {
+        dateB = b.messageDateRaw;
+      } else if (b.createdAtRaw instanceof Date) {
+        dateB = b.createdAtRaw;
+      } else {
+        dateB = new Date(b.messageDate || b.time || 0);
+      }
       
       if (sortOrder === 'newest') {
         return dateB.getTime() - dateA.getTime();

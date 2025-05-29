@@ -14,6 +14,9 @@ export interface Task {
   messageDate: string;
   status: 'pending' | 'completed';
   extractedFrom: string;
+  // Raw dates for sorting (optional for backward compatibility)
+  createdAtRaw?: Date;
+  messageDateRaw?: Date;
 }
 
 export interface Message {
