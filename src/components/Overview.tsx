@@ -7,12 +7,18 @@ import { ChatConfig } from '../hooks/useChatSelection';
 import Sidebar from './Sidebar';
 import ChatSelectionModal from './ChatSelectionModal';
 import CopyTasksButton from './CopyTasksButton';
+import FilterButton from './FilterButton';
+import SortButton from './SortButton';
 import { getChatTasks, pollChatProcessingStatus, ChatTask, ChatProcessingStatus, useTaskUpdates } from '../services/api';
 import { TaskMessageList } from './TaskMessageList';
 import { Chat, Task, Message } from '../types/index';
 import { getCachedTasks, setCachedTasks, clearTaskCache } from '../utils/taskCache';
 import Notifications from './Notifications';
 import UserMenu from './UserMenu';
+
+// Add types for filtering and sorting
+type TaskFilter = 'all' | 'completed' | 'pending';
+type SortOrder = 'newest' | 'oldest';
 
 interface OverviewProps {
   chats: Chat[];
@@ -82,6 +88,10 @@ const Overview: React.FC<OverviewProps> = ({
 }) => {
   const [showChatSelection, setShowChatSelection] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Filter and sort state
+  const [taskFilter, setTaskFilter] = useState<TaskFilter>('all');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   
   // Mobile navigation state - start with sidebar visible on mobile
   const [showSidebar, setShowSidebar] = useState(true);
@@ -248,6 +258,37 @@ const Overview: React.FC<OverviewProps> = ({
       : messages.filter(msg => msg.chatId === selectedChatId)
     : tasks;
 
+  // Apply filtering and sorting to tasks
+  const getFilteredAndSortedTasks = (tasksToFilter: Task[]): Task[] => {
+    // Apply filter
+    let filteredTasks = tasksToFilter;
+    if (taskFilter === 'completed') {
+      filteredTasks = tasksToFilter.filter(task => task.status === 'completed');
+    } else if (taskFilter === 'pending') {
+      filteredTasks = tasksToFilter.filter(task => task.status === 'pending');
+    }
+
+    // Apply sorting
+    return filteredTasks.sort((a, b) => {
+      // Parse the dates - try both message date and creation time
+      const dateA = new Date(a.messageDate || a.time || 0);
+      const dateB = new Date(b.messageDate || b.time || 0);
+      
+      if (sortOrder === 'newest') {
+        return dateB.getTime() - dateA.getTime();
+      } else {
+        return dateA.getTime() - dateB.getTime();
+      }
+    });
+  };
+
+  // Update content to use filtered and sorted tasks
+  const filteredContent = selectedChatId && selectedChat
+    ? selectedChat.mode === 'observe'
+      ? getFilteredAndSortedTasks(tasks.filter(task => task.chatId === selectedChatId))
+      : messages.filter(msg => msg.chatId === selectedChatId)
+    : getFilteredAndSortedTasks(tasks);
+
   // Debug content
   // useEffect(() => {
   //   console.log('Filtered content for display:', content);
@@ -399,17 +440,30 @@ const Overview: React.FC<OverviewProps> = ({
               selectedChat.mode === 'observe' ? (
                 <>
                   Tasks from {selectedChat.name} 
-                  <span className={styles.count}>({content.length})</span>
+                  <span className={styles.count}>({filteredContent.length})</span>
                   {isProcessing && <span className={styles.processingStatus}>Processing...</span>}
                 </>
               ) : (
-                <>Messages from {selectedChat.name} <span className={styles.count}>({content.length})</span></>
+                <>Messages from {selectedChat.name} <span className={styles.count}>({filteredContent.length})</span></>
               )
             ) : (
-              <>All Tasks <span className={styles.count}>({tasks.length})</span></>
+              <>All Tasks <span className={styles.count}>({filteredContent.length})</span></>
             )}
           </h3>
           <div className={styles.headerActions}>
+            {/* Filter and Sort Controls - only show for task views */}
+            {(!selectedChat || selectedChat.mode === 'observe') && (
+              <div className={styles.filterSortControls}>
+                <FilterButton 
+                  value={taskFilter} 
+                  onChange={setTaskFilter}
+                />
+                <SortButton 
+                  value={sortOrder} 
+                  onChange={setSortOrder}
+                />
+              </div>
+            )}
             <CopyTasksButton tasks={tasks} selectedChatId={selectedChatId} />
           </div>
         </div>
@@ -433,7 +487,7 @@ const Overview: React.FC<OverviewProps> = ({
           <TaskMessageList
             isLoadingTasks={isLoadingTasks}
             taskError={taskError}
-            content={content}
+            content={filteredContent}
             selectedChat={selectedChat}
             isProcessing={isProcessing}
             fetchTasksForChat={fetchTasksForChat}

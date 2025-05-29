@@ -390,6 +390,22 @@
     gap: 12px;
     padding: 0; /* Remove extra padding from task list */
   }
+
+  /* Mobile filter and sort controls */
+  .filterSortControls {
+    gap: 8px;
+  }
+
+  /* Hide filter controls in mobile header actions to save space */
+  .mobileHeaderActions .filterSortControls {
+    display: none;
+  }
+
+  /* Ensure no blue artifacts from other elements */
+  .taskItem *,
+  .messageItem * {
+    box-sizing: border-box;
+  }
 }
 
 /* Tablet adjustments */
@@ -832,6 +848,12 @@
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.filterSortControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .refreshButton {
