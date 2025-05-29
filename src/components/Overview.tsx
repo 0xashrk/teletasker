@@ -25,6 +25,7 @@ interface OverviewProps {
   onToggleChat: (chatId: string) => void;
   chatConfigs: ChatConfig[];
   onSetMode: (chatId: string, mode: 'observe' | 'automate') => void;
+  setBatchModes: (chatModes: { chatId: string; mode: 'observe' | 'automate' }[]) => void;
   onSaveConfigurations: () => Promise<void>;
   isLoading?: boolean;
   removeMonitoredChat: (chatId: string) => Promise<void>;
@@ -72,6 +73,7 @@ const Overview: React.FC<OverviewProps> = ({
   onToggleChat,
   chatConfigs,
   onSetMode,
+  setBatchModes,
   onSaveConfigurations,
   isLoading = false,
   removeMonitoredChat,
@@ -262,9 +264,10 @@ const Overview: React.FC<OverviewProps> = ({
       !chatConfigs.find(config => config.id === chatId)
     );
     
-    newlySelectedChats.forEach(chatId => {
-      onSetMode(chatId, 'observe');
-    });
+    if (newlySelectedChats.length > 0) {
+      const chatModes = newlySelectedChats.map(chatId => ({ chatId, mode: 'observe' as const }));
+      setBatchModes(chatModes);
+    }
     
     // Save configurations in the background
     try {

@@ -13,6 +13,7 @@ interface UseChatSelectionReturn {
   configuredChats: (TelegramChat & { mode: 'observe' | 'automate' })[];
   handleToggleChat: (id: string) => void;
   handleSetMode: (chatId: string, mode: 'observe' | 'automate') => void;
+  setBatchModes: (chatModes: { chatId: string; mode: 'observe' | 'automate' }[]) => void;
   saveChatConfigurations: () => Promise<void>;
   isLoading: boolean;
   error: string | null;
@@ -81,6 +82,23 @@ export const useChatSelection = (
     }
   };
 
+  const setBatchModes = (chatModes: { chatId: string; mode: 'observe' | 'automate' }[]) => {
+    setChatConfigs(prevConfigs => {
+      const newConfigs = [...prevConfigs];
+      
+      chatModes.forEach(({ chatId, mode }) => {
+        const existingIndex = newConfigs.findIndex(c => c.id === chatId);
+        if (existingIndex >= 0) {
+          newConfigs[existingIndex] = { ...newConfigs[existingIndex], mode };
+        } else {
+          newConfigs.push({ id: chatId, mode });
+        }
+      });
+      
+      return newConfigs;
+    });
+  };
+
   // New function to persist all changes at once
   const saveChatConfigurations = async () => {
     try {
@@ -130,6 +148,7 @@ export const useChatSelection = (
     configuredChats,
     handleToggleChat,
     handleSetMode,
+    setBatchModes,
     saveChatConfigurations,
     isLoading,
     error,

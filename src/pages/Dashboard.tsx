@@ -51,6 +51,7 @@ const Dashboard: React.FC = () => {
     configuredChats,
     handleToggleChat,
     handleSetMode,
+    setBatchModes,
     saveChatConfigurations,
     isLoading,
     error,
@@ -107,10 +108,9 @@ const Dashboard: React.FC = () => {
   };
 
   const handleContinue = async () => {
-    // Auto-configure all selected chats with "Track" mode
-    selectedChats.forEach(chatId => {
-      handleSetMode(chatId, 'observe');
-    });
+    // Auto-configure all selected chats with "Track" mode in a single atomic operation
+    const chatModes = selectedChats.map(chatId => ({ chatId, mode: 'observe' as const }));
+    setBatchModes(chatModes);
     
     // Skip AssistantModeConfig and go directly to Overview
     setShowModes(true);
@@ -123,8 +123,6 @@ const Dashboard: React.FC = () => {
       console.error('Error saving chat configurations:', error);
     }
   };
-
-
 
   const renderContent = () => {
     // Show loading state until initialization is complete
@@ -164,6 +162,7 @@ const Dashboard: React.FC = () => {
         onToggleChat={handleToggleChat}
         chatConfigs={chatConfigs}
         onSetMode={handleSetMode}
+        setBatchModes={setBatchModes}
         onSaveConfigurations={saveChatConfigurations}
         isLoading={isLoading}
         removeMonitoredChat={removeMonitoredChat}
