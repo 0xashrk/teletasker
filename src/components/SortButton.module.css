@@ -36,7 +36,9 @@
 .sortIcon {
   font-size: 14px;
   line-height: 1;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dropdownIcon {
@@ -96,8 +98,9 @@
 }
 
 .sortOption.selected {
-  background: var(--accent-color, rgba(0, 122, 255, 0.15));
+  background: var(--background-hover, rgba(255, 255, 255, 0.12));
   color: var(--accent-color, #007AFF);
+  font-weight: 500;
 }
 
 .optionIcon {
@@ -105,5 +108,7 @@
   line-height: 1;
   width: 16px;
   text-align: center;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 } 
