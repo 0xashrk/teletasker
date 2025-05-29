@@ -18,7 +18,7 @@ root.render(
       <PrivyProvider
         appId={process.env.REACT_APP_PRIVY_APP_ID!}
         config={{
-          loginMethods: ['twitter', 'telegram', 'email'],
+          loginMethods: ['twitter'],
           appearance: {
             theme: 'light',
             accentColor: '#007AFF',
@@ -37,7 +37,7 @@ root.render(
     <PrivyProvider
       appId={process.env.REACT_APP_PRIVY_APP_ID!}
       config={{
-        loginMethods: ['twitter', 'telegram', 'email'],
+        loginMethods: ['twitter'],
         appearance: {
           theme: 'light',
           accentColor: '#007AFF',

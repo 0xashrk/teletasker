@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // console.log('Login attempt starting...');
     try {
       const result = await privyLogin();
-      console.log('Login result:', result);
+      // console.log('Login result:', result);
       return result;
     } catch (error) {
       // console.error('Login error:', error);
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // });
     
     if (user) {
-      console.log('Privy User in AuthContext:', user);
+      // console.log('Privy User in AuthContext:', user);
     }
   }, [authenticated, user, ready]);
 
