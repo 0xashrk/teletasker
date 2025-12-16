@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import LoginButton from './LoginButton';
-import Pricing from './homepage/Pricing';
 import styles from './HomePage.module.css';
 
 const HomePage: React.FC = () => {
@@ -70,9 +69,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Pricing Section */}
-      <Pricing />
 
       {/* Social Proof Section */}
       <section className={styles.socialProof}>

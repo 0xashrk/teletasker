@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(CI=false yarn build:*)",
+      "Bash(npx update-browserslist-db@latest:*)"
+    ]
+  }
+}

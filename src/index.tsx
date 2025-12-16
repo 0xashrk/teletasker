@@ -24,7 +24,9 @@ root.render(
             accentColor: '#007AFF',
           },
           embeddedWallets: {
-            createOnLogin: 'off',
+            ethereum: {
+              createOnLogin: 'off',
+            },
           },
         }}
       >
@@ -43,7 +45,9 @@ root.render(
           accentColor: '#007AFF',
         },
         embeddedWallets: {
-          createOnLogin: 'off',
+          ethereum: {
+            createOnLogin: 'off',
+          },
         },
       }}
     >
